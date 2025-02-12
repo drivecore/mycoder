@@ -2,9 +2,12 @@ import { Logger } from "./logger.js";
 import chalk from "chalk";
 import { createRequire } from "module";
 import type { PackageJson } from "type-fest";
+import { VersionCache } from './versionCache.js';
+import semver from 'semver';
 
 const require = createRequire(import.meta.url);
 const logger = new Logger({ name: "version-check" });
+const versionCache = new VersionCache();
 
 /**
  * Gets the current package info from package.json
@@ -60,7 +63,7 @@ export function generateUpgradeMessage(
   latestVersion: string,
   packageName: string,
 ): string | null {
-  return currentVersion !== latestVersion
+  return semver.gt(latestVersion, currentVersion)
     ? chalk.green(
         `  Update available: ${currentVersion} → ${latestVersion}\n  Run 'npm install -g ${packageName}' to update`,
       )
@@ -68,8 +71,45 @@ export function generateUpgradeMessage(
 }
 
 /**
+ * Updates the version cache
+ */
+async function updateVersionCache(
+  packageName: string,
+  version: string,
+): Promise<void> {
+  try {
+    versionCache.write({ version });
+  } catch (error) {
+    logger.warn(
+      "Error updating version cache:",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
+/**
+ * Performs a background version check and updates the cache
+ */
+async function backgroundVersionCheck(
+  packageName: string,
+): Promise<void> {
+  try {
+    const latestVersion = await fetchLatestVersion(packageName);
+    if (latestVersion) {
+      await updateVersionCache(packageName, latestVersion);
+    }
+  } catch (error) {
+    logger.warn(
+      "Background version check failed:",
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
+/**
  * Checks if a newer version of the package is available on npm.
- * Only runs check when package is installed globally.
+ * - Immediately returns cached version check result if available
+ * - Always performs a background check to update cache for next time
  *
  * @returns Upgrade message string if update available, null otherwise
  */
@@ -82,12 +122,31 @@ export async function checkForUpdates(): Promise<string | null> {
       return null;
     }
 
-    const latestVersion = await fetchLatestVersion(packageName);
+    // Always trigger background version check for next time
+    setImmediate(() => {
+      backgroundVersionCheck(packageName).catch(error => {
+        logger.warn(
+          "Background version check failed:",
+          error instanceof Error ? error.message : String(error),
+        );
+      });
+    });
 
+    // Use cached data for immediate response if available
+    const cachedData = versionCache.read();
+    if (cachedData) {
+      return generateUpgradeMessage(currentVersion, cachedData.version, packageName);
+    }
+
+    // No cache available, need to check server
+    const latestVersion = await fetchLatestVersion(packageName);
     if (!latestVersion) {
       logger.warn("Unable to determine latest published version");
       return null;
     }
+
+    // Update cache with result
+    await updateVersionCache(packageName, latestVersion);
 
     return generateUpgradeMessage(currentVersion, latestVersion, packageName);
   } catch (error) {
