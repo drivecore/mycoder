@@ -1,5 +1,11 @@
 # mycoder
 
+## 0.0.17
+
+### Patch Changes
+
+- Fix the linux cli and add a test to ensure it doesn't break again.
+
 ## 0.0.16
 
 ### Patch Changes

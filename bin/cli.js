@@ -1,2 +1,2 @@
-#!/usr/bin/env node --no-deprecation
+#!/usr/bin/env node
 import "../dist/index.js";

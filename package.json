@@ -1,7 +1,7 @@
 {
   "name": "mycoder",
   "description": "A command line tool using agent that can do arbitrary tasks, including coding tasks",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "type": "module",
   "bin": "./bin/cli.js",
   "main": "./dist/index.js",
@@ -53,7 +53,6 @@
     "chalk": "^5",
     "dotenv": "^16",
     "playwright": "^1.50.1",
-
     "source-map-support": "^0.5",
     "uuid": "^11",
     "yargs": "^17",
