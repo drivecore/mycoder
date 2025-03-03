@@ -1,4 +1,4 @@
-import { AnthropicStream, StreamingTextResponse, anthropic } from 'ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages.js';
 
 import { getAnthropicApiKeyError } from '../../utils/errors.js';
@@ -118,10 +118,8 @@ export class AnthropicProvider implements LLMProvider {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) throw new Error(getAnthropicApiKeyError());
 
-    // Using Vercel AI SDK to create Anthropic client
-    const client = anthropic({
-      apiKey,
-    });
+    // Create Anthropic client
+    const client = new Anthropic({ apiKey });
 
     logger.verbose(
       `Requesting completion with ${messages.length} messages with ${JSON.stringify(messages).length} bytes`,
@@ -144,7 +142,7 @@ export class AnthropicProvider implements LLMProvider {
         tools.map((t) => ({
           name: t.name,
           description: t.description,
-          input_schema: t.parameters,
+          input_schema: t.parameters as Anthropic.Tool.InputSchema,
         })),
       ),
       tool_choice: { type: 'auto' },
