@@ -15,32 +15,37 @@ const toolContext: ToolContext = {
   pageFilter: 'simple',
   tokenTracker: new TokenTracker(),
 };
-// Mock Anthropic SDK
-vi.mock('@anthropic-ai/sdk', () => {
-  return {
-    default: vi.fn().mockImplementation(() => ({
-      messages: {
-        create: vi
-          .fn()
-          .mockResolvedValueOnce({
-            content: [
-              {
-                type: 'tool_use',
-                name: 'respawn',
-                id: 'test-id',
-                input: { respawnContext: 'new context' },
-              },
-            ],
-            usage: { input_tokens: 10, output_tokens: 10 },
-          })
-          .mockResolvedValueOnce({
-            content: [],
-            usage: { input_tokens: 5, output_tokens: 5 },
-          }),
-      },
-    })),
-  };
-});
+
+// Mock the AnthropicProvider
+vi.mock('./llm/anthropic.js', () => ({
+  AnthropicProvider: class {
+    constructor() {}
+    sendRequest = vi
+      .fn()
+      .mockResolvedValueOnce({
+        content: [
+          {
+            type: 'tool_use',
+            name: 'respawn',
+            id: 'test-id',
+            input: { respawnContext: 'new context' },
+          },
+        ],
+        toolCalls: [
+          {
+            type: 'tool_use',
+            name: 'respawn',
+            id: 'test-id',
+            input: { respawnContext: 'new context' },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        content: [],
+        toolCalls: []
+      })
+  },
+}));
 
 describe('toolAgent respawn functionality', () => {
   const tools = getTools();

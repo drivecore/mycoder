@@ -1,13 +1,11 @@
 import { execSync } from 'child_process';
 
-import Anthropic from '@anthropic-ai/sdk';
-import { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages/messages.js';
 import chalk from 'chalk';
 
-import { getAnthropicApiKeyError } from '../utils/errors.js';
-
+import { AnthropicProvider } from './llm/anthropic.js';
+import { LLMProvider } from './llm/types.js';
 import { executeToolCall } from './executeToolCall.js';
-import { TokenTracker, TokenUsage } from './tokens.js';
+import { TokenTracker } from './tokens.js';
 import {
   Tool,
   TextContent,
@@ -79,7 +77,7 @@ const CONFIG = {
       'When you run into issues or unexpected results, take a step back and read the project documentation and configuration files and look at other source files in the project for examples of what works.',
       '',
       'Use sub-agents for parallel tasks, providing them with specific context they need rather than having them rediscover it.',
-    ].join('\\n');
+    ].join('\n');
   },
 };
 
@@ -87,28 +85,6 @@ interface ToolCallResult {
   sequenceCompleted: boolean;
   completionResult?: string;
   toolResults: ToolResultContent[];
-}
-
-function processResponse(response: Anthropic.Message) {
-  const content: (TextContent | ToolUseContent)[] = [];
-  const toolCalls: ToolUseContent[] = [];
-
-  for (const message of response.content) {
-    if (message.type === 'text') {
-      content.push({ type: 'text', text: message.text });
-    } else if (message.type === 'tool_use') {
-      const toolUse: ToolUseContent = {
-        type: 'tool_use',
-        name: message.name,
-        id: message.id,
-        input: message.input,
-      };
-      content.push(toolUse);
-      toolCalls.push(toolUse);
-    }
-  }
-
-  return { content, toolCalls };
 }
 
 async function executeTools(
@@ -184,62 +160,6 @@ async function executeTools(
   return { sequenceCompleted, completionResult, toolResults };
 }
 
-// a function that takes a list of messages and returns a list of messages but with the last message having a cache_control of ephemeral
-function addCacheControlToTools<T>(messages: T[]): T[] {
-  return messages.map((m, i) => ({
-    ...m,
-    ...(i === messages.length - 1
-      ? { cache_control: { type: 'ephemeral' } }
-      : {}),
-  }));
-}
-
-function addCacheControlToContentBlocks(
-  content: ContentBlockParam[],
-): ContentBlockParam[] {
-  return content.map((c, i) => {
-    if (i === content.length - 1) {
-      if (
-        c.type === 'text' ||
-        c.type === 'document' ||
-        c.type === 'image' ||
-        c.type === 'tool_use' ||
-        c.type === 'tool_result' ||
-        c.type === 'thinking' ||
-        c.type === 'redacted_thinking'
-      ) {
-        return { ...c, cache_control: { type: 'ephemeral' } };
-      }
-    }
-    return c;
-  });
-}
-function addCacheControlToMessages(
-  messages: Anthropic.Messages.MessageParam[],
-): Anthropic.Messages.MessageParam[] {
-  return messages.map((m, i) => {
-    if (typeof m.content === 'string') {
-      return {
-        ...m,
-        content: [
-          {
-            type: 'text',
-            text: m.content,
-            cache_control: { type: 'ephemeral' },
-          },
-        ] as ContentBlockParam[],
-      };
-    }
-    return {
-      ...m,
-      content:
-        i >= messages.length - 2
-          ? addCacheControlToContentBlocks(m.content)
-          : m.content,
-    };
-  });
-}
-
 export const toolAgent = async (
   initialPrompt: string,
   tools: Tool[],
@@ -253,10 +173,13 @@ export const toolAgent = async (
 
   let interactions = 0;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error(getAnthropicApiKeyError());
+  // Create LLM provider
+  const llmProvider: LLMProvider = new AnthropicProvider({
+    model: config.model,
+    maxTokens: config.maxTokens,
+    temperature: config.temperature,
+  });
 
-  const client = new Anthropic({ apiKey });
   const messages: Message[] = [
     {
       role: 'user',
@@ -278,32 +201,15 @@ export const toolAgent = async (
 
     interactions++;
 
-    // Create request parameters
-    const requestParams: Anthropic.MessageCreateParams = {
-      model: config.model,
-      max_tokens: config.maxTokens,
-      temperature: config.temperature,
-      messages: addCacheControlToMessages(messages),
-      system: [
-        {
-          type: 'text',
-          text: systemPrompt,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      tools: addCacheControlToTools(
-        tools.map((t) => ({
-          name: t.name,
-          description: t.description,
-          input_schema: t.parameters as Anthropic.Tool.InputSchema,
-        })),
-      ),
-      tool_choice: { type: 'auto' },
-    };
+    // Request completion from LLM provider
+    const { content, toolCalls } = await llmProvider.sendRequest({
+      systemPrompt,
+      messages,
+      tools,
+      context,
+    });
 
-    const response = await client.messages.create(requestParams);
-
-    if (!response.content.length) {
+    if (!content.length) {
       // Instead of treating empty response as completion, remind the agent
       logger.verbose('Received empty response from agent, sending reminder');
       messages.push({
@@ -318,11 +224,6 @@ export const toolAgent = async (
       continue;
     }
 
-    // Track both regular and cached token usage
-    const tokenUsagePerMessage = TokenUsage.fromMessage(response);
-    tokenTracker.tokenUsage.add(tokenUsagePerMessage);
-
-    const { content, toolCalls } = processResponse(response);
     messages.push({
       role: 'assistant',
       content,
@@ -332,14 +233,14 @@ export const toolAgent = async (
     const assistantMessage = content
       .filter((c) => c.type === 'text')
       .map((c) => c.text)
-      .join('\\n');
+      .join('\n');
     if (assistantMessage) {
       logger.info(assistantMessage);
     }
 
     logger.log(
       tokenTracker.logLevel,
-      chalk.blue(`[Token Usage/Message] ${tokenUsagePerMessage.toString()}`),
+      chalk.blue(`[Token Usage/Message] ${tokenTracker.tokenUsage.toString()}`),
     );
 
     const { sequenceCompleted, completionResult, respawn } = await executeTools(
