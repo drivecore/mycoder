@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
-
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
+import { getPlatformNewline } from '../../utils/github.js';
 
 /**
  * Available model providers
@@ -64,6 +64,8 @@ export function getDefaultSystemPrompt(toolContext: ToolContext): string {
     githubMode: toolContext.githubMode,
   };
 
+  // Use the platform-specific newline handling for GitHub CLI commands
+
   const githubModeInstructions = context.githubMode
     ? [
         '',
@@ -76,6 +78,8 @@ export function getDefaultSystemPrompt(toolContext: ToolContext): string {
         '- Create additional GitHub issues for follow-up tasks or ideas',
         '',
         'You can use the GitHub CLI (`gh`) for all GitHub interactions.',
+        '',
+        `When creating GitHub issues or PRs, use "${getPlatformNewline()}" for newlines in your text.`,
       ].join('\n')
     : '';
 
