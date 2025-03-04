@@ -4,7 +4,7 @@ Command-line interface for AI-powered coding tasks.
 
 ## Features
 
-- 🤖 **AI-Powered**: Leverages Anthropic's Claude and OpenAI models for intelligent coding assistance
+- 🤖 **AI-Powered**: Leverages Anthropic's Claude, OpenAI models, and Ollama for intelligent coding assistance
 - 🛠️ **Extensible Tool System**: Modular architecture with various tool categories
 - 🔄 **Parallel Execution**: Ability to spawn sub-agents for concurrent task processing
 - 📝 **Self-Modification**: Can modify code, it was built and tested by writing itself
@@ -82,24 +82,23 @@ mycoder config set modelName gpt-4o-2024-05-13
 
 ### Model Selection
 
-MyCoder supports both Anthropic and OpenAI models. You can configure which model to use with the following commands:
+MyCoder supports Anthropic, OpenAI, and Ollama models. You can configure which model provider and model name to use with the following commands:
 
 ```bash
-# Use OpenAI's GPT-4o model
+# Use OpenAI models
 mycoder config set modelProvider openai
-mycoder config set modelName gpt-4o-2024-05-13
+mycoder config set modelName gpt-4o-2024-05-13  # or any other OpenAI model
 
-# Use OpenAI's o3-mini model
-mycoder config set modelProvider openai
-mycoder config set modelName o3-mini-2024-07-18
-
-# Use Anthropic's Claude 3.7 Sonnet model
+# Use Anthropic models
 mycoder config set modelProvider anthropic
-mycoder config set modelName claude-3-7-sonnet-20250219
+mycoder config set modelName claude-3-7-sonnet-20250219  # or any other Anthropic model
 
-# Use Anthropic's Claude 3 Opus model
-mycoder config set modelProvider anthropic
-mycoder config set modelName claude-3-opus-20240229
+# Use Ollama models (local)
+mycoder config set modelProvider ollama
+mycoder config set modelName llama3-groq-tool-use  # or any other model available in your Ollama instance
+
+# Configure custom Ollama server URL (default is http://localhost:11434/api)
+mycoder config set ollamaBaseUrl http://your-ollama-server:11434/api
 ```
 
 You can also specify the model provider and name directly when running a command:
@@ -114,6 +113,7 @@ mycoder --modelProvider openai --modelName gpt-4o-2024-05-13 "Your prompt here"
 - `headless`: Run browser in headless mode with no UI showing (default: `true`)
 - `userSession`: Use user's existing browser session instead of sandboxed session (default: `false`)
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
+- `ollamaBaseUrl`: Base URL for Ollama API (default: `http://localhost:11434/api`)
 
 Example:
 
@@ -126,12 +126,17 @@ mycoder config set userSession true
 
 # Use readability for webpage processing
 mycoder config set pageFilter readability
+
+# Set custom Ollama server URL
+mycoder config set ollamaBaseUrl http://your-ollama-server:11434/api
 ```
 
 ## Environment Variables
 
 - `ANTHROPIC_API_KEY`: Your Anthropic API key (required when using Anthropic models)
 - `OPENAI_API_KEY`: Your OpenAI API key (required when using OpenAI models)
+
+Note: Ollama models do not require an API key as they run locally or on a specified server.
 
 ## Development
 

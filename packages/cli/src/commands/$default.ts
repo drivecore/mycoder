@@ -12,7 +12,6 @@ import {
   subAgentTool,
   errorToString,
   getModel,
-  AVAILABLE_MODELS,
   DEFAULT_CONFIG,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
@@ -109,15 +108,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         );
         throw new Error('OpenAI API key not found');
       }
-
-      // Validate model name
-      if (!AVAILABLE_MODELS[userModelProvider].includes(userModelName)) {
-        logger.error(
-          `Invalid model name: ${userModelName} for provider ${userModelProvider}`,
-          `Available models for ${userModelProvider}: ${AVAILABLE_MODELS[userModelProvider].join(', ')}`,
-        );
-        throw new Error(`Invalid model name: ${userModelName}`);
-      }
+      // No API key check needed for Ollama as it uses a local server
 
       let prompt: string | undefined;
 
@@ -166,8 +157,9 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const agentConfig = {
         ...DEFAULT_CONFIG,
         model: getModel(
-          userModelProvider as 'anthropic' | 'openai',
+          userModelProvider as 'anthropic' | 'openai' | 'ollama',
           userModelName,
+          { ollamaBaseUrl: config.ollamaBaseUrl },
         ),
       };
 

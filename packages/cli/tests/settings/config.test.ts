@@ -43,6 +43,7 @@ describe('Config', () => {
         pageFilter: 'none',
         modelProvider: 'anthropic',
         modelName: 'claude-3-7-sonnet-20250219',
+        ollamaBaseUrl: 'http://localhost:11434/api',
       });
       expect(fs.existsSync).toHaveBeenCalledWith(mockConfigFile);
     });
@@ -74,6 +75,7 @@ describe('Config', () => {
         pageFilter: 'none',
         modelProvider: 'anthropic',
         modelName: 'claude-3-7-sonnet-20250219',
+        ollamaBaseUrl: 'http://localhost:11434/api',
       });
     });
   });

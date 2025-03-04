@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { getDefaultSystemPrompt } from '../../core/toolAgent/index.js';
 import { getModel } from '../../core/toolAgent/config.js';
+import { getDefaultSystemPrompt } from '../../core/toolAgent/index.js';
 import { toolAgent } from '../../core/toolAgent.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
@@ -18,23 +18,14 @@ const parameterSchema = z.object({
   projectContext: z
     .string()
     .describe('Context about the problem or environment'),
-  fileContext: z
-    .object({
-      workingDirectory: z
-        .string()
-        .optional()
-        .describe('The directory where the sub-agent should operate'),
-      relevantFiles: z
-        .string()
-        .optional()
-        .describe(
-          'A list of files, which may include ** or * wildcard characters',
-        ),
-    })
-    .describe(
-      'When working with files and directories, it is best to be very specific to avoid sub-agents making incorrect assumptions',
-    )
-    .optional(),
+  workingDirectory: z
+    .string()
+    .optional()
+    .describe('The directory where the sub-agent should operate'),
+  relevantFilesDirectories: z
+    .string()
+    .optional()
+    .describe('A list of files, which may include ** or * wildcard characters'),
 });
 
 const returnSchema = z.object({
@@ -77,25 +68,22 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
     // Validate parameters
-    const { description, goal, projectContext, fileContext } =
-      parameterSchema.parse(params);
+    const {
+      description,
+      goal,
+      projectContext,
+      workingDirectory,
+      relevantFilesDirectories,
+    } = parameterSchema.parse(params);
 
     // Construct a well-structured prompt
     const prompt = [
       `Description: ${description}`,
       `Goal: ${goal}`,
       `Project Context: ${projectContext}`,
-      fileContext
-        ? `\nContext:\n${[
-            fileContext.workingDirectory
-              ? `- Working Directory: ${fileContext.workingDirectory}`
-              : '',
-            fileContext.relevantFiles
-              ? `- Relevant Files:\n  ${fileContext.relevantFiles}`
-              : '',
-          ]
-            .filter(Boolean)
-            .join('\n')}`
+      workingDirectory ? `Working Directory: ${workingDirectory}` : '',
+      relevantFilesDirectories
+        ? `Relevant Files:\n  ${relevantFilesDirectories}`
         : '',
     ]
       .filter(Boolean)
@@ -110,8 +98,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
 
     const result = await toolAgent(prompt, tools, config, {
       ...context,
-      workingDirectory:
-        fileContext?.workingDirectory ?? context.workingDirectory,
+      workingDirectory: workingDirectory ?? context.workingDirectory,
     });
     return { response: result.result };
   },

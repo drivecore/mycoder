@@ -14,6 +14,7 @@ const defaultConfig = {
   pageFilter: 'none' as 'simple' | 'none' | 'readability',
   modelProvider: 'anthropic',
   modelName: 'claude-3-7-sonnet-20250219',
+  ollamaBaseUrl: 'http://localhost:11434/api',
 };
 
 export type Config = typeof defaultConfig;
