@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
+import { formatGitHubText } from '../../utils/github.js';
 import { errorToString } from '../../utils/errorToString.js';
 
 import type { ChildProcess } from 'child_process';
@@ -79,9 +80,20 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { command, timeout = DEFAULT_TIMEOUT },
-    { logger, workingDirectory },
+    { logger, workingDirectory, githubMode },
   ): Promise<ReturnType> => {
     logger.verbose(`Starting shell command: ${command}`);
+
+    // If GitHub mode is enabled and this is a GitHub CLI command,
+    // ensure newlines are properly escaped for the platform
+    let processedCommand = command;
+    if (githubMode && command.startsWith('gh ')) {
+      // Only process commands that might contain content with newlines
+      if (command.includes('--body') || command.includes('--title') || command.includes('--comment')) {
+        processedCommand = formatGitHubText(command);
+        logger.verbose(`Processed GitHub command with platform-specific newlines`);
+      }
+    }
 
     return new Promise((resolve) => {
       try {
@@ -90,13 +102,13 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
         // Split command into command and args
         // Use command directly with shell: true
-        const process = spawn(command, [], {
+        const process = spawn(processedCommand, [], {
           shell: true,
           cwd: workingDirectory,
         });
 
         const processState: ProcessState = {
-          command,
+          command: processedCommand,
           process,
           stdout: [],
           stderr: [],

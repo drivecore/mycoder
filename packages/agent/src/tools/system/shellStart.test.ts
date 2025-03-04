@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
+import * as githubUtils from '../../utils/github.js';
 import { MockLogger } from '../../utils/mockLogger.js';
 import { sleep } from '../../utils/sleep.js';
 
@@ -157,5 +158,47 @@ describe('shellStartTool', () => {
     );
 
     expect(result.mode).toBe('sync');
+  });
+
+  it('should format GitHub CLI commands correctly in GitHub mode', async () => {
+    // Create a GitHub mode context
+    const githubModeContext: ToolContext = {
+      ...toolContext,
+      githubMode: true,
+    };
+
+    // Spy on formatGitHubText function
+    const formatSpy = vi.spyOn(githubUtils, 'formatGitHubText');
+    formatSpy.mockImplementation((text) => `FORMATTED:${text}`);
+
+    // Test with a GitHub CLI command that has a body
+    await shellStartTool.execute(
+      {
+        command: 'gh issue create --title "Test Issue" --body "Line 1\\nLine 2"',
+        description: 'GitHub CLI test',
+        timeout: 100,
+      },
+      githubModeContext,
+    );
+
+    // Verify formatGitHubText was called
+    expect(formatSpy).toHaveBeenCalled();
+    
+    // Test with a non-GitHub command (should not format)
+    formatSpy.mockClear();
+    await shellStartTool.execute(
+      {
+        command: 'echo "Not a GitHub command"',
+        description: 'Non-GitHub command test',
+        timeout: 100,
+      },
+      githubModeContext,
+    );
+
+    // Verify formatGitHubText was not called for non-GitHub commands
+    expect(formatSpy).not.toHaveBeenCalled();
+    
+    // Restore the original implementation
+    formatSpy.mockRestore();
   });
 });
