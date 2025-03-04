@@ -4,14 +4,7 @@ An open-source mono-repository containing the MyCoder agent and cli.
 
 !NOTE: To get started with the mycoder agent, [please see the CLI package](packages/cli)
 
-## Features
-
-- 🤖 **AI-Powered**: Leverages Anthropic's Claude API for intelligent decision making
-- 🛠️ **Extensible Tool System**: Modular architecture with various tool categories
-- 🔄 **Parallel Execution**: Ability to spawn sub-agents for concurrent task processing
-- 📝 **Self-Modification**: Can modify code, it was built and tested by writing itself
-- 🔍 **Smart Logging**: Hierarchical, color-coded logging system for clear output
-- 👤 **Human Compatible**: Uses README.md, project files and shell commands to build its own context
+undefined
 
 Please join the MyCoder.ai discord for support: https://discord.gg/5K6TYrHGHt
 
