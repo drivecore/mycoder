@@ -16,6 +16,7 @@ const defaultConfig = {
   modelName: 'claude-3-7-sonnet-20250219',
   ollamaBaseUrl: 'http://localhost:11434/api',
   customPrompt: '',
+  profile: false,
 };
 
 export type Config = typeof defaultConfig;

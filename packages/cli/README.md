@@ -82,16 +82,18 @@ mycoder config set modelName gpt-4o-2024-05-13
 
 ### Model Selection
 
+NOTE: Anthropic Claude 3.7 works the best by far in our testing.
+
 MyCoder supports Anthropic, OpenAI, xAI/Grok, Mistral AI, and Ollama models. You can configure which model provider and model name to use with the following commands:
 
 ```bash
+# Use Anthropic models [These work the best at this time]
+mycoder config set modelProvider anthropic
+mycoder config set modelName claude-3-7-sonnet-20250219  # or any other Anthropic model
+
 # Use OpenAI models
 mycoder config set modelProvider openai
 mycoder config set modelName gpt-4o-2024-05-13  # or any other OpenAI model
-
-# Use Anthropic models
-mycoder config set modelProvider anthropic
-mycoder config set modelName claude-3-7-sonnet-20250219  # or any other Anthropic model
 
 # Use xAI/Grok models
 mycoder config set modelProvider xai
@@ -117,7 +119,7 @@ mycoder --modelProvider openai --modelName gpt-4o-2024-05-13 "Your prompt here"
 
 ### Available Configuration Options
 
-- `githubMode`: Enable GitHub mode for working with issues and PRs (default: `false`)
+- `githubMode`: Enable GitHub mode (requires "gh" cli to be installed) for working with issues and PRs (default: `false`)
 - `headless`: Run browser in headless mode with no UI showing (default: `true`)
 - `userSession`: Use user's existing browser session instead of sandboxed session (default: `false`)
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
