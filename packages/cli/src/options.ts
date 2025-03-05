@@ -9,6 +9,7 @@ export type SharedOptions = {
   readonly sentryDsn?: string;
   readonly modelProvider?: string;
   readonly modelName?: string;
+  readonly profile?: boolean;
 };
 
 export const sharedOptions = {
@@ -18,6 +19,11 @@ export const sharedOptions = {
     description: 'Set minimum logging level',
     default: 'info',
     choices: ['debug', 'verbose', 'info', 'warn', 'error'],
+  } as const,
+  profile: {
+    type: 'boolean',
+    description: 'Enable performance profiling of CLI startup',
+    default: false,
   } as const,
   modelProvider: {
     type: 'string',
