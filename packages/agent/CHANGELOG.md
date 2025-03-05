@@ -1,5 +1,11 @@
 # mycoder-agent
 
+## 0.6.0
+
+### Minor Changes
+
+- Simplify browser message tool parameter schema to make it easier for AI to call.
+
 ## 0.5.0
 
 ### Minor Changes
