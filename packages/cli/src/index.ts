@@ -26,17 +26,6 @@ sourceMapSupport.install();
 mark('After sourceMapSupport install');
 
 const main = async () => {
-  // Parse argv early to check for profiling flag
-  const parsedArgv = await yargs(hideBin(process.argv))
-    .options(sharedOptions)
-    .parse();
-
-  // Get config to check for profile setting
-  const config = getConfig();
-
-  // Enable profiling if --profile flag is set or if enabled in config
-  enableProfiling(Boolean(parsedArgv.profile) || Boolean(config.profile));
-
   mark('Main function start');
 
   dotenv.config();
@@ -56,9 +45,11 @@ const main = async () => {
   const packageInfo = require('../package.json') as PackageJson;
   mark('After package.json load');
 
+  console.log('packageInfo', packageInfo);
+
   // Set up yargs with the new CLI interface
   mark('Before yargs setup');
-  await yargs(hideBin(process.argv))
+  const argv = await yargs(hideBin(process.argv))
     .scriptName(packageInfo.name!)
     .version(packageInfo.version!)
     .options(sharedOptions)
@@ -74,6 +65,13 @@ const main = async () => {
     .strict()
     .showHelpOnFail(true)
     .help().argv;
+
+  // Get config to check for profile setting
+  const config = getConfig();
+
+  // Enable profiling if --profile flag is set or if enabled in config
+  enableProfiling(Boolean(argv.profile) || Boolean(config.profile));
+  mark('After yargs setup');
 };
 
 await main()
