@@ -56,7 +56,6 @@ const parameterSchema = z.object({
     ),
   description: z
     .string()
-    .max(80)
     .describe('The reason you are using the text editor (max 80 chars)'),
 });
 
