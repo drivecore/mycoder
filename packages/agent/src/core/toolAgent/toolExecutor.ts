@@ -2,8 +2,9 @@ import { CoreMessage, CoreToolMessage, ToolResultPart } from 'ai';
 
 import { executeToolCall } from '../executeToolCall.js';
 import { TokenTracker } from '../tokens.js';
+import { ToolUseContent } from '../types.js';
 
-import { Tool, ToolCallResult, ToolContext, ToolUseContent } from './types.js';
+import { Tool, ToolCallResult, ToolContext } from './types.js';
 
 const safeParse = (value: string) => {
   try {
