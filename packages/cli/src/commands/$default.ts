@@ -191,6 +191,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         workingDirectory: '.',
         tokenTracker,
         githubMode: config.githubMode,
+        customPrompt: config.customPrompt,
       });
 
       const output =

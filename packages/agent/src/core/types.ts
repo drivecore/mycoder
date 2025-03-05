@@ -17,6 +17,7 @@ export type ToolContext = {
   pageFilter: pageFilter;
   tokenTracker: TokenTracker;
   githubMode: boolean;
+  customPrompt?: string;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {
