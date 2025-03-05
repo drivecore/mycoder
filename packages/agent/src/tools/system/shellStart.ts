@@ -29,7 +29,6 @@ const parameterSchema = z.object({
   command: z.string().describe('The shell command to execute'),
   description: z
     .string()
-    .max(80)
     .describe('The reason this shell command is being run (max 80 chars)'),
   timeout: z
     .number()

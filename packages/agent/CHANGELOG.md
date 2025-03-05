@@ -1,5 +1,21 @@
 # mycoder-agent
 
+## 0.5.0
+
+### Minor Changes
+
+- a51b970: Convert from JsonSchema7Type to ZodSchema for tool parameters and returns, required for Vercel AI SDK integration.
+- 27f73e3: Add GitHub mode to MyCoder for working with issues and PRs
+- 66ff39e: Add support for OpenAI models (o3 mini and GPT-4o) via Vercel AI SDK
+- 9b9d953: Add performance profiler via --profile to diagnose slow start-up times on some OSes.
+- 27c2ba5: Refactored toolAgent.ts into modular components for improved maintainability and testability. Split into config.ts, messageUtils.ts, toolExecutor.ts, tokenTracking.ts, and types.ts modules.
+- a4331b8: Add textEditor tool that combines readFile and updateFile functionality
+- 9b9d953: Use cross platform compatibility tooling to build up context, rather than Linux/MacOS specific tools.
+
+### Patch Changes
+
+- 870cbee: Re-implemented token caching for Vercel AI SDK usage with Anthropic provider to reduce token consumption during repeated API calls.
+
 ## 0.4.0
 
 ### Minor Changes
