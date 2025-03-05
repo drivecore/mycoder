@@ -2,8 +2,18 @@ import { CoreMessage, CoreToolMessage, ToolResultPart } from 'ai';
 
 import { executeToolCall } from '../executeToolCall.js';
 import { TokenTracker } from '../tokens.js';
+import { ToolUseContent } from '../types.js';
 
-import { Tool, ToolCallResult, ToolContext, ToolUseContent } from './types.js';
+import { Tool, ToolCallResult, ToolContext } from './types.js';
+
+const safeParse = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.error('Error parsing JSON:', error, 'original value:', value);
+    return { error: value };
+  }
+};
 
 /**
  * Executes a list of tool calls and returns the results
@@ -67,7 +77,7 @@ export async function executeTools(
         type: 'tool-result',
         toolCallId: call.id,
         toolName: call.name,
-        result: JSON.parse(toolResult),
+        result: safeParse(toolResult),
       } satisfies ToolResultPart;
     }),
   );
