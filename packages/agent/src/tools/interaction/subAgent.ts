@@ -12,7 +12,6 @@ import { getTools } from '../getTools.js';
 const parameterSchema = z.object({
   description: z
     .string()
-    .max(80)
     .describe("A brief description of the sub-agent's purpose (max 80 chars)"),
   goal: z
     .string()
