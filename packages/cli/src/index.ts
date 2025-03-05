@@ -45,8 +45,6 @@ const main = async () => {
   const packageInfo = require('../package.json') as PackageJson;
   mark('After package.json load');
 
-  console.log('packageInfo', packageInfo);
-
   // Set up yargs with the new CLI interface
   mark('Before yargs setup');
   const argv = await yargs(hideBin(process.argv))
