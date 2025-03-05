@@ -14,7 +14,7 @@ export * from './tokenTracking.js';
 export * from './types.js';
 
 // Export default system prompt for convenience
-export const getDefaultSystemPrompt = (context: any) => {
+export const getDefaultSystemPrompt = (context: Record<string, unknown>) => {
   return `You are an AI agent that can use tools to accomplish tasks.
 
 Current Context:
@@ -24,20 +24,3 @@ ${context.directoryListing ?? 'No directory listing available'}
 System: ${context.systemInfo ?? 'No system info available'}
 DateTime: ${new Date().toString()}`;
 };
-export const getDefaultSystemPrompt = (context: any) => {
-  return `You are an AI agent that can use tools to accomplish tasks.
-
-Current Context:
-Directory: ${context.workingDirectory}
-Files:
-${context.directoryListing ?? 'No directory listing available'}
-System: ${context.systemInfo ?? 'No system info available'}
-DateTime: ${new Date().toString()}`;
-};
-
-// Re-export everything from the module
-export * from './config.js';
-export * from './messageUtils.js';
-export * from './toolExecutor.js';
-export * from './tokenTracking.js';
-export * from './types.js';

@@ -1,7 +1,10 @@
-// Re-export all types from the original types.ts file
-export * from '../types.js';
+// Import types from the core types file
+import { Tool, ToolContext } from '../types.js';
 
-// Only define new types specific to toolAgent here
+// Export the imported types explicitly
+export { Tool, ToolContext };
+
+// Define types specific to toolAgent here
 export interface ToolAgentResult {
   result: string;
   interactions: number;
@@ -10,7 +13,7 @@ export interface ToolAgentResult {
 export interface ToolCallResult {
   sequenceCompleted: boolean;
   completionResult?: string;
-  toolResults: any[];
+  toolResults: unknown[];
   respawn?: { context: string };
 }
 
