@@ -18,7 +18,6 @@ const parameterSchema = z.object({
     .describe('Default timeout in milliseconds (default: 30000)'),
   description: z
     .string()
-    .max(80)
     .describe('The reason for starting this browser session (max 80 chars)'),
 });
 

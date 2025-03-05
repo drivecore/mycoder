@@ -15,7 +15,6 @@ const parameterSchema = z.object({
     .describe('The shell command to execute in MacOS bash format'),
   description: z
     .string()
-    .max(80)
     .describe('The reason this shell command is being run (max 80 chars)'),
   timeout: z
     .number()

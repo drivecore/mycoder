@@ -53,7 +53,6 @@ const parameterSchema = z.object({
     .describe('Signal to send to the process (e.g., SIGTERM, SIGINT)'),
   description: z
     .string()
-    .max(80)
     .describe('The reason for this shell interaction (max 80 chars)'),
 });
 
