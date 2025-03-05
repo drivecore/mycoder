@@ -1,10 +1,11 @@
 # Tool Agent Module
 
-This directory contains the refactored Tool Agent implementation, split into smaller, focused modules for improved maintainability and testability.
+This directory contains the Tool Agent implementation, split into smaller, focused modules for improved maintainability and testability.
 
 ## Module Structure
 
-- **index.ts**: Main entry point and orchestration of the tool agent functionality
+- **index.ts**: Re-exports from toolAgentCore.ts and other modules
+- **toolAgentCore.ts**: Main implementation of the tool agent functionality
 - **config.ts**: Configuration-related code and default settings
 - **messageUtils.ts**: Utilities for handling and formatting messages
 - **toolExecutor.ts**: Logic for executing tool calls
@@ -14,10 +15,10 @@ This directory contains the refactored Tool Agent implementation, split into sma
 ## Usage
 
 ```typescript
-import { toolAgent } from './toolAgent/index.js';
-import { Tool, ToolContext } from './toolAgent/types.js';
+import { toolAgent } from '../../core/toolAgent/index.js';
+import { Tool, ToolContext } from '../../core/types.js';
 
-// Use the toolAgent function as before
+// Use the toolAgent function
 const result = await toolAgent(prompt, tools, config, context);
 ```
 
@@ -28,7 +29,3 @@ const result = await toolAgent(prompt, tools, config, context);
 - **Clearer responsibilities**: Each module has a single purpose
 - **Easier onboarding**: New developers can understand the system more quickly
 - **Simpler future extensions**: Modular design makes it easier to extend functionality
-
-## Migration
-
-The original `toolAgent.ts` file now re-exports from this directory for backward compatibility, but it will display a deprecation warning. New code should import directly from the toolAgent directory.

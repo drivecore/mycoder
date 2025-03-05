@@ -2,8 +2,10 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { getModel } from '../../core/toolAgent/config.js';
-import { getDefaultSystemPrompt } from '../../core/toolAgent/index.js';
-import { toolAgent } from '../../core/toolAgent.js';
+import {
+  getDefaultSystemPrompt,
+  toolAgent,
+} from '../../core/toolAgent/index.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
 
