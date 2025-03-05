@@ -11,6 +11,7 @@ import { command as testSentryCommand } from './commands/test-sentry.js';
 import { command as testProfileCommand } from './commands/test-profile.js';
 import { command as toolsCommand } from './commands/tools.js';
 import { sharedOptions } from './options.js';
+import { getConfig } from './settings/config.js';
 import { initSentry, captureException } from './sentry/index.js';
 import { enableProfiling, mark, reportTimings } from './utils/performance.js';
 
@@ -28,8 +29,11 @@ const main = async () => {
   // Parse argv early to check for profiling flag
   const parsedArgv = await yargs(hideBin(process.argv)).options(sharedOptions).parse();
   
-  // Enable profiling if --profile flag is set
-  enableProfiling(Boolean(parsedArgv.profile));
+  // Get config to check for profile setting
+  const config = getConfig();
+  
+  // Enable profiling if --profile flag is set or if enabled in config
+  enableProfiling(Boolean(parsedArgv.profile) || Boolean(config.profile));
   
   mark('Main function start');
   
