@@ -14,9 +14,10 @@ export function enableProfiling(enabled: boolean): void {
 
 /**
  * Mark a timing point in the application
+ * Always collect data, but only report if profiling is enabled
  */
 export function mark(label: string): void {
-  if (!isEnabled) return;
+  // Always collect timing data regardless of whether profiling is enabled
   timings[label] = performance.now() - cliStartTime;
 }
 
