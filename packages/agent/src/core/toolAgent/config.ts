@@ -1,4 +1,6 @@
-import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 import { anthropic } from '@ai-sdk/anthropic';
 import { mistral } from '@ai-sdk/mistral';
@@ -62,19 +64,86 @@ export const DEFAULT_CONFIG = {
  * Gets the default system prompt with contextual information about the environment
  */
 export function getDefaultSystemPrompt(toolContext: ToolContext): string {
-  // Gather context with error handling
-  const getCommandOutput = (command: string, label: string): string => {
+  // Gather context using Node.js APIs for cross-platform compatibility
+  const getCurrentDirectory = (): string => {
     try {
-      return execSync(command).toString().trim();
+      return process.cwd();
     } catch (error) {
-      return `[Error getting ${label}: ${(error as Error).message}]`;
+      return `[Error getting current directory: ${(error as Error).message}]`;
+    }
+  };
+
+  const getFileList = (): string => {
+    try {
+      const currentDir = process.cwd();
+      const files = fs.readdirSync(currentDir, { withFileTypes: true });
+
+      // Sort directories first, then files
+      files.sort((a, b) => {
+        if (a.isDirectory() && !b.isDirectory()) return -1;
+        if (!a.isDirectory() && b.isDirectory()) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      // Format similar to 'ls -la' output
+      const fileDetails = files.map((file) => {
+        try {
+          const stats = fs.statSync(path.join(currentDir, file.name));
+          const permissions = getPermissionString(stats);
+          const links = stats.nlink || 1;
+          const owner =
+            process.platform === 'win32' ? 'OWNER' : stats.uid.toString();
+          const group =
+            process.platform === 'win32' ? 'GROUP' : stats.gid.toString();
+          const size = stats.size;
+          const mtime = stats.mtime
+            .toDateString()
+            .split(' ')
+            .slice(1)
+            .join(' ');
+          const type = file.isDirectory() ? 'd' : '-';
+
+          return `${type}${permissions} ${links.toString().padStart(2)} ${owner.padEnd(10)} ${group.padEnd(10)} ${size.toString().padStart(8)} ${mtime} ${file.name}${file.isDirectory() ? '/' : ''}`;
+        } catch (err) {
+          return `[Error getting details for ${file.name}: ${(err as Error).message}]`;
+        }
+      });
+
+      return `total ${files.length}\n${fileDetails.join('\n')}`;
+    } catch (error) {
+      return `[Error getting file listing: ${(error as Error).message}]`;
+    }
+  };
+
+  const getPermissionString = (stats: fs.Stats): string => {
+    const mode = stats.mode;
+    const permissions = [
+      mode & 0o400 ? 'r' : '-',
+      mode & 0o200 ? 'w' : '-',
+      mode & 0o100 ? 'x' : '-',
+      mode & 0o040 ? 'r' : '-',
+      mode & 0o020 ? 'w' : '-',
+      mode & 0o010 ? 'x' : '-',
+      mode & 0o004 ? 'r' : '-',
+      mode & 0o002 ? 'w' : '-',
+      mode & 0o001 ? 'x' : '-',
+    ].join('');
+
+    return permissions;
+  };
+
+  const getSystemInfo = (): string => {
+    try {
+      return `${os.type()} ${os.hostname()} ${os.release()} ${os.platform()} ${os.arch()}`;
+    } catch (error) {
+      return `[Error getting system information: ${(error as Error).message}]`;
     }
   };
 
   const context = {
-    pwd: getCommandOutput('pwd', 'current directory'),
-    files: getCommandOutput('ls -la', 'file listing'),
-    system: getCommandOutput('uname -a', 'system information'),
+    pwd: getCurrentDirectory(),
+    files: getFileList(),
+    system: getSystemInfo(),
     datetime: new Date().toString(),
     githubMode: toolContext.githubMode,
   };
