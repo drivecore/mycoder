@@ -59,15 +59,24 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
     if (argv.command === 'list') {
       logger.info('Current configuration:');
       const defaultConfig = getDefaultConfig();
-      Object.entries(config).forEach(([key, value]) => {
+
+      // Get all valid config keys
+      const validKeys = Object.keys(defaultConfig);
+
+      // Filter and sort config entries
+      const configEntries = Object.entries(config)
+        .filter(([key]) => validKeys.includes(key))
+        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+
+      // Display config entries with default indicators
+      configEntries.forEach(([key, value]) => {
         const isDefault =
           JSON.stringify(value) ===
           JSON.stringify(defaultConfig[key as keyof typeof defaultConfig]);
-        const valueDisplay = chalk.green(value);
-        const statusIndicator = isDefault
-          ? chalk.dim(' (default)')
-          : chalk.blue(' (custom)');
-        logger.info(`  ${key}: ${valueDisplay}${statusIndicator}`);
+        const valueDisplay = isDefault
+          ? chalk.dim(`${value} (default)`)
+          : chalk.green(value);
+        logger.info(`  ${key}: ${valueDisplay}`);
       });
       return;
     }
@@ -98,6 +107,16 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
 
       if (argv.value === undefined) {
         logger.error('Value is required for set command');
+        return;
+      }
+
+      // Validate that the key exists in default config
+      const defaultConfig = getDefaultConfig();
+      if (!(argv.key in defaultConfig)) {
+        logger.error(`Invalid configuration key '${argv.key}'`);
+        logger.info(
+          `Valid configuration keys: ${Object.keys(defaultConfig).join(', ')}`,
+        );
         return;
       }
 
