@@ -17,6 +17,7 @@ const defaultConfig = {
   ollamaBaseUrl: 'http://localhost:11434/api',
   customPrompt: '',
   profile: false,
+  tokenCache: true,
 };
 
 export type Config = typeof defaultConfig;

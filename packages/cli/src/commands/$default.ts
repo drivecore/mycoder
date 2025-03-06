@@ -88,6 +88,9 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       undefined,
       argv.tokenUsage ? LogLevel.info : LogLevel.debug,
     );
+    // Use command line option if provided, otherwise use config value
+    tokenTracker.tokenCache =
+      argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
 
     try {
       // Get configuration for model provider and name
@@ -177,6 +180,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         tokenTracker,
         githubMode: config.githubMode,
         customPrompt: config.customPrompt,
+        tokenCache:
+          argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
       });
 
       const output =
