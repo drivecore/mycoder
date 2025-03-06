@@ -92,6 +92,10 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
     try {
       // Get configuration for model provider and name
       const userConfig = getConfig();
+      // Use command line option if provided, otherwise use config value
+      tokenTracker.tokenCache =
+        argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
+
       const userModelProvider = argv.modelProvider || userConfig.modelProvider;
       const userModelName = argv.modelName || userConfig.modelName;
       const userMaxTokens = argv.maxTokens || userConfig.maxTokens;
@@ -181,6 +185,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         tokenTracker,
         githubMode: config.githubMode,
         customPrompt: config.customPrompt,
+        tokenCache:
+          argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
       });
 
       const output =

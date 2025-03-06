@@ -12,6 +12,7 @@ export type SharedOptions = {
   readonly maxTokens?: number;
   readonly temperature?: number;
   readonly profile?: boolean;
+  readonly tokenCache?: boolean;
 };
 
 export const sharedOptions = {
@@ -81,5 +82,9 @@ export const sharedOptions = {
     type: 'string',
     description: 'Custom Sentry DSN for error tracking',
     hidden: true,
+  } as const,
+  tokenCache: {
+    type: 'boolean',
+    description: 'Enable token caching for LLM API calls',
   } as const,
 };

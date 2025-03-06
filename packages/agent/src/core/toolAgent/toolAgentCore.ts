@@ -57,11 +57,20 @@ export const toolAgent = async (
       });
     });
 
-    // Apply cache control to messages for token caching
-    const messagesWithCacheControl = [
-      createCacheControlMessageFromSystemPrompt(systemPrompt),
-      ...addCacheControlToMessages(messages),
-    ];
+    // Apply cache control to messages for token caching if enabled
+    const messagesWithCacheControl =
+      tokenTracker.tokenCache !== false && context.tokenCache !== false
+        ? [
+            createCacheControlMessageFromSystemPrompt(systemPrompt),
+            ...addCacheControlToMessages(messages),
+          ]
+        : [
+            {
+              role: 'system',
+              content: systemPrompt,
+            } as CoreMessage,
+            ...messages,
+          ];
 
     const generateTextProps = {
       model: config.model,

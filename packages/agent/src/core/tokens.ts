@@ -73,6 +73,7 @@ export class TokenUsage {
 export class TokenTracker {
   public tokenUsage = new TokenUsage();
   public children: TokenTracker[] = [];
+  public tokenCache?: boolean;
 
   constructor(
     public readonly name: string = 'unnamed',

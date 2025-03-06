@@ -125,6 +125,7 @@ mycoder --modelProvider openai --modelName gpt-4o-2024-05-13 "Your prompt here"
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
 - `ollamaBaseUrl`: Base URL for Ollama API (default: `http://localhost:11434/api`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
+- `tokenCache`: Enable token caching for LLM API calls (default: `true`)
 
 Example:
 
@@ -143,6 +144,9 @@ mycoder config set ollamaBaseUrl http://your-ollama-server:11434/api
 
 # Set custom instructions for the agent
 mycoder config set customPrompt "Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible."
+
+# Disable token caching for LLM API calls
+mycoder config set tokenCache false
 ```
 
 ## Environment Variables

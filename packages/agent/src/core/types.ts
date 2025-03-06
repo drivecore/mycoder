@@ -18,6 +18,7 @@ export type ToolContext = {
   tokenTracker: TokenTracker;
   githubMode: boolean;
   customPrompt?: string;
+  tokenCache?: boolean;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {
