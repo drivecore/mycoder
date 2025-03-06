@@ -9,6 +9,8 @@ export type SharedOptions = {
   readonly sentryDsn?: string;
   readonly modelProvider?: string;
   readonly modelName?: string;
+  readonly maxTokens?: number;
+  readonly temperature?: number;
   readonly profile?: boolean;
 };
 
@@ -33,6 +35,14 @@ export const sharedOptions = {
   modelName: {
     type: 'string',
     description: 'AI model name to use',
+  } as const,
+  maxTokens: {
+    type: 'number',
+    description: 'Maximum number of tokens to generate',
+  } as const,
+  temperature: {
+    type: 'number',
+    description: 'Temperature for text generation (0.0-1.0)',
   } as const,
   interactive: {
     type: 'boolean',

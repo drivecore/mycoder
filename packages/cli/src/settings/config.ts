@@ -14,6 +14,8 @@ const defaultConfig = {
   pageFilter: 'none' as 'simple' | 'none' | 'readability',
   modelProvider: 'anthropic',
   modelName: 'claude-3-7-sonnet-20250219',
+  maxTokens: 4096,
+  temperature: 0.7,
   ollamaBaseUrl: 'http://localhost:11434/api',
   customPrompt: '',
   profile: false,
