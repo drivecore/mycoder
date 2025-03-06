@@ -24,6 +24,11 @@ const defaultConfig = {
 
 export type Config = typeof defaultConfig;
 
+// Export the default config for use in other functions
+export const getDefaultConfig = (): Config => {
+  return { ...defaultConfig };
+};
+
 export const getConfig = (): Config => {
   if (!fs.existsSync(configFile)) {
     return defaultConfig;
