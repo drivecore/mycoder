@@ -75,6 +75,9 @@ mycoder config get githubMode
 # Set a configuration value
 mycoder config set githubMode true
 
+# Reset a configuration value to its default
+mycoder config clear customPrompt
+
 # Configure model provider and model name
 mycoder config set modelProvider openai
 mycoder config set modelName gpt-4o-2024-05-13
