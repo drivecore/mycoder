@@ -1,7 +1,5 @@
 import { CoreMessage, ToolSet, generateText, tool as makeTool } from 'ai';
 
-import { getAnthropicApiKeyError } from '../../utils/errors.js';
-
 import { DEFAULT_CONFIG } from './config.js';
 import {
   addCacheControlToMessages,
@@ -29,9 +27,6 @@ export const toolAgent = async (
   logger.verbose('Initial prompt:', initialPrompt);
 
   let interactions = 0;
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error(getAnthropicApiKeyError());
 
   const messages: CoreMessage[] = [
     {
