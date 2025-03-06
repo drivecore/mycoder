@@ -65,6 +65,37 @@ describe.skip('Config Command', () => {
       interactive: false,
       command: 'list',
     } as any);
+    it('should filter out invalid config keys in list command', async () => {
+      // Mock getConfig to return config with invalid keys
+      vi.mocked(getConfig).mockReturnValue({
+        githubMode: false,
+        invalidKey: 'some value',
+      } as any);
+
+      // Mock getDefaultConfig to return only valid keys
+      vi.mocked(getDefaultConfig).mockReturnValue({
+        githubMode: false,
+      });
+
+      await command.handler!({
+        _: ['config', 'config', 'list'],
+        logLevel: 'info',
+        interactive: false,
+        command: 'list',
+      } as any);
+
+      expect(getConfig).toHaveBeenCalled();
+      expect(getDefaultConfig).toHaveBeenCalled();
+
+      // Should show the valid key
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining('githubMode'),
+      );
+
+      // Should not show the invalid key
+      const infoCallArgs = mockLogger.info.mock.calls.flat();
+      expect(infoCallArgs.join()).not.toContain('invalidKey');
+    });
 
     expect(getConfig).toHaveBeenCalled();
     expect(mockLogger.info).toHaveBeenCalledWith('Current configuration:');
@@ -144,6 +175,21 @@ describe.skip('Config Command', () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Value is required'),
+    );
+  });
+
+  it('should validate key exists in default config for set command', async () => {
+    await command.handler!({
+      _: ['config', 'config', 'set', 'invalidKey', 'value'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'set',
+      key: 'invalidKey',
+      value: 'value',
+    } as any);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid configuration key'),
     );
   });
 
