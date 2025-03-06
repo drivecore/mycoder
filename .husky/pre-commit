@@ -1,1 +1,24 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+
+# Run lint-staged for code formatting and linting
+echo "Running lint-staged..."
 pnpm lint-staged
+
+# Run build to ensure project builds successfully
+echo "Running build checks..."
+pnpm build || {
+  echo "❌ Build failed. Please fix the build errors before committing."
+  exit 1
+}
+
+# Run tests to ensure all tests pass
+echo "Running tests..."
+pnpm test || {
+  echo "❌ Tests failed. Please fix the failing tests before committing."
+  exit 1
+}
+
+echo "✅ All checks passed!"
