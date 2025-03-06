@@ -83,9 +83,11 @@ export const toolAgent = async (
 
     const localToolCalls = formatToolCalls(toolCalls);
 
-    if (!text.length) {
-      // Instead of treating empty response as completion, remind the agent
-      logger.verbose('Received empty response from agent, sending reminder');
+    if (!text.length && toolCalls.length === 0) {
+      // Only consider it empty if there's no text AND no tool calls
+      logger.verbose(
+        'Received truly empty response from agent (no text and no tool calls), sending reminder',
+      );
       messages.push({
         role: 'user',
         content: [
