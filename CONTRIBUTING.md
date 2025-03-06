@@ -87,8 +87,10 @@ This project and everyone participating in it is governed by our Code of Conduct
 
    - `pnpm lint`: Lints the staged files using ESLint
    - `pnpm format`: Formats the staged files using Prettier
+   - `pnpm build`: Ensures the project builds successfully
+   - `pnpm test`: Ensures all tests pass
 
-   If either of these commands fails due to linting errors or formatting issues, the commit will be aborted. Please fix the reported issues and try committing again.
+   If any of these commands fails, the commit will be aborted. Please fix the reported issues and try committing again.
 
    You can also run the lint and format commands manually at any time:
 
