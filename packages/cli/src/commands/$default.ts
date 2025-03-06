@@ -88,13 +88,14 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       undefined,
       argv.tokenUsage ? LogLevel.info : LogLevel.debug,
     );
-    // Use command line option if provided, otherwise use config value
-    tokenTracker.tokenCache =
-      argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
 
     try {
       // Get configuration for model provider and name
       const userConfig = getConfig();
+      // Use command line option if provided, otherwise use config value
+      tokenTracker.tokenCache =
+        argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
+
       const userModelProvider = argv.modelProvider || userConfig.modelProvider;
       const userModelName = argv.modelName || userConfig.modelName;
 

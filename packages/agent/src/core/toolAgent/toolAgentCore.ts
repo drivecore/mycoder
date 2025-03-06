@@ -64,7 +64,13 @@ export const toolAgent = async (
             createCacheControlMessageFromSystemPrompt(systemPrompt),
             ...addCacheControlToMessages(messages),
           ]
-        : [{ role: 'system', content: systemPrompt }, ...messages];
+        : [
+            {
+              role: 'system',
+              content: systemPrompt,
+            } as CoreMessage,
+            ...messages,
+          ];
 
     const generateTextProps = {
       model: config.model,

@@ -46,6 +46,7 @@ describe('Config', () => {
         ollamaBaseUrl: 'http://localhost:11434/api',
         profile: false,
         customPrompt: '',
+        tokenCache: true,
       });
       expect(fs.existsSync).toHaveBeenCalledWith(mockConfigFile);
     });
@@ -80,6 +81,7 @@ describe('Config', () => {
         ollamaBaseUrl: 'http://localhost:11434/api',
         profile: false,
         customPrompt: '',
+        tokenCache: true,
       });
     });
   });
