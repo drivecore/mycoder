@@ -66,6 +66,7 @@ export const toolAgent = async (
     const generateTextProps = {
       model: config.model,
       temperature: config.temperature,
+      maxTokens: config.maxTokens,
       messages: messagesWithCacheControl,
       tools: toolSet,
     };

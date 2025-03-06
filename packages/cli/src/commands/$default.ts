@@ -94,6 +94,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const userConfig = getConfig();
       const userModelProvider = argv.modelProvider || userConfig.modelProvider;
       const userModelName = argv.modelName || userConfig.modelName;
+      const userMaxTokens = argv.maxTokens || userConfig.maxTokens;
+      const userTemperature = argv.temperature || userConfig.temperature;
 
       // Early API key check based on model provider
       const providerSettings =
@@ -166,6 +168,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
           userModelName,
           { ollamaBaseUrl: config.ollamaBaseUrl },
         ),
+        maxTokens: userMaxTokens,
+        temperature: userTemperature,
       };
 
       const result = await toolAgent(prompt, tools, agentConfig, {
