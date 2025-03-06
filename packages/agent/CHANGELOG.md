@@ -1,5 +1,11 @@
 # mycoder-agent
 
+## 0.6.1
+
+### Patch Changes
+
+- 5f43eeb: Improve check for API keys with better help messages.
+
 ## 0.6.0
 
 ### Minor Changes
