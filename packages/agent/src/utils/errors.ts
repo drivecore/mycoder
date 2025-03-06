@@ -36,13 +36,24 @@ export const getProviderApiKeyError = (provider: string): string => {
   }
 
   const { keyName, docsUrl } = config;
+  const platform = process.platform;
+  let osSpecificInstructions = '';
+
+  if (platform === 'win32') {
+    osSpecificInstructions = `- Using the windows command prompt, "setx ${keyName}=[your-api-key]"`;
+  } else if (platform === 'darwin' || platform === 'linux') {
+    osSpecificInstructions = `- As an environment variable, "export ${keyName}=[your-api-key]"`;
+  } else {
+    osSpecificInstructions = `- As an environment variable (platform-specific command)`;
+  }
 
   return `
 Error: ${keyName} environment variable is not set
 
-Before using MyCoder with ${provider} models, you must have a ${keyName} specified either:
+Before using MyCoder with ${provider} models, you must have a ${keyName} specified.
 
-- As an environment variable, "export ${keyName}=[your-api-key]" or
+You can set it via:
+${osSpecificInstructions}
 - In a .env file in the folder you run "mycoder" from
 
 For setup instructions, visit: ${docsUrl}
