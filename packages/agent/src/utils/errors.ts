@@ -1,47 +1,54 @@
-export const getAnthropicApiKeyError = () => `
-Error: ANTHROPIC_API_KEY environment variable is not set
+// Provider configuration map
+export const providerConfig: Record<
+  string,
+  { keyName: string; docsUrl: string } | undefined
+> = {
+  anthropic: {
+    keyName: 'ANTHROPIC_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/getting-started/anthropic',
+  },
+  openai: {
+    keyName: 'OPENAI_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/getting-started/openai',
+  },
+  xai: {
+    keyName: 'XAI_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/getting-started/xai',
+  },
+  mistral: {
+    keyName: 'MISTRAL_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/getting-started/mistral',
+  },
+  // No API key needed for ollama as it uses a local server
+  ollama: undefined,
+};
 
-Before using MyCoder with Anthropic models, you must have an ANTHROPIC_API_KEY specified either:
+/**
+ * Generates a provider-specific API key error message
+ * @param provider The LLM provider name
+ * @returns Error message with provider-specific instructions
+ */
+export const getProviderApiKeyError = (provider: string): string => {
+  const config = providerConfig[provider];
 
-- As an environment variable, "export ANTHROPIC_API_KEY=[your-api-key]" or
+  if (!config) {
+    return `Unknown provider: ${provider}`;
+  }
+
+  const { keyName, docsUrl } = config;
+
+  return `
+Error: ${keyName} environment variable is not set
+
+Before using MyCoder with ${provider} models, you must have a ${keyName} specified either:
+
+- As an environment variable, "export ${keyName}=[your-api-key]" or
 - In a .env file in the folder you run "mycoder" from
 
-Get an API key from https://www.anthropic.com/api
-For setup instructions, visit: https://mycoder.ai/docs/getting-started/anthropic
+For setup instructions, visit: ${docsUrl}
 `;
+};
 
-export const getOpenAIApiKeyError = () => `
-Error: OPENAI_API_KEY environment variable is not set
-
-Before using MyCoder with OpenAI models, you must have an OPENAI_API_KEY specified either:
-
-- As an environment variable, "export OPENAI_API_KEY=[your-api-key]" or
-- In a .env file in the folder you run "mycoder" from
-
-Get an API key from https://platform.openai.com/api-keys
-For setup instructions, visit: https://mycoder.ai/docs/getting-started/openai
-`;
-
-export const getXAIApiKeyError = () => `
-Error: XAI_API_KEY environment variable is not set
-
-Before using MyCoder with xAI models, you must have an XAI_API_KEY specified either:
-
-- As an environment variable, "export XAI_API_KEY=[your-api-key]" or
-- In a .env file in the folder you run "mycoder" from
-
-Get an API key from https://platform.xai.com
-For setup instructions, visit: https://mycoder.ai/docs/getting-started/xai
-`;
-
-export const getMistralApiKeyError = () => `
-Error: MISTRAL_API_KEY environment variable is not set
-
-Before using MyCoder with Mistral models, you must have a MISTRAL_API_KEY specified either:
-
-- As an environment variable, "export MISTRAL_API_KEY=[your-api-key]" or
-- In a .env file in the folder you run "mycoder" from
-
-Get an API key from https://console.mistral.ai/api-keys/
-For setup instructions, visit: https://mycoder.ai/docs/getting-started/mistral
-`;
+// Legacy function for backward compatibility
+export const getAnthropicApiKeyError = () =>
+  getProviderApiKeyError('anthropic');

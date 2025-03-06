@@ -6,10 +6,8 @@ import {
   toolAgent,
   Logger,
   getTools,
-  getAnthropicApiKeyError,
-  getOpenAIApiKeyError,
-  getXAIApiKeyError,
-  getMistralApiKeyError,
+  getProviderApiKeyError,
+  providerConfig,
   userPrompt,
   LogLevel,
   subAgentTool,
@@ -98,24 +96,17 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const userModelName = argv.modelName || userConfig.modelName;
 
       // Early API key check based on model provider
-      if (userModelProvider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
-        logger.error(getAnthropicApiKeyError());
-        throw new Error('Anthropic API key not found');
-      } else if (
-        userModelProvider === 'openai' &&
-        !process.env.OPENAI_API_KEY
-      ) {
-        logger.error(getOpenAIApiKeyError());
-        throw new Error('OpenAI API key not found');
-      } else if (userModelProvider === 'xai' && !process.env.XAI_API_KEY) {
-        logger.error(getXAIApiKeyError());
-        throw new Error('xAI API key not found');
-      } else if (
-        userModelProvider === 'mistral' &&
-        !process.env.MISTRAL_API_KEY
-      ) {
-        logger.error(getMistralApiKeyError());
-        throw new Error('Mistral API key not found');
+      const providerSettings =
+        providerConfig[userModelProvider as keyof typeof providerConfig];
+
+      if (providerSettings) {
+        const { keyName } = providerSettings;
+        const apiKey = process.env[keyName];
+
+        if (!apiKey) {
+          logger.error(getProviderApiKeyError(userModelProvider));
+          throw new Error(`${userModelProvider} API key not found`);
+        }
       }
       // No API key check needed for Ollama as it uses a local server
 
