@@ -34,15 +34,15 @@ export class TokenUsage {
     return usage;
   }
 
-  /*
-  static fromMessage(message: Anthropic.Message) {
+  // This method will be updated in Phase 3 to work with llm-interface
+  static fromLLMInterfaceResponse(response: any) {
     const usage = new TokenUsage();
-    usage.input = message.usage.input_tokens;
-    usage.cacheWrites = message.usage.cache_creation_input_tokens ?? 0;
-    usage.cacheReads = message.usage.cache_read_input_tokens ?? 0;
-    usage.output = message.usage.output_tokens;
+    if (response && response.usage) {
+      usage.input = response.usage.prompt_tokens || 0;
+      usage.output = response.usage.completion_tokens || 0;
+    }
     return usage;
-  }*/
+  }
 
   static sum(usages: TokenUsage[]) {
     const usage = new TokenUsage();

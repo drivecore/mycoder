@@ -1,11 +1,12 @@
-import { CoreMessage, ToolSet, generateText, tool as makeTool } from 'ai';
+import { LLMInterface } from 'llm-interface';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { DEFAULT_CONFIG } from './config.js';
 import {
-  addCacheControlToMessages,
+  CoreMessage,
+  convertToLLMInterfaceMessages,
   createCacheControlMessageFromSystemPrompt,
-  createToolCallParts,
-  formatToolCalls,
+  addCacheControlToMessages,
 } from './messageUtils.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
@@ -49,12 +50,17 @@ export const toolAgent = async (
 
     interactions++;
 
-    const toolSet: ToolSet = {};
-    tools.forEach((tool) => {
-      toolSet[tool.name] = makeTool({
-        description: tool.description,
-        parameters: tool.parameters,
-      });
+    // Convert tools to the format expected by llm-interface
+    const toolDefinitions = tools.map((tool) => {
+      const schema = zodToJsonSchema(tool.parameters);
+      return {
+        type: 'function',
+        function: {
+          name: tool.name,
+          description: tool.description,
+          parameters: schema,
+        },
+      };
     });
 
     // Apply cache control to messages for token caching if enabled
@@ -72,77 +78,109 @@ export const toolAgent = async (
             ...messages,
           ];
 
-    const generateTextProps = {
-      model: config.model,
-      temperature: config.temperature,
-      maxTokens: config.maxTokens,
-      messages: messagesWithCacheControl,
-      tools: toolSet,
-    };
-    const { text, toolCalls } = await generateText(generateTextProps);
+    // Convert messages to the format expected by llm-interface
+    const llmMessages = convertToLLMInterfaceMessages(messagesWithCacheControl);
 
-    const localToolCalls = formatToolCalls(toolCalls);
-
-    if (!text.length && toolCalls.length === 0) {
-      // Only consider it empty if there's no text AND no tool calls
-      logger.verbose(
-        'Received truly empty response from agent (no text and no tool calls), sending reminder',
+    try {
+      // Call the LLM using llm-interface
+      const response = await LLMInterface.sendMessage(
+        config.model.provider,
+        {
+          messages: llmMessages,
+          tools: toolDefinitions,
+          model: config.model.model,
+        },
+        {
+          max_tokens: config.maxTokens,
+          temperature: config.temperature,
+        },
       );
+
+      // Extract text and tool calls from the response
+      const text = response.results || '';
+      const toolCalls = response.toolCalls || [];
+
+      // Format tool calls to match our expected format
+      const localToolCalls = toolCalls.map((call) => ({
+        type: 'tool_use',
+        name: call.function?.name,
+        id: call.id,
+        input: JSON.parse(call.function?.arguments || '{}'),
+      }));
+
+      if (!text && toolCalls.length === 0) {
+        // Only consider it empty if there's no text AND no tool calls
+        logger.verbose(
+          'Received truly empty response from agent (no text and no tool calls), sending reminder',
+        );
+        messages.push({
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
+            },
+          ],
+        });
+        continue;
+      }
+
+      messages.push({
+        role: 'assistant',
+        content: [{ type: 'text', text: text }],
+      });
+
+      if (text) {
+        logger.info(text);
+      }
+
+      if (toolCalls.length > 0) {
+        const toolCallParts = toolCalls.map((call) => ({
+          type: 'tool-call',
+          toolCallId: call.id,
+          toolName: call.function?.name,
+          args: JSON.parse(call.function?.arguments || '{}'),
+        }));
+
+        messages.push({
+          role: 'assistant',
+          content: toolCallParts,
+        });
+      }
+
+      const { sequenceCompleted, completionResult, respawn } =
+        await executeTools(localToolCalls, tools, messages, context);
+
+      if (respawn) {
+        logger.info('Respawning agent with new context');
+        // Reset messages to just the new context
+        messages.length = 0;
+        messages.push({
+          role: 'user',
+          content: [{ type: 'text', text: respawn.context }],
+        });
+        continue;
+      }
+
+      if (sequenceCompleted) {
+        const result: ToolAgentResult = {
+          result: completionResult ?? 'Sequence explicitly completed',
+          interactions,
+        };
+        logTokenUsage(tokenTracker);
+        return result;
+      }
+    } catch (error: any) {
+      logger.error('Error calling LLM:', error);
       messages.push({
         role: 'user',
         content: [
           {
             type: 'text',
-            text: 'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
+            text: `There was an error calling the LLM: ${error.message || String(error)}. Please try again or call the sequenceComplete tool if you've completed your task.`,
           },
         ],
       });
-      continue;
-    }
-
-    messages.push({
-      role: 'assistant',
-      content: [{ type: 'text', text: text }],
-    });
-
-    if (text) {
-      logger.info(text);
-    }
-
-    if (toolCalls.length > 0) {
-      const toolCallParts = createToolCallParts(toolCalls);
-
-      messages.push({
-        role: 'assistant',
-        content: toolCallParts,
-      });
-    }
-
-    const { sequenceCompleted, completionResult, respawn } = await executeTools(
-      localToolCalls,
-      tools,
-      messages,
-      context,
-    );
-
-    if (respawn) {
-      logger.info('Respawning agent with new context');
-      // Reset messages to just the new context
-      messages.length = 0;
-      messages.push({
-        role: 'user',
-        content: [{ type: 'text', text: respawn.context }],
-      });
-      continue;
-    }
-
-    if (sequenceCompleted) {
-      const result: ToolAgentResult = {
-        result: completionResult ?? 'Sequence explicitly completed',
-        interactions,
-      };
-      logTokenUsage(tokenTracker);
-      return result;
     }
   }
 

@@ -1,9 +1,8 @@
-import { CoreMessage, CoreToolMessage, ToolResultPart } from 'ai';
-
 import { executeToolCall } from '../executeToolCall.js';
 import { TokenTracker } from '../tokens.js';
 import { ToolUseContent } from '../types.js';
 
+import { CoreMessage } from './messageUtils.js';
 import { Tool, ToolCallResult, ToolContext } from './types.js';
 
 const safeParse = (value: string) => {
@@ -43,7 +42,7 @@ export async function executeTools(
           toolCallId: respawnCall.id,
           toolName: respawnCall.name,
           result: { success: true },
-        } satisfies ToolResultPart,
+        },
       ],
       respawn: {
         context: respawnCall.input.respawnContext,
@@ -51,7 +50,7 @@ export async function executeTools(
     };
   }
 
-  const toolResults: ToolResultPart[] = await Promise.all(
+  const toolResults = await Promise.all(
     toolCalls.map(async (call) => {
       let toolResult = '';
       try {
@@ -78,7 +77,7 @@ export async function executeTools(
         toolCallId: call.id,
         toolName: call.name,
         result: safeParse(toolResult),
-      } satisfies ToolResultPart;
+      };
     }),
   );
 
@@ -92,7 +91,7 @@ export async function executeTools(
   messages.push({
     role: 'tool',
     content: toolResults,
-  } satisfies CoreToolMessage);
+  });
 
   if (sequenceCompletedTool) {
     logger.verbose('Sequence completed', { completionResult });

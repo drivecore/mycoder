@@ -1,8 +1,28 @@
-import { CoreMessage, ToolCallPart } from 'ai';
+// Define our own message types to replace Vercel AI SDK types
+export interface MessageContent {
+  type: string;
+  text?: string;
+  toolName?: string;
+  toolCallId?: string;
+  args?: any;
+  result?: any;
+}
+
+export interface CoreMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool';
+  content: string | MessageContent[];
+}
+
+export interface ToolCallPart {
+  type: 'tool-call';
+  toolCallId: string;
+  toolName: string;
+  args: any;
+}
 
 /**
- * Creates a cache control message from a system prompt
- * This is used for token caching with the Vercel AI SDK
+ * Creates a message for llm-interface with caching enabled
+ * This function will be enhanced in Phase 3 to support token caching with llm-interface
  */
 export function createCacheControlMessageFromSystemPrompt(
   systemPrompt: string,
@@ -10,44 +30,17 @@ export function createCacheControlMessageFromSystemPrompt(
   return {
     role: 'system',
     content: systemPrompt,
-    providerOptions: {
-      anthropic: { cacheControl: { type: 'ephemeral' } },
-    },
   };
 }
 
 /**
- * Adds cache control to the messages for token caching with the Vercel AI SDK
- * This marks the last two messages as ephemeral which allows the conversation up to that
- * point to be cached (with a ~5 minute window), reducing token usage when making multiple API calls
+ * Adds cache control to the messages
+ * This function will be enhanced in Phase 3 to support token caching with llm-interface
  */
 export function addCacheControlToMessages(
   messages: CoreMessage[],
 ): CoreMessage[] {
-  if (messages.length <= 1) return messages;
-
-  // Create a deep copy of the messages array to avoid mutating the original
-  const result = JSON.parse(JSON.stringify(messages)) as CoreMessage[];
-
-  // Get the last two messages (if available)
-  const lastTwoMessageIndices = [messages.length - 1, messages.length - 2];
-
-  // Add providerOptions with anthropic cache control to the last two messages
-  lastTwoMessageIndices.forEach((index) => {
-    if (index >= 0) {
-      const message = result[index];
-      if (message) {
-        // For the Vercel AI SDK, we need to add the providerOptions.anthropic property
-        // with cacheControl: 'ephemeral' to enable token caching
-        message.providerOptions = {
-          ...message.providerOptions,
-          anthropic: { cacheControl: { type: 'ephemeral' } },
-        };
-      }
-    }
-  });
-
-  return result;
+  return messages;
 }
 
 /**
@@ -56,9 +49,9 @@ export function addCacheControlToMessages(
 export function formatToolCalls(toolCalls: any[]): any[] {
   return toolCalls.map((call) => ({
     type: 'tool_use',
-    name: call.toolName,
-    id: call.toolCallId,
-    input: call.args,
+    name: call.name,
+    id: call.id,
+    input: call.input,
   }));
 }
 
@@ -68,8 +61,61 @@ export function formatToolCalls(toolCalls: any[]): any[] {
 export function createToolCallParts(toolCalls: any[]): Array<ToolCallPart> {
   return toolCalls.map((toolCall) => ({
     type: 'tool-call',
-    toolCallId: toolCall.toolCallId,
-    toolName: toolCall.toolName,
-    args: toolCall.args,
+    toolCallId: toolCall.id,
+    toolName: toolCall.name,
+    args: toolCall.input,
   }));
+}
+
+/**
+ * Converts CoreMessage format to llm-interface message format
+ */
+export function convertToLLMInterfaceMessages(messages: CoreMessage[]): any[] {
+  return messages.map((message) => {
+    if (typeof message.content === 'string') {
+      return {
+        role: message.role,
+        content: message.content,
+      };
+    } else {
+      // Handle complex content (text or tool calls)
+      if (
+        message.role === 'assistant' &&
+        message.content.some((c) => c.type === 'tool-call')
+      ) {
+        // This is a message with tool calls
+        return {
+          role: message.role,
+          content: message.content
+            .filter((c) => c.type === 'text')
+            .map((c) => c.text || '')
+            .join(''),
+          tool_calls: message.content
+            .filter((c) => c.type === 'tool-call')
+            .map((c) => ({
+              id: c.toolCallId || '',
+              type: 'function',
+              function: {
+                name: c.toolName || '',
+                arguments: JSON.stringify(c.args || {}),
+              },
+            })),
+        };
+      } else if (message.role === 'tool') {
+        // This is a tool response message
+        const content = message.content[0];
+        return {
+          role: 'tool',
+          tool_call_id: content?.toolCallId || '',
+          content: content?.result ? JSON.stringify(content.result) : '{}',
+        };
+      } else {
+        // Regular user or assistant message with text content
+        return {
+          role: message.role,
+          content: message.content.map((c) => c.text || '').join(''),
+        };
+      }
+    }
+  });
 }

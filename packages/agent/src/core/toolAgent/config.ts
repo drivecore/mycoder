@@ -2,11 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { anthropic } from '@ai-sdk/anthropic';
-import { mistral } from '@ai-sdk/mistral';
-import { openai } from '@ai-sdk/openai';
-import { xai } from '@ai-sdk/xai';
-import { createOllama, ollama } from 'ollama-ai-provider';
+import { LLMInterface } from 'llm-interface';
 
 /**
  * Available model providers
@@ -20,28 +16,35 @@ export type ModelProvider =
 
 /**
  * Get the model instance based on provider and model name
+ *
+ * This now returns a provider identifier that will be used by llm-interface
  */
 export function getModel(
   provider: ModelProvider,
   modelName: string,
   options?: { ollamaBaseUrl?: string },
 ) {
+  // Set up API keys from environment variables
+  if (process.env.ANTHROPIC_API_KEY) {
+    LLMInterface.setApiKey('anthropic', process.env.ANTHROPIC_API_KEY);
+  }
+
+  // Return the provider and model information for llm-interface
   switch (provider) {
     case 'anthropic':
-      return anthropic(modelName);
+      return { provider: 'anthropic.messages', model: modelName };
     case 'openai':
-      return openai(modelName);
+      return { provider: 'openai.chat', model: modelName };
     case 'ollama':
-      if (options?.ollamaBaseUrl) {
-        return createOllama({
-          baseURL: options.ollamaBaseUrl,
-        })(modelName);
-      }
-      return ollama(modelName);
+      return {
+        provider: 'ollama.chat',
+        model: modelName,
+        ollamaBaseUrl: options?.ollamaBaseUrl,
+      };
     case 'xai':
-      return xai(modelName);
+      return { provider: 'xai.chat', model: modelName };
     case 'mistral':
-      return mistral(modelName);
+      return { provider: 'mistral.chat', model: modelName };
     default:
       throw new Error(`Unknown model provider: ${provider}`);
   }
@@ -54,7 +57,7 @@ import { ToolContext } from '../types';
  */
 export const DEFAULT_CONFIG = {
   maxIterations: 200,
-  model: anthropic('claude-3-7-sonnet-20250219'),
+  model: { provider: 'anthropic.messages', model: 'claude-3-sonnet-20240229' },
   maxTokens: 4096,
   temperature: 0.7,
   getSystemPrompt: getDefaultSystemPrompt,
