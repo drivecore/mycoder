@@ -5,6 +5,7 @@ This PR implements Phase 1 of replacing the Vercel AI SDK with the llm-interface
 ## Changes Made
 
 1. Removed Vercel AI SDK dependencies:
+
    - Removed `ai` package
    - Removed `@ai-sdk/anthropic` package
    - Removed `@ai-sdk/mistral` package
@@ -13,6 +14,7 @@ This PR implements Phase 1 of replacing the Vercel AI SDK with the llm-interface
    - Removed `ollama-ai-provider` package
 
 2. Added llm-interface dependency:
+
    - Added `llm-interface` package
 
 3. Updated core components:
@@ -49,5 +51,6 @@ The llm-interface library provides several advantages over the Vercel AI SDK:
 ## Testing
 
 The changes have been tested by:
+
 1. Running the existing test suite
 2. Manual testing of the agent with various prompts and tools
