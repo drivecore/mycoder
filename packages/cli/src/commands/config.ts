@@ -45,6 +45,10 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       .example(
         '$0 config clear customPrompt',
         'Reset customPrompt to default value',
+      )
+      .example(
+        '$0 config set ANTHROPIC_API_KEY <your-key>',
+        'Store your Anthropic API key in configuration',
       ) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   },
   handler: async (argv: ArgumentsCamelCase<ConfigOptions>) => {
@@ -118,6 +122,30 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
           `Valid configuration keys: ${Object.keys(defaultConfig).join(', ')}`,
         );
         return;
+      }
+
+      // Check if this is an API key and add a warning
+      if (argv.key.includes('API_KEY')) {
+        logger.warn(
+          chalk.yellow(
+            'Warning: Storing API keys in configuration is less secure than using environment variables.'
+          )
+        );
+        logger.warn(
+          chalk.yellow(
+            'Your API key will be stored in plaintext in the configuration file.'
+          )
+        );
+        
+        // Ask for confirmation
+        const isConfirmed = await confirm(
+          'Do you want to continue storing your API key in the configuration?'
+        );
+        
+        if (!isConfirmed) {
+          logger.info('Operation cancelled.');
+          return;
+        }
       }
 
       // Parse the value based on current type or infer boolean/number

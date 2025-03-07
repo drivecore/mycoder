@@ -20,6 +20,11 @@ const defaultConfig = {
   customPrompt: '',
   profile: false,
   tokenCache: true,
+  // API keys (empty by default)
+  ANTHROPIC_API_KEY: '',
+  OPENAI_API_KEY: '',
+  XAI_API_KEY: '',
+  MISTRAL_API_KEY: '',
 };
 
 export type Config = typeof defaultConfig;
