@@ -18,6 +18,8 @@ Command-line interface for AI-powered coding tasks.
 npm install -g mycoder
 ```
 
+For detailed installation instructions for macOS and Linux, including how to set up Node.js using NVM, [see our installation guide](../../docs/installation.md).
+
 ## Usage
 
 ```bash

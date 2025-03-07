@@ -4,6 +4,8 @@ An open-source mono-repository containing the MyCoder agent and cli.
 
 !NOTE: To get started with the mycoder agent, [please see the CLI package](packages/cli)
 
+For detailed installation instructions for macOS and Linux, [see our installation guide](docs/installation.md)
+
 ## Features
 
 - 🤖 **AI-Powered**: Leverages Anthropic's Claude and OpenAI models for intelligent decision making

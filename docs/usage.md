@@ -48,6 +48,8 @@ npm install -g mycoder
 npx mycoder
 ```
 
+For detailed installation instructions for macOS and Linux, including how to set up Node.js using NVM, [see our installation guide](installation.md).
+
 ### Supported AI Providers
 
 MyCoder supports multiple AI providers:
