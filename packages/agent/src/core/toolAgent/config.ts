@@ -2,11 +2,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { anthropic } from '@ai-sdk/anthropic';
-import { mistral } from '@ai-sdk/mistral';
-import { openai } from '@ai-sdk/openai';
-import { xai } from '@ai-sdk/xai';
-import { createOllama, ollama } from 'ollama-ai-provider';
+import { createProvider, LLMProvider } from '../llm/index.js';
+import { ToolContext } from '../types';
 
 /**
  * Available model providers
@@ -25,36 +22,34 @@ export function getModel(
   provider: ModelProvider,
   modelName: string,
   options?: { ollamaBaseUrl?: string },
-) {
+): LLMProvider {
   switch (provider) {
     case 'anthropic':
-      return anthropic(modelName);
+      return createProvider('anthropic', modelName);
     case 'openai':
-      return openai(modelName);
+      return createProvider('openai', modelName);
     case 'ollama':
       if (options?.ollamaBaseUrl) {
-        return createOllama({
-          baseURL: options.ollamaBaseUrl,
-        })(modelName);
+        return createProvider('ollama', modelName, {
+          baseUrl: options.ollamaBaseUrl,
+        });
       }
-      return ollama(modelName);
+      return createProvider('ollama', modelName);
     case 'xai':
-      return xai(modelName);
+      return createProvider('xai', modelName);
     case 'mistral':
-      return mistral(modelName);
+      return createProvider('mistral', modelName);
     default:
       throw new Error(`Unknown model provider: ${provider}`);
   }
 }
-
-import { ToolContext } from '../types';
 
 /**
  * Default configuration for the tool agent
  */
 export const DEFAULT_CONFIG = {
   maxIterations: 200,
-  model: anthropic('claude-3-7-sonnet-20250219'),
+  model: getModel('anthropic', 'claude-3-7-sonnet-20250219'),
   maxTokens: 4096,
   temperature: 0.7,
   getSystemPrompt: getDefaultSystemPrompt,
