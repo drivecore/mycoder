@@ -80,9 +80,12 @@ export class AnthropicProvider implements LLMProvider {
       // Add tools if provided
       if (functions && functions.length > 0) {
         (requestOptions as any).tools = functions.map(fn => ({
-          name: fn.name,
-          description: fn.description,
-          input_schema: fn.parameters,
+          type: 'function',
+          function: {
+            name: fn.name,
+            description: fn.description,
+            parameters: fn.parameters,
+          }
         }));
       }
       
@@ -91,9 +94,12 @@ export class AnthropicProvider implements LLMProvider {
       // Extract content and tool calls
       const content = response.content.find(c => c.type === 'text')?.text || '';
       const toolCalls = response.content
-        .filter(c => (c as any).type === 'tool_use')
+        .filter(c => {
+          const contentType = (c as any).type;
+          return contentType === 'tool_use';
+        })
         .map(c => {
-          const toolUse = c as any; // Type assertion for tool_use content
+          const toolUse = c as any;
           return {
             id: toolUse.id || `tool-${Math.random().toString(36).substring(2, 11)}`,
             name: toolUse.name,
