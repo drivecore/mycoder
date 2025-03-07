@@ -70,13 +70,14 @@ async function _openaiExample() {
 
       // Example of adding a tool result
       const toolResult: Message = {
-        role: 'tool',
-        name: toolCall.name,
+        role: 'tool_result',
+        tool_use_id: toolCall.id,
         content: JSON.stringify({
           temperature: 72,
           unit: 'fahrenheit',
           description: 'Sunny with some clouds',
         }),
+        is_error: false,
       };
 
       // Continue the conversation with the tool result

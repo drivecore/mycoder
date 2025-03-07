@@ -6,7 +6,7 @@
  * Base message type with role and content
  */
 export interface BaseMessage {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: 'system' | 'user' | 'assistant' | 'tool_use' | 'tool_result';
   content: string;
   name?: string;
 }
@@ -35,9 +35,18 @@ export interface AssistantMessage extends BaseMessage {
 /**
  * Tool message for representing tool responses
  */
-export interface ToolMessage extends BaseMessage {
-  role: 'tool';
+export interface ToolUseMessage extends BaseMessage {
+  role: 'tool_use';
   name: string; // Tool name is required for tool messages
+  id: string; // Tool ID is required for tool messages
+  content: string; // the arguments in string form, but JSON
+}
+
+export interface ToolResultMessage extends BaseMessage {
+  role: 'tool_result';
+  tool_use_id: string; // Tool Use ID is required for tool messages
+  content: string; // the results in string form, but JSON
+  is_error: boolean; // whether the tool call was successful
 }
 
 /**
@@ -47,7 +56,8 @@ export type Message =
   | SystemMessage
   | UserMessage
   | AssistantMessage
-  | ToolMessage;
+  | ToolUseMessage
+  | ToolResultMessage;
 
 /**
  * Function/Tool definition for LLM

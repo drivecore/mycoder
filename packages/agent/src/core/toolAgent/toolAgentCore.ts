@@ -1,6 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { Message, generateText } from '../llm/index.js';
+import { Message, ToolUseMessage, generateText } from '../llm/index.js';
 
 import { DEFAULT_CONFIG } from './config.js';
 import { formatToolCalls } from './messageUtils.js';
@@ -105,6 +105,18 @@ export const toolAgent = async (
 
     // Handle tool calls if any
     if (toolCalls.length > 0) {
+      messages.push(
+        ...toolCalls.map(
+          (toolCall) =>
+            ({
+              role: 'tool_use',
+              name: toolCall.name,
+              id: toolCall.id,
+              content: toolCall.arguments,
+            }) satisfies ToolUseMessage,
+        ),
+      );
+
       // Execute the tools and get results
       const { sequenceCompleted, completionResult, respawn } =
         await executeTools(localToolCalls, tools, messages, context);

@@ -8,7 +8,7 @@ export function formatToolCalls(toolCalls: ToolCall[]): any[] {
     type: 'tool_use',
     name: call.name,
     id: call.id,
-    input: JSON.parse(call.arguments),
+    input: call.arguments,
   }));
 }
 
@@ -30,13 +30,15 @@ export function createToolCallParts(toolCalls: any[]): any[] {
  */
 export function addToolResultToMessages(
   messages: Message[],
-  toolName: string,
+  toolUseId: string,
   toolResult: any,
+  isError: boolean,
 ): void {
   messages.push({
-    role: 'tool',
-    name: toolName,
+    role: 'tool_result',
+    tool_use_id: toolUseId,
     content:
       typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult),
+    is_error: isError,
   });
 }

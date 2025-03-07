@@ -3,11 +3,16 @@
  */
 import { LLMProvider } from './provider.js';
 import {
+  AssistantMessage,
   FunctionDefinition,
   GenerateOptions,
   LLMResponse,
   Message,
+  SystemMessage,
   ToolCall,
+  ToolResultMessage,
+  ToolUseMessage,
+  UserMessage,
 } from './types.js';
 
 /**
@@ -112,23 +117,31 @@ export function normalizeMessages(messages: Message[]): Message[] {
         return {
           role: 'system',
           content: msg.content,
-        };
+        } satisfies SystemMessage;
       case 'user':
         return {
           role: 'user',
           content: msg.content,
-        };
+        } satisfies UserMessage;
       case 'assistant':
         return {
           role: 'assistant',
           content: msg.content,
-        };
-      case 'tool':
+        } satisfies AssistantMessage;
+      case 'tool_use':
         return {
-          role: 'tool',
+          role: 'tool_use',
+          id: msg.id,
+          name: msg.name,
           content: msg.content,
-          name: msg.name || 'unknown_tool', // Ensure name is always present for tool messages
-        };
+        } satisfies ToolUseMessage;
+      case 'tool_result':
+        return {
+          role: 'tool_result',
+          tool_use_id: msg.tool_use_id,
+          content: msg.content,
+          is_error: msg.is_error,
+        } satisfies ToolResultMessage;
       default:
         // Use type assertion for unknown roles
         console.warn(

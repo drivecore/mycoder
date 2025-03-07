@@ -36,7 +36,7 @@ export async function executeTools(
   const respawnCall = toolCalls.find((call) => call.name === 'respawn');
   if (respawnCall) {
     // Add the tool result to messages
-    addToolResultToMessages(messages, respawnCall.name, { success: true });
+    addToolResultToMessages(messages, respawnCall.id, { success: true }, false);
 
     return {
       sequenceCompleted: false,
@@ -56,12 +56,14 @@ export async function executeTools(
   const toolResults = await Promise.all(
     toolCalls.map(async (call) => {
       let toolResult = '';
+      let isError = false;
       try {
         toolResult = await executeToolCall(call, tools, {
           ...context,
           tokenTracker: new TokenTracker(call.name, context.tokenTracker),
         });
       } catch (errorStr: any) {
+        isError = true;
         if (errorStr instanceof Error) {
           if (errorStr.stack) {
             context.logger.error(`Tool error stack trace: ${errorStr.stack}`);
@@ -78,7 +80,7 @@ export async function executeTools(
       const parsedResult = safeParse(toolResult);
 
       // Add the tool result to messages
-      addToolResultToMessages(messages, call.name, parsedResult);
+      addToolResultToMessages(messages, call.id, parsedResult, isError);
 
       return {
         toolCallId: call.id,

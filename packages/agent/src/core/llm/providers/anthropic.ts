@@ -82,11 +82,20 @@ export class AnthropicProvider implements LLMProvider {
           description: fn.description,
           input_schema: fn.parameters,
         }));
-        console.log('Tools for Anthropic:', JSON.stringify(tools, null, 2));
         (requestOptions as any).tools = tools;
       }
 
+      console.log(
+        'Input Messages for Anthropic:',
+        JSON.stringify(requestOptions.messages, null, 2),
+      );
+
       const response = await this.client.messages.create(requestOptions);
+
+      console.log(
+        'Response from Anthropic:',
+        JSON.stringify(response.content, null, 2),
+      );
 
       // Extract content and tool calls
       const content =
@@ -144,21 +153,32 @@ export class AnthropicProvider implements LLMProvider {
           role: 'assistant',
           content: msg.content,
         };
-      } else if (msg.role === 'tool') {
+      } else if (msg.role === 'tool_result') {
         // Anthropic expects tool responses as an assistant message with tool_results
+        return {
+          role: 'user',
+          content: [
+            {
+              type: 'tool_result',
+              tool_use_id: msg.tool_use_id, // Use name as the tool_use_id
+              content: msg.content,
+              is_error: msg.is_error,
+            },
+          ],
+        };
+      } else if (msg.role === 'tool_use') {
         return {
           role: 'assistant',
           content: [
             {
-              type: 'tool_result',
-              tool_use_id: msg.name, // Use name as the tool_use_id
-              content: msg.content,
+              type: 'tool_use',
+              name: msg.name,
+              id: msg.id,
+              input: JSON.parse(msg.content),
             },
           ],
         };
       }
-
-      // Default fallback
       return {
         role: 'user',
         content: msg.content,
