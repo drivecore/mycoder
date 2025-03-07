@@ -66,7 +66,7 @@ async function _openaiExample() {
     const toolCall = response.toolCalls[0];
     if (toolCall) {
       console.log(`Tool called: ${toolCall.name}`);
-      console.log(`Arguments: ${toolCall.arguments}`);
+      console.log(`Arguments: ${toolCall.content}`);
 
       // Example of adding a tool result
       const toolResult: Message = {

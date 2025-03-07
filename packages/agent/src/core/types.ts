@@ -41,7 +41,7 @@ export type Tool<TParams = Record<string, any>, TReturn = any> = {
 export type ToolCall = {
   id: string;
   name: string;
-  input: any;
+  content: string;
 };
 
 export type TextContent = {

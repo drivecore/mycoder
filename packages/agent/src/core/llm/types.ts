@@ -2,6 +2,8 @@
  * Core message types for LLM interactions
  */
 
+import { ToolCall } from '../types';
+
 /**
  * Base message type with role and content
  */
@@ -66,15 +68,6 @@ export interface FunctionDefinition {
   name: string;
   description: string;
   parameters: Record<string, any>; // JSON Schema object
-}
-
-/**
- * Tool call made by the model
- */
-export interface ToolCall {
-  id: string;
-  name: string;
-  arguments: string; // JSON string of arguments
 }
 
 /**

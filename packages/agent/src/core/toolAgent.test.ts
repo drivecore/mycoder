@@ -75,7 +75,7 @@ describe('toolAgent', () => {
       {
         id: '1',
         name: 'mockTool',
-        input: { input: 'test' },
+        content: JSON.stringify({ input: 'test' }),
       },
       [mockTool],
       toolContext,
@@ -90,7 +90,7 @@ describe('toolAgent', () => {
         {
           id: '1',
           name: 'nonexistentTool',
-          input: {},
+          content: JSON.stringify({}),
         },
         [mockTool],
         toolContext,
@@ -103,7 +103,7 @@ describe('toolAgent', () => {
       {
         id: '1',
         name: 'errorTool',
-        input: {},
+        content: JSON.stringify({}),
       },
       [errorTool],
       toolContext,

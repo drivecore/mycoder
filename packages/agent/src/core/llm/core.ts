@@ -1,6 +1,7 @@
 /**
  * Core LLM abstraction for generating text
  */
+
 import { LLMProvider } from './provider.js';
 import {
   AssistantMessage,
@@ -9,7 +10,6 @@ import {
   LLMResponse,
   Message,
   SystemMessage,
-  ToolCall,
   ToolResultMessage,
   ToolUseMessage,
   UserMessage,
@@ -33,47 +33,6 @@ export async function generateText(
 
   // Use the provider to generate the response
   return provider.generateText(options);
-}
-
-/**
- * Format tool calls for consistent usage across providers
- *
- * @param rawToolCalls Tool calls from provider
- * @returns Normalized tool calls
- */
-export function normalizeToolCalls(rawToolCalls: any[]): ToolCall[] {
-  if (
-    !rawToolCalls ||
-    !Array.isArray(rawToolCalls) ||
-    rawToolCalls.length === 0
-  ) {
-    return [];
-  }
-
-  return rawToolCalls.map((call) => {
-    // Handle different provider formats
-    if (typeof call.arguments === 'string') {
-      // Already in correct format
-      return {
-        id:
-          call.id ||
-          `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        name: call.name || call.function?.name,
-        arguments: call.arguments,
-      };
-    } else if (typeof call.arguments === 'object') {
-      // Convert object to JSON string
-      return {
-        id:
-          call.id ||
-          `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        name: call.name || call.function?.name,
-        arguments: JSON.stringify(call.arguments),
-      };
-    } else {
-      throw new Error(`Unsupported tool call format: ${JSON.stringify(call)}`);
-    }
-  });
 }
 
 /**

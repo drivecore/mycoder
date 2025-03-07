@@ -1,7 +1,6 @@
 /**
  * OpenAI provider implementation
  */
-import { normalizeToolCalls } from '../core.js';
 import { LLMProvider } from '../provider.js';
 import {
   GenerateOptions,
@@ -100,7 +99,7 @@ export class OpenAIProvider implements LLMProvider {
 
       return {
         text: content,
-        toolCalls: normalizeToolCalls(toolCalls),
+        toolCalls: toolCalls,
       };
     } catch (error) {
       throw new Error(`Error calling OpenAI API: ${(error as Error).message}`);

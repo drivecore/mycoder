@@ -1,7 +1,7 @@
 import { executeToolCall } from '../executeToolCall.js';
 import { Message } from '../llm/types.js';
 import { TokenTracker } from '../tokens.js';
-import { ToolUseContent } from '../types.js';
+import { ToolCall } from '../types.js';
 
 import { addToolResultToMessages } from './messageUtils.js';
 import { Tool, ToolCallResult, ToolContext } from './types.js';
@@ -19,7 +19,7 @@ const safeParse = (value: string) => {
  * Executes a list of tool calls and returns the results
  */
 export async function executeTools(
-  toolCalls: ToolUseContent[],
+  toolCalls: ToolCall[],
   tools: Tool[],
   messages: Message[],
   context: ToolContext,
@@ -48,7 +48,7 @@ export async function executeTools(
         },
       ],
       respawn: {
-        context: respawnCall.input.respawnContext,
+        context: JSON.parse(respawnCall.content).respawnContext,
       },
     };
   }

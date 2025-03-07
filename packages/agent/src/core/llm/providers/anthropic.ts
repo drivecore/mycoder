@@ -85,17 +85,7 @@ export class AnthropicProvider implements LLMProvider {
         (requestOptions as any).tools = tools;
       }
 
-      console.log(
-        'Input Messages for Anthropic:',
-        JSON.stringify(requestOptions.messages, null, 2),
-      );
-
       const response = await this.client.messages.create(requestOptions);
-
-      console.log(
-        'Response from Anthropic:',
-        JSON.stringify(response.content, null, 2),
-      );
 
       // Extract content and tool calls
       const content =
@@ -112,7 +102,7 @@ export class AnthropicProvider implements LLMProvider {
               toolUse.id ||
               `tool-${Math.random().toString(36).substring(2, 11)}`,
             name: toolUse.name,
-            arguments: JSON.stringify(toolUse.input),
+            content: JSON.stringify(toolUse.input),
           };
         });
 

@@ -3,7 +3,6 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { Message, ToolUseMessage, generateText } from '../llm/index.js';
 
 import { DEFAULT_CONFIG } from './config.js';
-import { formatToolCalls } from './messageUtils.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
 import { Tool, ToolAgentResult, ToolContext } from './types.js';
@@ -78,9 +77,6 @@ export const toolAgent = async (
 
     const { text, toolCalls } = await generateText(provider, generateOptions);
 
-    // Format tool calls to our expected format
-    const localToolCalls = formatToolCalls(toolCalls);
-
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
       logger.verbose(
@@ -112,14 +108,14 @@ export const toolAgent = async (
               role: 'tool_use',
               name: toolCall.name,
               id: toolCall.id,
-              content: toolCall.arguments,
+              content: toolCall.content,
             }) satisfies ToolUseMessage,
         ),
       );
 
       // Execute the tools and get results
       const { sequenceCompleted, completionResult, respawn } =
-        await executeTools(localToolCalls, tools, messages, context);
+        await executeTools(toolCalls, tools, messages, context);
 
       if (respawn) {
         logger.info('Respawning agent with new context');
