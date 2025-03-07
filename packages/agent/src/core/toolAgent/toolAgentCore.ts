@@ -1,3 +1,5 @@
+import { zodToJsonSchema } from 'zod-to-json-schema';
+
 import { DEFAULT_CONFIG } from './config.js';
 import {
   formatToolCalls,
@@ -59,10 +61,10 @@ export const toolAgent = async (
     interactions++;
 
     // Convert tools to function definitions
-    const functionDefinitions: FunctionDefinition[] = tools.map((tool) => ({
+    const functionDefinitions = tools.map((tool) => ({
       name: tool.name,
       description: tool.description,
-      parameters: tool.parameters,
+      parameters: tool.parametersJsonSchema || zodToJsonSchema(tool.parameters),
     }));
 
     // Prepare the messages for the LLM, including the system message
