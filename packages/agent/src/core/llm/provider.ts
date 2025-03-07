@@ -1,7 +1,9 @@
 /**
- * LLM Provider interface and factory
+ * Provider registry and factory implementations
  */
-import { GenerateOptions, LLMResponse } from './types.js';
+
+import { AnthropicProvider } from './providers/anthropic.js';
+import { ProviderOptions, GenerateOptions, LLMResponse } from './types.js';
 
 /**
  * Interface for LLM providers
@@ -39,12 +41,39 @@ export interface LLMProvider {
   countTokens(text: string): Promise<number>;
 }
 
+// Provider factory registry
+const providerFactories: Record<
+  string,
+  (model: string, options: ProviderOptions) => LLMProvider
+> = {
+  anthropic: (model, options) => new AnthropicProvider(model, options),
+};
+
 /**
- * Factory function to create a provider
- *
- * @param providerType Provider type (e.g., 'openai', 'anthropic')
- * @param model Model name
- * @param options Provider-specific options
- * @returns LLM provider instance
+ * Create a provider instance
  */
-export { createProvider, registerProvider } from './providers/index.js';
+export function createProvider(
+  providerType: string,
+  model: string,
+  options: ProviderOptions = {},
+): LLMProvider {
+  const factory = providerFactories[providerType.toLowerCase()];
+
+  if (!factory) {
+    throw new Error(
+      `Provider '${providerType}' not found. Available providers: ${Object.keys(providerFactories).join(', ')}`,
+    );
+  }
+
+  return factory(model, options);
+}
+
+/**
+ * Register a new provider implementation
+ */
+export function registerProvider(
+  providerType: string,
+  factory: (model: string, options: ProviderOptions) => LLMProvider,
+): void {
+  providerFactories[providerType.toLowerCase()] = factory;
+}

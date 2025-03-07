@@ -1,6 +1,7 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { Message, ToolUseMessage, generateText } from '../llm/index.js';
+import { generateText } from '../llm/core.js';
+import { Message, ToolUseMessage } from '../llm/types.js';
 
 import { DEFAULT_CONFIG } from './config.js';
 import { logTokenUsage } from './tokenTracking.js';

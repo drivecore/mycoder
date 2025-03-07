@@ -1,9 +1,9 @@
 /**
  * Examples of using the LLM abstraction
  */
+import { generateText } from './core.js';
+import { createProvider } from './provider.js';
 import { FunctionDefinition, Message } from './types.js';
-
-import { createProvider, generateText } from './index.js';
 
 /**
  * Example of using the OpenAI provider
