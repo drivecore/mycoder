@@ -28,6 +28,16 @@ export function getModel(
   if (process.env.ANTHROPIC_API_KEY) {
     LLMInterface.setApiKey('anthropic', process.env.ANTHROPIC_API_KEY);
   }
+  if (process.env.OPENAI_API_KEY) {
+    LLMInterface.setApiKey('openai', process.env.OPENAI_API_KEY);
+  }
+  if (process.env.XAI_API_KEY) {
+    LLMInterface.setApiKey('xai', process.env.XAI_API_KEY);
+  }
+  if (process.env.MISTRAL_API_KEY) {
+    LLMInterface.setApiKey('mistral', process.env.MISTRAL_API_KEY);
+  }
+  // Ollama typically doesn't need an API key as it's self-hosted
 
   // Return the provider and model information for llm-interface
   switch (provider) {
@@ -61,6 +71,7 @@ export const DEFAULT_CONFIG = {
   maxTokens: 4096,
   temperature: 0.7,
   getSystemPrompt: getDefaultSystemPrompt,
+  ollamaBaseUrl: 'http://localhost:11434/api',
 };
 
 /**

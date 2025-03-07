@@ -21,3 +21,16 @@ export type ErrorResult = {
   errorMessage: string;
   errorType: string;
 };
+
+export interface ToolAgentConfig {
+  maxIterations: number;
+  model: {
+    provider: string;
+    model: string;
+    ollamaBaseUrl?: string;
+  };
+  maxTokens: number;
+  temperature: number;
+  getSystemPrompt: (context: ToolContext) => string;
+  ollamaBaseUrl?: string;
+}

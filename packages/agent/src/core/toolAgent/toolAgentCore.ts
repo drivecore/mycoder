@@ -10,7 +10,12 @@ import {
 } from './messageUtils.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
-import { Tool, ToolAgentResult, ToolContext } from './types.js';
+import {
+  Tool,
+  ToolAgentResult,
+  ToolContext,
+  ToolAgentConfig,
+} from './types.js';
 
 /**
  * Main tool agent function that orchestrates the conversation with the AI
@@ -19,7 +24,7 @@ import { Tool, ToolAgentResult, ToolContext } from './types.js';
 export const toolAgent = async (
   initialPrompt: string,
   tools: Tool[],
-  config = DEFAULT_CONFIG,
+  config: ToolAgentConfig = DEFAULT_CONFIG,
   context: ToolContext,
 ): Promise<ToolAgentResult> => {
   const { logger, tokenTracker } = context;
@@ -83,13 +88,24 @@ export const toolAgent = async (
 
     try {
       // Call the LLM using llm-interface
+      const modelOptions: any = {
+        messages: llmMessages,
+        tools: toolDefinitions,
+        model: config.model.model,
+      };
+
+      // Add ollamaBaseUrl for Ollama provider if available
+      if (
+        config.model.provider.startsWith('ollama') &&
+        (config.model.ollamaBaseUrl || config.ollamaBaseUrl)
+      ) {
+        modelOptions.ollamaBaseUrl =
+          config.model.ollamaBaseUrl || config.ollamaBaseUrl;
+      }
+
       const response = await LLMInterface.sendMessage(
         config.model.provider,
-        {
-          messages: llmMessages,
-          tools: toolDefinitions,
-          model: config.model.model,
-        },
+        modelOptions,
         {
           max_tokens: config.maxTokens,
           temperature: config.temperature,
