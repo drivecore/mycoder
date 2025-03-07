@@ -80,11 +80,11 @@ export class AnthropicProvider implements LLMProvider {
       // Add tools if provided
       if (functions && functions.length > 0) {
         const tools = functions.map(fn => ({
-          type: 'function',
-          function: {
+          type: 'custom',
+          custom: {
             name: fn.name,
             description: fn.description,
-            parameters: fn.parameters,
+            input_schema: fn.parameters,
           }
         }));
         console.log('Tools for Anthropic:', JSON.stringify(tools, null, 2));
