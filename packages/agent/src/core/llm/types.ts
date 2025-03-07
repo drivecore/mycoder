@@ -43,7 +43,11 @@ export interface ToolMessage extends BaseMessage {
 /**
  * Union type for all message types
  */
-export type Message = SystemMessage | UserMessage | AssistantMessage | ToolMessage;
+export type Message =
+  | SystemMessage
+  | UserMessage
+  | AssistantMessage
+  | ToolMessage;
 
 /**
  * Function/Tool definition for LLM

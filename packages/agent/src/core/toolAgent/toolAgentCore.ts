@@ -1,22 +1,14 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import { Message, generateText } from '../llm/index.js';
+
 import { DEFAULT_CONFIG } from './config.js';
-import {
-  formatToolCalls,
-  createToolCallParts,
-} from './messageUtils.js';
+import { formatToolCalls } from './messageUtils.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
 import { Tool, ToolAgentResult, ToolContext } from './types.js';
 
 // Import from our new LLM abstraction instead of Vercel AI SDK
-import { 
-  Message, 
-  FunctionDefinition, 
-  generateText, 
-  createProvider,
-  normalizeFunctionDefinitions
-} from '../llm/index.js';
 
 /**
  * Main tool agent function that orchestrates the conversation with the AI
@@ -96,7 +88,8 @@ export const toolAgent = async (
       );
       messages.push({
         role: 'user',
-        content: 'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
+        content:
+          'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
       });
       continue;
     }
@@ -113,12 +106,8 @@ export const toolAgent = async (
     // Handle tool calls if any
     if (toolCalls.length > 0) {
       // Execute the tools and get results
-      const { sequenceCompleted, completionResult, respawn } = await executeTools(
-        localToolCalls,
-        tools,
-        messages,
-        context,
-      );
+      const { sequenceCompleted, completionResult, respawn } =
+        await executeTools(localToolCalls, tools, messages, context);
 
       if (respawn) {
         logger.info('Respawning agent with new context');

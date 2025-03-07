@@ -1,7 +1,8 @@
 import { executeToolCall } from '../executeToolCall.js';
+import { Message } from '../llm/types.js';
 import { TokenTracker } from '../tokens.js';
 import { ToolUseContent } from '../types.js';
-import { Message } from '../llm/types.js';
+
 import { addToolResultToMessages } from './messageUtils.js';
 import { Tool, ToolCallResult, ToolContext } from './types.js';
 
@@ -35,12 +36,8 @@ export async function executeTools(
   const respawnCall = toolCalls.find((call) => call.name === 'respawn');
   if (respawnCall) {
     // Add the tool result to messages
-    addToolResultToMessages(
-      messages,
-      respawnCall.name,
-      { success: true }
-    );
-    
+    addToolResultToMessages(messages, respawnCall.name, { success: true });
+
     return {
       sequenceCompleted: false,
       toolResults: [
@@ -79,13 +76,9 @@ export async function executeTools(
       }
 
       const parsedResult = safeParse(toolResult);
-      
+
       // Add the tool result to messages
-      addToolResultToMessages(
-        messages,
-        call.name,
-        parsedResult
-      );
+      addToolResultToMessages(messages, call.name, parsedResult);
 
       return {
         toolCallId: call.id,

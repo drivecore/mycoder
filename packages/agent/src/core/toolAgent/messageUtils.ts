@@ -31,13 +31,12 @@ export function createToolCallParts(toolCalls: any[]): any[] {
 export function addToolResultToMessages(
   messages: Message[],
   toolName: string,
-  toolResult: any
+  toolResult: any,
 ): void {
   messages.push({
     role: 'tool',
     name: toolName,
-    content: typeof toolResult === 'string' 
-      ? toolResult 
-      : JSON.stringify(toolResult)
+    content:
+      typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult),
   });
 }

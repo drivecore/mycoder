@@ -1,16 +1,14 @@
 /**
  * OpenAI provider implementation
  */
-import { LLMProvider } from '../provider.js';
-import { 
-  FunctionDefinition,
-  GenerateOptions, 
-  LLMResponse, 
-  Message, 
-  ProviderOptions, 
-  ToolCall 
-} from '../types.js';
 import { normalizeToolCalls } from '../core.js';
+import { LLMProvider } from '../provider.js';
+import {
+  GenerateOptions,
+  LLMResponse,
+  Message,
+  ProviderOptions,
+} from '../types.js';
 
 /**
  * OpenAI-specific options
@@ -37,7 +35,7 @@ export class OpenAIProvider implements LLMProvider {
     this.apiKey = options.apiKey || process.env.OPENAI_API_KEY || '';
     this.organization = options.organization || process.env.OPENAI_ORGANIZATION;
     this.baseUrl = options.baseUrl || 'https://api.openai.com/v1';
-    
+
     if (!this.apiKey) {
       throw new Error('OpenAI API key is required');
     }
@@ -47,10 +45,16 @@ export class OpenAIProvider implements LLMProvider {
    * Generate text using OpenAI API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const { messages, functions, temperature = 0.7, maxTokens, stopSequences } = options;
-    
+    const {
+      messages,
+      functions,
+      temperature = 0.7,
+      maxTokens,
+      stopSequences,
+    } = options;
+
     const formattedMessages = this.formatMessages(messages);
-    
+
     const requestBody: any = {
       model: this.model,
       messages: formattedMessages,
@@ -58,40 +62,42 @@ export class OpenAIProvider implements LLMProvider {
       ...(maxTokens && { max_tokens: maxTokens }),
       ...(stopSequences && { stop: stopSequences }),
     };
-    
+
     // Add functions if provided
     if (functions && functions.length > 0) {
-      requestBody.tools = functions.map(fn => ({
+      requestBody.tools = functions.map((fn) => ({
         type: 'function',
         function: {
           name: fn.name,
           description: fn.description,
-          parameters: fn.parameters
-        }
+          parameters: fn.parameters,
+        },
       }));
       requestBody.tool_choice = 'auto';
     }
-    
+
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          ...(this.organization && { 'OpenAI-Organization': this.organization }),
+          Authorization: `Bearer ${this.apiKey}`,
+          ...(this.organization && {
+            'OpenAI-Organization': this.organization,
+          }),
         },
         body: JSON.stringify(requestBody),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
       }
-      
+
       const data = await response.json();
       const content = data.choices[0]?.message?.content || '';
       const toolCalls = data.choices[0]?.message?.tool_calls || [];
-      
+
       return {
         text: content,
         toolCalls: normalizeToolCalls(toolCalls),
@@ -115,16 +121,16 @@ export class OpenAIProvider implements LLMProvider {
    * Format messages for OpenAI API
    */
   private formatMessages(messages: Message[]): any[] {
-    return messages.map(msg => {
+    return messages.map((msg) => {
       const formatted: any = {
         role: msg.role,
         content: msg.content,
       };
-      
+
       if (msg.name) {
         formatted.name = msg.name;
       }
-      
+
       return formatted;
     });
   }

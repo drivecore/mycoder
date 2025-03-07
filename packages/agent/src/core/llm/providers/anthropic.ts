@@ -1,17 +1,15 @@
 /**
  * Anthropic provider implementation
  */
-import { LLMProvider } from '../provider.js';
-import { 
-  FunctionDefinition,
-  GenerateOptions, 
-  LLMResponse, 
-  Message, 
-  ProviderOptions, 
-  ToolCall 
-} from '../types.js';
-import { normalizeToolCalls } from '../core.js';
 import Anthropic from '@anthropic-ai/sdk';
+
+import { LLMProvider } from '../provider.js';
+import {
+  GenerateOptions,
+  LLMResponse,
+  Message,
+  ProviderOptions,
+} from '../types.js';
 
 /**
  * Anthropic-specific options
@@ -36,7 +34,7 @@ export class AnthropicProvider implements LLMProvider {
     this.model = model;
     this.apiKey = options.apiKey || process.env.ANTHROPIC_API_KEY || '';
     this.baseUrl = options.baseUrl;
-    
+
     if (!this.apiKey) {
       throw new Error('Anthropic API key is required');
     }
@@ -52,20 +50,20 @@ export class AnthropicProvider implements LLMProvider {
    * Generate text using Anthropic API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const { 
-      messages, 
-      functions, 
-      temperature = 0.7, 
-      maxTokens, 
+    const {
+      messages,
+      functions,
+      temperature = 0.7,
+      maxTokens,
       stopSequences,
-      topP 
+      topP,
     } = options;
-    
+
     // Extract system message
-    const systemMessage = messages.find(msg => msg.role === 'system');
-    const nonSystemMessages = messages.filter(msg => msg.role !== 'system');
+    const systemMessage = messages.find((msg) => msg.role === 'system');
+    const nonSystemMessages = messages.filter((msg) => msg.role !== 'system');
     const formattedMessages = this.formatMessages(nonSystemMessages);
-    
+
     try {
       const requestOptions: Anthropic.MessageCreateParams = {
         model: this.model,
@@ -79,7 +77,7 @@ export class AnthropicProvider implements LLMProvider {
 
       // Add tools if provided
       if (functions && functions.length > 0) {
-        const tools = functions.map(fn => ({
+        const tools = functions.map((fn) => ({
           name: fn.name,
           description: fn.description,
           input_schema: fn.parameters,
@@ -87,31 +85,36 @@ export class AnthropicProvider implements LLMProvider {
         console.log('Tools for Anthropic:', JSON.stringify(tools, null, 2));
         (requestOptions as any).tools = tools;
       }
-      
+
       const response = await this.client.messages.create(requestOptions);
-      
+
       // Extract content and tool calls
-      const content = response.content.find(c => c.type === 'text')?.text || '';
+      const content =
+        response.content.find((c) => c.type === 'text')?.text || '';
       const toolCalls = response.content
-        .filter(c => {
+        .filter((c) => {
           const contentType = (c as any).type;
           return contentType === 'tool_use';
         })
-        .map(c => {
+        .map((c) => {
           const toolUse = c as any;
           return {
-            id: toolUse.id || `tool-${Math.random().toString(36).substring(2, 11)}`,
+            id:
+              toolUse.id ||
+              `tool-${Math.random().toString(36).substring(2, 11)}`,
             name: toolUse.name,
             arguments: JSON.stringify(toolUse.input),
           };
         });
-      
+
       return {
         text: content,
         toolCalls: toolCalls,
       };
     } catch (error) {
-      throw new Error(`Error calling Anthropic API: ${(error as Error).message}`);
+      throw new Error(
+        `Error calling Anthropic API: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -130,7 +133,7 @@ export class AnthropicProvider implements LLMProvider {
    */
   private formatMessages(messages: Message[]): any[] {
     // Format messages for Anthropic API
-    return messages.map(msg => {
+    return messages.map((msg) => {
       if (msg.role === 'user') {
         return {
           role: 'user',
@@ -150,11 +153,11 @@ export class AnthropicProvider implements LLMProvider {
               type: 'tool_result',
               tool_use_id: msg.name, // Use name as the tool_use_id
               content: msg.content,
-            }
+            },
           ],
         };
       }
-      
+
       // Default fallback
       return {
         role: 'user',
