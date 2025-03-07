@@ -46,3 +46,14 @@ export const updateConfig = (config: Partial<Config>): Config => {
   fs.writeFileSync(configFile, JSON.stringify(updatedConfig, null, 2));
   return updatedConfig;
 };
+
+/**
+ * Clears all configuration settings by removing the config file
+ * @returns The default configuration that will now be used
+ */
+export const clearAllConfig = (): Config => {
+  if (fs.existsSync(configFile)) {
+    fs.unlinkSync(configFile);
+  }
+  return defaultConfig;
+};

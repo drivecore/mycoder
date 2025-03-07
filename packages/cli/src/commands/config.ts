@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { createInterface } from 'readline/promises';
 import { Logger } from 'mycoder-agent';
 
 import { SharedOptions } from '../options.js';
@@ -6,8 +7,28 @@ import {
   getConfig,
   getDefaultConfig,
   updateConfig,
+  clearAllConfig,
 } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
+
+/**
+ * Prompts the user for confirmation with a yes/no question
+ * @param question The question to ask the user
+ * @returns True if the user confirmed, false otherwise
+ */
+async function confirm(question: string): Promise<boolean> {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    const answer = await rl.question(`${question} (y/N): `);
+    return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
+  } finally {
+    rl.close();
+  }
+}
 
 import type { CommandModule, ArgumentsCamelCase } from 'yargs';
 
@@ -15,6 +36,7 @@ export interface ConfigOptions extends SharedOptions {
   command: 'get' | 'set' | 'list' | 'clear';
   key?: string;
   value?: string;
+  all?: boolean;
 }
 
 export const command: CommandModule<SharedOptions, ConfigOptions> = {
@@ -36,6 +58,11 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         describe: 'Configuration value (for set command)',
         type: 'string',
       })
+      .option('all', {
+        describe: 'Clear all configuration settings (for clear command)',
+        type: 'boolean',
+        default: false,
+      })
       .example('$0 config list', 'List all configuration values')
       .example(
         '$0 config get githubMode',
@@ -45,6 +72,10 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       .example(
         '$0 config clear customPrompt',
         'Reset customPrompt to default value',
+      )
+      .example(
+        '$0 config clear --all',
+        'Clear all configuration settings',
       ) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   },
   handler: async (argv: ArgumentsCamelCase<ConfigOptions>) => {
@@ -153,8 +184,26 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
 
     // Handle 'clear' command
     if (argv.command === 'clear') {
+      // Check if --all flag is provided
+      if (argv.all) {
+        // Confirm with the user before clearing all settings
+        const isConfirmed = await confirm(
+          'Are you sure you want to clear all configuration settings? This action cannot be undone.'
+        );
+        
+        if (!isConfirmed) {
+          logger.info('Operation cancelled.');
+          return;
+        }
+        
+        // Clear all settings
+        clearAllConfig();
+        logger.info('All configuration settings have been cleared. Default values will be used.');
+        return;
+      }
+      
       if (!argv.key) {
-        logger.error('Key is required for clear command');
+        logger.error('Key is required for clear command (or use --all to clear all settings)');
         return;
       }
 
