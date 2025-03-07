@@ -1,15 +1,14 @@
-import { CoreMessage, ToolSet, generateText, tool as makeTool } from 'ai';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+
+import { generateText } from '../llm/core.js';
+import { Message, ToolUseMessage } from '../llm/types.js';
 
 import { DEFAULT_CONFIG } from './config.js';
-import {
-  addCacheControlToMessages,
-  createCacheControlMessageFromSystemPrompt,
-  createToolCallParts,
-  formatToolCalls,
-} from './messageUtils.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
 import { Tool, ToolAgentResult, ToolContext } from './types.js';
+
+// Import from our new LLM abstraction instead of Vercel AI SDK
 
 /**
  * Main tool agent function that orchestrates the conversation with the AI
@@ -28,10 +27,11 @@ export const toolAgent = async (
 
   let interactions = 0;
 
-  const messages: CoreMessage[] = [
+  // Create messages using our new Message type
+  const messages: Message[] = [
     {
       role: 'user',
-      content: [{ type: 'text', text: initialPrompt }],
+      content: initialPrompt,
     },
   ];
 
@@ -39,6 +39,9 @@ export const toolAgent = async (
 
   // Get the system prompt once at the start
   const systemPrompt = config.getSystemPrompt(context);
+
+  // Create the LLM provider
+  const provider = config.model;
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.verbose(
@@ -49,39 +52,31 @@ export const toolAgent = async (
 
     interactions++;
 
-    const toolSet: ToolSet = {};
-    tools.forEach((tool) => {
-      toolSet[tool.name] = makeTool({
-        description: tool.description,
-        parameters: tool.parameters,
-      });
-    });
+    // Convert tools to function definitions
+    const functionDefinitions = tools.map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parametersJsonSchema || zodToJsonSchema(tool.parameters),
+    }));
 
-    // Apply cache control to messages for token caching if enabled
-    const messagesWithCacheControl =
-      tokenTracker.tokenCache !== false && context.tokenCache !== false
-        ? [
-            createCacheControlMessageFromSystemPrompt(systemPrompt),
-            ...addCacheControlToMessages(messages),
-          ]
-        : [
-            {
-              role: 'system',
-              content: systemPrompt,
-            } as CoreMessage,
-            ...messages,
-          ];
+    // Prepare the messages for the LLM, including the system message
+    const messagesWithSystem: Message[] = [
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
+      ...messages,
+    ];
 
-    const generateTextProps = {
-      model: config.model,
+    // Generate text using our new LLM abstraction
+    const generateOptions = {
+      messages: messagesWithSystem,
+      functions: functionDefinitions,
       temperature: config.temperature,
       maxTokens: config.maxTokens,
-      messages: messagesWithCacheControl,
-      tools: toolSet,
     };
-    const { text, toolCalls } = await generateText(generateTextProps);
 
-    const localToolCalls = formatToolCalls(toolCalls);
+    const { text, toolCalls } = await generateText(provider, generateOptions);
 
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
@@ -90,59 +85,58 @@ export const toolAgent = async (
       );
       messages.push({
         role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: 'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
-          },
-        ],
+        content:
+          'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
       });
       continue;
     }
 
-    messages.push({
-      role: 'assistant',
-      content: [{ type: 'text', text: text }],
-    });
-
+    // Add the assistant's text response to messages
     if (text) {
+      messages.push({
+        role: 'assistant',
+        content: text,
+      });
       logger.info(text);
     }
 
+    // Handle tool calls if any
     if (toolCalls.length > 0) {
-      const toolCallParts = createToolCallParts(toolCalls);
+      messages.push(
+        ...toolCalls.map(
+          (toolCall) =>
+            ({
+              role: 'tool_use',
+              name: toolCall.name,
+              id: toolCall.id,
+              content: toolCall.content,
+            }) satisfies ToolUseMessage,
+        ),
+      );
 
-      messages.push({
-        role: 'assistant',
-        content: toolCallParts,
-      });
-    }
+      // Execute the tools and get results
+      const { sequenceCompleted, completionResult, respawn } =
+        await executeTools(toolCalls, tools, messages, context);
 
-    const { sequenceCompleted, completionResult, respawn } = await executeTools(
-      localToolCalls,
-      tools,
-      messages,
-      context,
-    );
+      if (respawn) {
+        logger.info('Respawning agent with new context');
+        // Reset messages to just the new context
+        messages.length = 0;
+        messages.push({
+          role: 'user',
+          content: respawn.context,
+        });
+        continue;
+      }
 
-    if (respawn) {
-      logger.info('Respawning agent with new context');
-      // Reset messages to just the new context
-      messages.length = 0;
-      messages.push({
-        role: 'user',
-        content: [{ type: 'text', text: respawn.context }],
-      });
-      continue;
-    }
-
-    if (sequenceCompleted) {
-      const result: ToolAgentResult = {
-        result: completionResult ?? 'Sequence explicitly completed',
-        interactions,
-      };
-      logTokenUsage(tokenTracker);
-      return result;
+      if (sequenceCompleted) {
+        const result: ToolAgentResult = {
+          result: completionResult ?? 'Sequence explicitly completed',
+          interactions,
+        };
+        logTokenUsage(tokenTracker);
+        return result;
+      }
     }
   }
 

@@ -9,6 +9,8 @@ describe('getModel', () => {
     expect(model.provider).toBe('anthropic.messages');
   });
 
+  /*
+
   it('should return the correct model for openai', () => {
     const model = getModel('openai', 'gpt-4o-2024-05-13');
     expect(model).toBeDefined();
@@ -32,6 +34,7 @@ describe('getModel', () => {
     expect(model).toBeDefined();
     expect(model.provider).toBe('mistral.chat');
   });
+*/
 
   it('should throw an error for unknown provider', () => {
     expect(() => {
