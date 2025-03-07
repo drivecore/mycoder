@@ -107,11 +107,24 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
       if (providerSettings) {
         const { keyName } = providerSettings;
-        const apiKey = process.env[keyName];
+        
+        // First check if the API key is in the config
+        const configApiKey = userConfig[keyName as keyof typeof userConfig] as string;
+        // Then fall back to environment variable
+        const envApiKey = process.env[keyName];
+        // Use config key if available, otherwise use env key
+        const apiKey = configApiKey || envApiKey;
 
         if (!apiKey) {
           logger.error(getProviderApiKeyError(userModelProvider));
           throw new Error(`${userModelProvider} API key not found`);
+        }
+        
+        // If we're using a key from config, set it as an environment variable
+        // This ensures it's available to the provider libraries
+        if (configApiKey && !envApiKey) {
+          process.env[keyName] = configApiKey;
+          logger.debug(`Using ${keyName} from configuration`);
         }
       }
       // No API key check needed for Ollama as it uses a local server

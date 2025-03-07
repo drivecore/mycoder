@@ -49,6 +49,11 @@ describe('Config', () => {
         profile: false,
         customPrompt: '',
         tokenCache: true,
+        // API keys
+        ANTHROPIC_API_KEY: '',
+        OPENAI_API_KEY: '',
+        XAI_API_KEY: '',
+        MISTRAL_API_KEY: '',
       });
       expect(fs.existsSync).toHaveBeenCalledWith(mockConfigFile);
     });
@@ -86,6 +91,11 @@ describe('Config', () => {
         profile: false,
         customPrompt: '',
         tokenCache: true,
+        // API keys
+        ANTHROPIC_API_KEY: '',
+        OPENAI_API_KEY: '',
+        XAI_API_KEY: '',
+        MISTRAL_API_KEY: '',
       });
     });
   });
