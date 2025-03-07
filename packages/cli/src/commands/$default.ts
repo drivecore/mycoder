@@ -107,9 +107,11 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
       if (providerSettings) {
         const { keyName } = providerSettings;
-        
+
         // First check if the API key is in the config
-        const configApiKey = userConfig[keyName as keyof typeof userConfig] as string;
+        const configApiKey = userConfig[
+          keyName as keyof typeof userConfig
+        ] as string;
         // Then fall back to environment variable
         const envApiKey = process.env[keyName];
         // Use config key if available, otherwise use env key
@@ -119,7 +121,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
           logger.error(getProviderApiKeyError(userModelProvider));
           throw new Error(`${userModelProvider} API key not found`);
         }
-        
+
         // If we're using a key from config, set it as an environment variable
         // This ensures it's available to the provider libraries
         if (configApiKey && !envApiKey) {

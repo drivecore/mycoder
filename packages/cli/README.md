@@ -1,6 +1,6 @@
 # MyCoder CLI
 
-Command-line interface for AI-powered coding tasks.
+Command-line interface for AI-powered coding tasks. Full details available on the main [MyCoder.ai website](https://mycoder.ai) and the [Official MyCoder.Ai Docs website](https://docs.mycoder.ai).
 
 ## Features
 
@@ -17,6 +17,8 @@ Command-line interface for AI-powered coding tasks.
 ```bash
 npm install -g mycoder
 ```
+
+For detailed installation instructions for macOS and Linux, including how to set up Node.js using NVM, [see our Getting Started guide](https://docs.mycoder.ai/docs/getting-started/).
 
 ## Usage
 
