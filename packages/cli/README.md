@@ -1,6 +1,6 @@
 # MyCoder CLI
 
-Command-line interface for AI-powered coding tasks.
+Command-line interface for AI-powered coding tasks. Full details available on the main [MyCoder.ai website](https://mycoder.ai) and the [Official MyCoder.Ai Docs website](https://docs.mycoder.ai).
 
 ## Features
 
