@@ -15,8 +15,25 @@ env:
 jobs:
   process-comment:
     runs-on: ubuntu-latest
-    if: contains(github.event.comment.body, '/mycoder pr') || contains(github.event.comment.body, '/mycoder plan')
+    if: contains(github.event.comment.body, '/mycoder')
     steps:
+      - name: Extract prompt from comment
+        id: extract-prompt
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          if [[ "$COMMENT" =~ "/mycoder "(.+) ]]; then
+            PROMPT="${BASH_REMATCH[1]}"
+          elif [[ "$COMMENT" =~ "/mycoder" ]]; then
+            # If just /mycoder with no text after, use a default prompt
+            PROMPT="Please review this issue and suggest next steps."
+          else
+            echo "No valid /mycoder command found"
+            exit 1
+          fi
+          echo "prompt=$PROMPT" >> $GITHUB_OUTPUT
+          echo "comment_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
+          echo "comment_id=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -36,20 +53,10 @@ jobs:
           # Skip tests when installing globally
           pnpm install -g mycoder --no-frozen-lockfile --ignore-scripts
 
-      - name: Run MyCoder PR command
-        if: contains(github.event.comment.body, '/mycoder pr')
+      - name: Run MyCoder with prompt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          echo "Running MyCoder to implement PR for issue #${{ github.event.issue.number }}"
-          mycoder --githubMode true --userPrompt false "Implement a PR for GitHub issue #${{ github.event.issue.number }}. Please review the issue details and implement a solution according to the requirements. After implementation, create a pull request that addresses this issue."
-
-      - name: Run MyCoder Plan command
-        if: contains(github.event.comment.body, '/mycoder plan')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          echo "Running MyCoder to create implementation plan for issue #${{ github.event.issue.number }}"
-          mycoder --githubMode true --userPrompt false "Review GitHub issue #${{ github.event.issue.number }} and create an implementation plan. Post your plan as a comment on the issue. Be thorough and consider all requirements mentioned in the issue description."
+          echo "Running MyCoder for issue #${{ github.event.issue.number }} with prompt: ${{ steps.extract-prompt.outputs.prompt }}"
+          mycoder --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} the user asked: '${{ steps.extract-prompt.outputs.prompt }}' in comment ${{ steps.extract-prompt.outputs.comment_url }}. Please address this request. If you create a PR or take actions outside the scope of this issue, please report back to the issue with a comment explaining what you did."

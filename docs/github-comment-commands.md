@@ -1,43 +1,68 @@
 # GitHub Comment Commands
 
-MyCoder provides automated actions in response to specific commands in GitHub issue comments. This feature allows you to trigger MyCoder directly from GitHub issues.
+MyCoder provides automated actions in response to `/mycoder` commands in GitHub issue comments. This feature allows you to trigger MyCoder directly from GitHub issues with flexible prompts.
 
-## Available Commands
+## How to Use
 
-### `/mycoder pr`
+Simply add a comment to any GitHub issue with `/mycoder` followed by your instructions:
 
-When you add a comment with `/mycoder pr` to any issue, MyCoder will:
+```
+/mycoder [your instructions here]
+```
 
+MyCoder will process your instructions in the context of the issue and respond accordingly.
+
+## Examples
+
+### Creating a PR
+
+```
+/mycoder implement a PR for this issue
+```
+
+MyCoder will:
 1. Check out the repository
 2. Review the issue details
 3. Implement a solution according to the requirements
 4. Create a pull request that addresses the issue
 
-Example:
+### Creating an Implementation Plan
+
 ```
-This looks like a great feature to add!
-
-/mycoder pr
+/mycoder create an implementation plan for this issue
 ```
 
-### `/mycoder plan`
-
-When you add a comment with `/mycoder plan` to any issue, MyCoder will:
-
+MyCoder will:
 1. Review the issue details
 2. Create a comprehensive implementation plan
 3. Post the plan as a comment on the issue
 
-Example:
-```
-I'm not sure about the best approach for this.
+### Other Use Cases
 
-/mycoder plan
+The `/mycoder` command is flexible and can handle various requests:
+
+```
+/mycoder suggest test cases for this feature
+```
+
+```
+/mycoder analyze the performance implications of this change
+```
+
+```
+/mycoder recommend libraries we could use for this implementation
 ```
 
 ## How It Works
 
-This functionality is implemented as a GitHub Action that runs whenever a new comment is added to an issue. The action checks for these specific command patterns and triggers MyCoder with the appropriate instructions.
+This functionality is implemented as a GitHub Action that runs whenever a new comment is added to an issue. The action checks for the `/mycoder` command pattern and triggers MyCoder with the appropriate instructions.
+
+MyCoder receives context about:
+- The issue number
+- The specific prompt you provided
+- The comment URL where the command was triggered
+
+If MyCoder creates a PR or takes actions outside the scope of the issue, it will report back to the issue with a comment explaining what was done.
 
 ## Requirements
 
@@ -52,4 +77,4 @@ For this feature to work in your repository:
 
 - The action runs with GitHub's default timeout limits
 - Complex implementations may require multiple iterations
-- The AI model's capabilities determine the quality of the implementation or plan
+- The AI model's capabilities determine the quality of the results
