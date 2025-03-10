@@ -38,6 +38,21 @@ mycoder -f prompt.txt
 mycoder config set githubMode true
 ```
 
+### GitHub Comment Commands
+
+MyCoder can be triggered directly from GitHub issue comments using the flexible `/mycoder` command:
+
+```
+/mycoder [your instructions here]
+```
+
+Examples:
+- `/mycoder implement a PR for this issue`
+- `/mycoder create an implementation plan`
+- `/mycoder suggest test cases for this feature`
+
+[Learn more about GitHub comment commands](docs/github-comment-commands.md)
+
 ## Packages
 
 - [mycoder](packages/cli) - Command-line interface for MyCoder
