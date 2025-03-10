@@ -1,6 +1,6 @@
 {
   "name": "mycoder-monorepo",
-  "version": "0.0.1",
+  "version": "0.7.0",
   "type": "module",
   "private": true,
   "packageManager": "pnpm@10.2.1",
