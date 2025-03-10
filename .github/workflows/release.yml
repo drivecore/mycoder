@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - release
 
 permissions:
   contents: write
@@ -12,8 +12,8 @@ permissions:
   packages: write
 
 env:
-  pnpm-version: 10.2.1
-  node-version: 23
+  PNPM_VERSION: 10.2.1
+  NODE_VERSION: 23
 
 jobs:
   release:
@@ -29,12 +29,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.pnpm-version }}
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
       - name: Install dependencies
