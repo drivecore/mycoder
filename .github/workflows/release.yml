@@ -14,6 +14,7 @@ permissions:
 env:
   PNPM_VERSION: 10.2.1
   NODE_VERSION: 23
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
   release:
@@ -47,8 +48,6 @@ jobs:
         run: cd packages/agent && pnpm exec playwright install --with-deps chromium
 
       - name: Test
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: pnpm test
 
       - name: Release
