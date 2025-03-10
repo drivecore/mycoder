@@ -34,6 +34,9 @@ mycoder "Implement a React component that displays a list of items"
 # Run with a prompt from a file
 mycoder -f prompt.txt
 
+# Disable user prompts for fully automated sessions
+mycoder --enableUserPrompt false "Generate a basic Express.js server"
+
 # Enable GitHub mode
 mycoder config set githubMode true
 ```

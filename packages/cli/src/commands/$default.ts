@@ -170,7 +170,10 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         'Once the task is complete ask the user, via the userPrompt tool if the results are acceptable or if changes are needed or if there are additional follow on tasks.',
       ].join('\n');
 
-      const tools = getTools();
+      const tools = getTools({
+        enableUserPrompt:
+          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
+      });
 
       // Error handling
       process.on('SIGINT', () => {
@@ -210,6 +213,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         customPrompt: config.customPrompt,
         tokenCache:
           argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
+        enableUserPrompt:
+          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
       });
 
       const output =

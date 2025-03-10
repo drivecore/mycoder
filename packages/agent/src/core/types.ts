@@ -19,6 +19,7 @@ export type ToolContext = {
   githubMode: boolean;
   customPrompt?: string;
   tokenCache?: boolean;
+  enableUserPrompt?: boolean;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

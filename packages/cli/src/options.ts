@@ -16,6 +16,7 @@ export type SharedOptions = {
   readonly temperature?: number;
   readonly profile?: boolean;
   readonly tokenCache?: boolean;
+  readonly enableUserPrompt?: boolean;
 };
 
 export const sharedOptions = {
@@ -101,5 +102,11 @@ export const sharedOptions = {
   tokenCache: {
     type: 'boolean',
     description: 'Enable token caching for LLM API calls',
+  } as const,
+  enableUserPrompt: {
+    type: 'boolean',
+    description:
+      'Enable or disable the userPrompt tool (disable for fully automated sessions)',
+    default: true,
   } as const,
 };
