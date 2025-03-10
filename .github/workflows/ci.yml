@@ -12,8 +12,7 @@ permissions:
   contents: read
 
 env:
-  pnpm-version: 10.2.1
-  node-version: 23
+  PNPM_VERSION: 10.2.1
 
 jobs:
   ci:
@@ -23,11 +22,12 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.pnpm-version }}
+          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.node-version }}
+          node-version-file: .nvmrc
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
