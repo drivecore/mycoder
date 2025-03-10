@@ -90,7 +90,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       .filter(Boolean)
       .join('\n');
 
-    const tools = getTools().filter((tool) => tool.name !== 'userPrompt');
+    const tools = getTools({ enableUserPrompt: false });
 
     // Update config if timeout is specified
     const config = {

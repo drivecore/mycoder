@@ -96,8 +96,16 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       tokenTracker.tokenCache =
         argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
 
-      const userModelProvider = argv.modelProvider || userConfig.modelProvider;
-      const userModelName = argv.modelName || userConfig.modelName;
+      const userModelProvider =
+        argv.provider ||
+        argv.modelProvider ||
+        userConfig.provider ||
+        userConfig.modelProvider;
+      const userModelName =
+        argv.model ||
+        argv.modelName ||
+        userConfig.model ||
+        userConfig.modelName;
       const userMaxTokens = argv.maxTokens || userConfig.maxTokens;
       const userTemperature = argv.temperature || userConfig.temperature;
 
@@ -107,9 +115,11 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
       if (providerSettings) {
         const { keyName } = providerSettings;
-        
+
         // First check if the API key is in the config
-        const configApiKey = userConfig[keyName as keyof typeof userConfig] as string;
+        const configApiKey = userConfig[
+          keyName as keyof typeof userConfig
+        ] as string;
         // Then fall back to environment variable
         const envApiKey = process.env[keyName];
         // Use config key if available, otherwise use env key
@@ -119,7 +129,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
           logger.error(getProviderApiKeyError(userModelProvider));
           throw new Error(`${userModelProvider} API key not found`);
         }
-        
+
         // If we're using a key from config, set it as an environment variable
         // This ensures it's available to the provider libraries
         if (configApiKey && !envApiKey) {
@@ -160,7 +170,10 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         'Once the task is complete ask the user, via the userPrompt tool if the results are acceptable or if changes are needed or if there are additional follow on tasks.',
       ].join('\n');
 
-      const tools = getTools();
+      const tools = getTools({
+        enableUserPrompt:
+          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
+      });
 
       // Error handling
       process.on('SIGINT', () => {
@@ -200,6 +213,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         customPrompt: config.customPrompt,
         tokenCache:
           argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
+        enableUserPrompt:
+          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
       });
 
       const output =

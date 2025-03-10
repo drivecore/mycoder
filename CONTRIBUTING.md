@@ -87,6 +87,7 @@ This project and everyone participating in it is governed by our Code of Conduct
    - **chore**: Changes to the build process or auxiliary tools and libraries
 
    Each commit message should be structured as follows:
+
    ```
    <type>[optional scope]: <description>
 
@@ -96,6 +97,7 @@ This project and everyone participating in it is governed by our Code of Conduct
    ```
 
    Example:
+
    ```
    feat(auth): implement JWT authentication
 

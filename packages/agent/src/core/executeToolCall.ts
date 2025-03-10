@@ -28,20 +28,60 @@ export const executeToolCall = async (
     logger,
   };
 
+  let parsedJson: any;
+  try {
+    parsedJson = JSON.parse(toolCall.content);
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(err.message);
+      return JSON.stringify({
+        error: true,
+        message: 'Invalid JSON for tool call: ' + err.message,
+        stack: err.stack,
+      });
+    } else {
+      logger.error(err);
+      return JSON.stringify({
+        error: true,
+        message: 'Invalid JSON for tool call: ' + err,
+      });
+    }
+  }
+
+  // validate JSON schema for input
+  let validatedJson: any;
+  try {
+    validatedJson = tool.parameters.parse(parsedJson);
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error(err.message);
+      return JSON.stringify({
+        error: true,
+        message: 'Invalid format for tool call: ' + err.message,
+        stack: err.stack,
+      });
+    } else {
+      logger.error(err);
+      return JSON.stringify({
+        error: true,
+        message: 'Invalid format for tool call: ' + err,
+      });
+    }
+  }
+
   // for each parameter log it and its name
   if (tool.logParameters) {
-    tool.logParameters(toolCall.input, toolContext);
+    tool.logParameters(validatedJson, toolContext);
   } else {
     logger.info('Parameters:');
-    Object.entries(toolCall.input).forEach(([name, value]) => {
+    Object.entries(validatedJson).forEach(([name, value]) => {
       logger.info(`  - ${name}: ${JSON.stringify(value).substring(0, 60)}`);
     });
   }
 
-  // TODO: validate JSON schema for input
-  let output;
+  let output: any;
   try {
-    output = await tool.execute(toolCall.input, toolContext);
+    output = await tool.execute(validatedJson, toolContext);
   } catch (err) {
     if (err instanceof Error) {
       logger.error(err.message);

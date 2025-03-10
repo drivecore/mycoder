@@ -1,5 +1,6 @@
-import chalk from 'chalk';
 import { createInterface } from 'readline/promises';
+
+import chalk from 'chalk';
 import { Logger } from 'mycoder-agent';
 
 import { SharedOptions } from '../options.js';
@@ -145,34 +146,36 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      // Validate that the key exists in default config
+      // Check if the key exists in default config
       const defaultConfig = getDefaultConfig();
       if (!(argv.key in defaultConfig)) {
-        logger.error(`Invalid configuration key '${argv.key}'`);
+        logger.warn(
+          `Warning: '${argv.key}' is not a standard configuration key`,
+        );
         logger.info(
           `Valid configuration keys: ${Object.keys(defaultConfig).join(', ')}`,
         );
-        return;
+        // Continue with the operation instead of returning
       }
 
       // Check if this is an API key and add a warning
       if (argv.key.includes('API_KEY')) {
         logger.warn(
           chalk.yellow(
-            'Warning: Storing API keys in configuration is less secure than using environment variables.'
-          )
+            'Warning: Storing API keys in configuration is less secure than using environment variables.',
+          ),
         );
         logger.warn(
           chalk.yellow(
-            'Your API key will be stored in plaintext in the configuration file.'
-          )
+            'Your API key will be stored in plaintext in the configuration file.',
+          ),
         );
-        
+
         // Ask for confirmation
         const isConfirmed = await confirm(
-          'Do you want to continue storing your API key in the configuration?'
+          'Do you want to continue storing your API key in the configuration?',
         );
-        
+
         if (!isConfirmed) {
           logger.info('Operation cancelled.');
           return;
@@ -216,22 +219,26 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       if (argv.all) {
         // Confirm with the user before clearing all settings
         const isConfirmed = await confirm(
-          'Are you sure you want to clear all configuration settings? This action cannot be undone.'
+          'Are you sure you want to clear all configuration settings? This action cannot be undone.',
         );
-        
+
         if (!isConfirmed) {
           logger.info('Operation cancelled.');
           return;
         }
-        
+
         // Clear all settings
         clearAllConfig();
-        logger.info('All configuration settings have been cleared. Default values will be used.');
+        logger.info(
+          'All configuration settings have been cleared. Default values will be used.',
+        );
         return;
       }
-      
+
       if (!argv.key) {
-        logger.error('Key is required for clear command (or use --all to clear all settings)');
+        logger.error(
+          'Key is required for clear command (or use --all to clear all settings)',
+        );
         return;
       }
 
