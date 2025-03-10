@@ -96,8 +96,16 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       tokenTracker.tokenCache =
         argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
 
-      const userModelProvider = argv.modelProvider || userConfig.modelProvider;
-      const userModelName = argv.modelName || userConfig.modelName;
+      const userModelProvider =
+        argv.provider ||
+        argv.modelProvider ||
+        userConfig.provider ||
+        userConfig.modelProvider;
+      const userModelName =
+        argv.model ||
+        argv.modelName ||
+        userConfig.model ||
+        userConfig.modelName;
       const userMaxTokens = argv.maxTokens || userConfig.maxTokens;
       const userTemperature = argv.temperature || userConfig.temperature;
 

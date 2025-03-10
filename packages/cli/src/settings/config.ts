@@ -12,6 +12,9 @@ const defaultConfig = {
   headless: true,
   userSession: false,
   pageFilter: 'none' as 'simple' | 'none' | 'readability',
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
+  // Legacy names - will be removed in a future version
   modelProvider: 'anthropic',
   modelName: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,

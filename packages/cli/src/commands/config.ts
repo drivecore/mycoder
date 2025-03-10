@@ -146,14 +146,16 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      // Validate that the key exists in default config
+      // Check if the key exists in default config
       const defaultConfig = getDefaultConfig();
       if (!(argv.key in defaultConfig)) {
-        logger.error(`Invalid configuration key '${argv.key}'`);
+        logger.warn(
+          `Warning: '${argv.key}' is not a standard configuration key`,
+        );
         logger.info(
           `Valid configuration keys: ${Object.keys(defaultConfig).join(', ')}`,
         );
-        return;
+        // Continue with the operation instead of returning
       }
 
       // Check if this is an API key and add a warning
