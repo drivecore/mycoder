@@ -31,29 +31,25 @@ jobs:
           node-version-file: .nvmrc
           cache: 'pnpm'
 
-      - name: Install MyCoder
-        run: pnpm install -g mycoder
+      - name: Install MyCoder globally
+        run: |
+          # Skip tests when installing globally
+          pnpm install -g mycoder --no-frozen-lockfile --ignore-scripts
 
       - name: Run MyCoder PR command
         if: contains(github.event.comment.body, '/mycoder pr')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
         run: |
           echo "Running MyCoder to implement PR for issue #${{ github.event.issue.number }}"
-          mycoder --githubMode true "Implement a PR for GitHub issue #${{ github.event.issue.number }}. The issue can be found at ${{ github.event.issue.html_url }}. Please review the issue details and implement a solution according to the requirements. After implementation, create a pull request that addresses this issue."
+          mycoder --githubMode true "Implement a PR for GitHub issue #${{ github.event.issue.number }}. Please review the issue details and implement a solution according to the requirements. After implementation, create a pull request that addresses this issue."
 
       - name: Run MyCoder Plan command
         if: contains(github.event.comment.body, '/mycoder plan')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
-          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
         run: |
           echo "Running MyCoder to create implementation plan for issue #${{ github.event.issue.number }}"
-          mycoder --githubMode true "Review GitHub issue #${{ github.event.issue.number }} at ${{ github.event.issue.html_url }} and create an implementation plan. Post your plan as a comment on the issue. Be thorough and consider all requirements mentioned in the issue description."
+          mycoder --githubMode true "Review GitHub issue #${{ github.event.issue.number }} and create an implementation plan. Post your plan as a comment on the issue. Be thorough and consider all requirements mentioned in the issue description."
