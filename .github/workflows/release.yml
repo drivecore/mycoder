@@ -47,6 +47,8 @@ jobs:
         run: cd packages/agent && pnpm exec playwright install --with-deps chromium
 
       - name: Test
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: pnpm test
 
       - name: Release
