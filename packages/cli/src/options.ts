@@ -7,6 +7,9 @@ export type SharedOptions = {
   readonly userSession?: boolean;
   readonly pageFilter?: 'simple' | 'none' | 'readability';
   readonly sentryDsn?: string;
+  readonly provider?: string;
+  readonly model?: string;
+  // Legacy options - will be removed in a future version
   readonly modelProvider?: string;
   readonly modelName?: string;
   readonly maxTokens?: number;
@@ -28,14 +31,26 @@ export const sharedOptions = {
     description: 'Enable performance profiling of CLI startup',
     default: false,
   } as const,
-  modelProvider: {
+  provider: {
     type: 'string',
     description: 'AI model provider to use',
     choices: ['anthropic', 'openai', 'ollama', 'xai', 'mistral'],
   } as const,
-  modelName: {
+  model: {
     type: 'string',
     description: 'AI model name to use',
+  } as const,
+  // Legacy options - will be removed in a future version
+  modelProvider: {
+    type: 'string',
+    description: 'AI model provider to use (deprecated, use provider instead)',
+    choices: ['anthropic', 'openai', 'ollama', 'xai', 'mistral'],
+    hidden: true,
+  } as const,
+  modelName: {
+    type: 'string',
+    description: 'AI model name to use (deprecated, use model instead)',
+    hidden: true,
   } as const,
   maxTokens: {
     type: 'number',
