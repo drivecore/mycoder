@@ -21,6 +21,7 @@ MyCoder will process your instructions in the context of the issue and respond a
 ```
 
 MyCoder will:
+
 1. Check out the repository
 2. Review the issue details
 3. Implement a solution according to the requirements
@@ -33,6 +34,7 @@ MyCoder will:
 ```
 
 MyCoder will:
+
 1. Review the issue details
 2. Create a comprehensive implementation plan
 3. Post the plan as a comment on the issue
@@ -58,6 +60,7 @@ The `/mycoder` command is flexible and can handle various requests:
 This functionality is implemented as a GitHub Action that runs whenever a new comment is added to an issue. The action checks for the `/mycoder` command pattern and triggers MyCoder with the appropriate instructions.
 
 MyCoder receives context about:
+
 - The issue number
 - The specific prompt you provided
 - The comment URL where the command was triggered

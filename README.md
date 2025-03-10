@@ -50,6 +50,7 @@ MyCoder can be triggered directly from GitHub issue comments using the flexible 
 ```
 
 Examples:
+
 - `/mycoder implement a PR for this issue`
 - `/mycoder create an implementation plan`
 - `/mycoder suggest test cases for this feature`
@@ -77,6 +78,21 @@ pnpm build
 # Run tests
 pnpm test
 ```
+
+## Release Process
+
+MyCoder follows the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages. Our release process is fully automated:
+
+1. Commit your changes following the conventional commits format
+2. Create a PR and get it reviewed and approved
+3. When merged to main, our CI/CD pipeline will:
+   - Determine the next version based on commit messages
+   - Generate a changelog
+   - Create a GitHub Release
+   - Tag the release
+   - Publish to NPM
+
+For more details, see the [Contributing Guide](CONTRIBUTING.md).
 
 ## Contributing
 

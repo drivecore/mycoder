@@ -19,11 +19,10 @@
     "clean:all": "pnpm -r clean:all && rimraf node_modules",
     "cloc": "npx cloc * --exclude-dir=node_modules,dist,.vinxi,.output",
     "gcloud-setup": "gcloud auth application-default login && gcloud config set account \"ben@drivecore.ai\" && gcloud config set project drivecore-primary && gcloud config set run/region us-central1",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "changeset publish",
     "cli": "cd packages/cli && node --no-deprecation bin/cli.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "semantic-release": "semantic-release",
+    "release": "semantic-release"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -36,7 +35,12 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
     "@eslint/js": "^9",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@typescript-eslint/parser": "^8.23.0",
     "eslint": "^9.0.0",
@@ -49,6 +53,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
     "prettier": "^3.5.1",
+    "semantic-release": "^24.2.3",
     "typescript-eslint": "^8.23.0"
   },
   "pnpm": {

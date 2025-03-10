@@ -1,0 +1,9 @@
+feat(release): implement conventional commits approach
+
+- Add commitlint to enforce conventional commit format
+- Replace changesets with semantic-release
+- Set up GitHub Actions workflow for automated releases
+- Update documentation with new release process
+- Add commit message template
+
+Closes #140

@@ -72,10 +72,43 @@ This project and everyone participating in it is governed by our Code of Conduct
 4. Commit your changes:
 
    ```bash
-   git commit -m "feat: add your feature description"
+   git commit
    ```
 
-   Follow [Conventional Commits](https://www.conventionalcommits.org/) specification.
+   We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for our commit messages:
+
+   - **feat**: A new feature
+   - **fix**: A bug fix
+   - **docs**: Documentation only changes
+   - **style**: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+   - **refactor**: A code change that neither fixes a bug nor adds a feature
+   - **perf**: A code change that improves performance
+   - **test**: Adding missing tests or correcting existing tests
+   - **chore**: Changes to the build process or auxiliary tools and libraries
+
+   Each commit message should be structured as follows:
+
+   ```
+   <type>[optional scope]: <description>
+
+   [optional body]
+
+   [optional footer(s)]
+   ```
+
+   Example:
+
+   ```
+   feat(auth): implement JWT authentication
+
+   - Add JWT token generation
+   - Add token validation middleware
+   - Update user routes to use authentication
+
+   Closes #123
+   ```
+
+   We have set up a commit message template and commitlint to help you follow this convention.
 
 5. Push to your fork and create a Pull Request
 
@@ -161,9 +194,18 @@ This project and everyone participating in it is governed by our Code of Conduct
 
 ## Release Process
 
-1. Maintainers will handle releases
-2. Follow semantic versioning
-3. Update changelog entries
-4. Tag releases appropriately
+1. Releases are automated through our CI/CD pipeline
+2. When code is merged to the main branch, semantic-release:
+   - Determines the next version based on conventional commit messages
+   - Generates a changelog from commit messages
+   - Creates a GitHub Release with the changelog
+   - Tags the release
+   - Publishes to NPM
+3. No manual release steps are required
+4. Ensure your commit messages follow the conventional commits format to trigger appropriate version bumps:
+   - `feat:` commits trigger a minor version bump
+   - `fix:` commits trigger a patch version bump
+   - `perf:` commits trigger a patch version bump
+   - Commits with `BREAKING CHANGE:` in the footer trigger a major version bump
 
 Thank you for contributing to MyCoder! 👍
