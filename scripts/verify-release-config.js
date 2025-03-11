@@ -17,18 +17,11 @@ const rootPackageJson = JSON.parse(
 const hasSemanticReleaseMonorepo =
   rootPackageJson.devDependencies &&
   'semantic-release-monorepo' in rootPackageJson.devDependencies;
-const hasLerna =
-  rootPackageJson.devDependencies && 'lerna' in rootPackageJson.devDependencies;
 
 if (!hasSemanticReleaseMonorepo) {
   console.error(
     '❌ semantic-release-monorepo is not installed in root package.json',
   );
-  process.exit(1);
-}
-
-if (!hasLerna) {
-  console.error('❌ lerna is not installed in root package.json');
   process.exit(1);
 }
 
@@ -44,13 +37,6 @@ if (
   console.error(
     '❌ Root .releaserc.json does not extend semantic-release-monorepo',
   );
-  process.exit(1);
-}
-
-console.log('Checking lerna.json...');
-// Check lerna.json
-if (!fs.existsSync(path.join(ROOT_DIR, 'lerna.json'))) {
-  console.error('❌ lerna.json is missing');
   process.exit(1);
 }
 
