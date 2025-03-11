@@ -19,6 +19,64 @@ export interface AnthropicOptions extends ProviderOptions {
   baseUrl?: string;
 }
 
+// a function that takes a list of messages and returns a list of messages but with the last message having a cache_control of ephemeral
+function addCacheControlToTools<T>(messages: T[]): T[] {
+  return messages.map((m, i) => ({
+    ...m,
+    ...(i === messages.length - 1
+      ? { cache_control: { type: 'ephemeral' } }
+      : {}),
+  }));
+}
+
+function addCacheControlToContentBlocks(
+  content: Anthropic.Messages.TextBlock[],
+): Anthropic.Messages.TextBlock[] {
+  return content.map((c, i) => {
+    if (i === content.length - 1) {
+      if (
+        c.type === 'text' ||
+        c.type === 'document' ||
+        c.type === 'image' ||
+        c.type === 'tool_use' ||
+        c.type === 'tool_result' ||
+        c.type === 'thinking' ||
+        c.type === 'redacted_thinking'
+      ) {
+        return { ...c, cache_control: { type: 'ephemeral' } };
+      }
+    }
+    return c;
+  });
+}
+function addCacheControlToMessages(
+  messages: Anthropic.Messages.MessageParam[],
+): Anthropic.Messages.MessageParam[] {
+  return messages.map((m, i) => {
+    if (typeof m.content === 'string') {
+      return {
+        ...m,
+        content: [
+          {
+            type: 'text',
+            text: m.content,
+            cache_control: { type: 'ephemeral' },
+          },
+        ],
+      };
+    }
+    return {
+      ...m,
+      content:
+        i >= messages.length - 2
+          ? addCacheControlToContentBlocks(
+              m.content as Anthropic.Messages.TextBlock[],
+            )
+          : m.content,
+    };
+  });
+}
+
 /**
  * Anthropic provider implementation
  */
@@ -50,14 +108,7 @@ export class AnthropicProvider implements LLMProvider {
    * Generate text using Anthropic API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const {
-      messages,
-      functions,
-      temperature = 0.7,
-      maxTokens,
-      stopSequences,
-      topP,
-    } = options;
+    const { messages, functions, temperature = 0.7, maxTokens, topP } = options;
 
     // Extract system message
     const systemMessage = messages.find((msg) => msg.role === 'system');
@@ -67,12 +118,12 @@ export class AnthropicProvider implements LLMProvider {
     try {
       const requestOptions: Anthropic.MessageCreateParams = {
         model: this.model,
-        messages: formattedMessages,
+        messages: addCacheControlToMessages(formattedMessages),
         temperature,
         max_tokens: maxTokens || 1024,
-        ...(stopSequences && { stop_sequences: stopSequences }),
-        ...(topP && { top_p: topP }),
-        ...(systemMessage && { system: systemMessage.content }),
+        system: systemMessage?.content,
+        top_p: topP,
+        stream: false,
       };
 
       // Add tools if provided
@@ -82,7 +133,7 @@ export class AnthropicProvider implements LLMProvider {
           description: fn.description,
           input_schema: fn.parameters,
         }));
-        (requestOptions as any).tools = tools;
+        (requestOptions as any).tools = addCacheControlToTools(tools);
       }
 
       const response = await this.client.messages.create(requestOptions);
