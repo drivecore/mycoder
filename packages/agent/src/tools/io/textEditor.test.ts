@@ -303,4 +303,94 @@ describe('textEditor', () => {
       );
     }).rejects.toThrow(/Found 2 occurrences/);
   });
+
+  it('should overwrite an existing file with create command', async () => {
+    const initialContent = 'Initial content';
+    const newContent = 'New content that overwrites the file';
+    const testPath = join(testDir, `${randomUUID()}.txt`);
+
+    // Create initial file
+    await textEditorTool.execute(
+      {
+        command: 'create',
+        path: testPath,
+        file_text: initialContent,
+        description: 'test',
+      },
+      toolContext,
+    );
+
+    // Verify initial content
+    let content = await readFile(testPath, 'utf8');
+    expect(content).toBe(initialContent);
+
+    // Overwrite the file using create command
+    const result = await textEditorTool.execute(
+      {
+        command: 'create',
+        path: testPath,
+        file_text: newContent,
+        description: 'test',
+      },
+      toolContext,
+    );
+
+    // Verify return value
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('File overwritten');
+
+    // Verify content has been updated
+    content = await readFile(testPath, 'utf8');
+    expect(content).toBe(newContent);
+  });
+
+  it('should be able to undo file overwrite', async () => {
+    const initialContent = 'Initial content that will be restored';
+    const overwrittenContent = 'This content will be undone';
+    const testPath = join(testDir, `${randomUUID()}.txt`);
+
+    // Create initial file
+    await textEditorTool.execute(
+      {
+        command: 'create',
+        path: testPath,
+        file_text: initialContent,
+        description: 'test',
+      },
+      toolContext,
+    );
+
+    // Overwrite the file
+    await textEditorTool.execute(
+      {
+        command: 'create',
+        path: testPath,
+        file_text: overwrittenContent,
+        description: 'test',
+      },
+      toolContext,
+    );
+
+    // Verify overwritten content
+    let content = await readFile(testPath, 'utf8');
+    expect(content).toBe(overwrittenContent);
+
+    // Undo the overwrite
+    const result = await textEditorTool.execute(
+      {
+        command: 'undo_edit',
+        path: testPath,
+        description: 'test',
+      },
+      toolContext,
+    );
+
+    // Verify return value
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('Successfully reverted');
+
+    // Verify content is back to initial
+    content = await readFile(testPath, 'utf8');
+    expect(content).toBe(initialContent);
+  });
 });
