@@ -1,3 +1,22 @@
+# mycoder-agent-v1.0.0 (2025-03-11)
+
+
+### Bug Fixes
+
+* **monorepo:** implement semantic-release-monorepo for proper versioning of sub-packages ([96c6284](https://github.com/drivecore/mycoder/commit/96c62848fbc3a4c1c591f3fd6202486e6461c4f2))
+* only consider response empty if no text AND no tool calls ([#127](https://github.com/drivecore/mycoder/issues/127)) ([af20ec5](https://github.com/drivecore/mycoder/commit/af20ec54468afed49632306fe553b307ab3c4ba5))
+* Replace shell commands with Node.js APIs for cross-platform compatibility ([07b4c24](https://github.com/drivecore/mycoder/commit/07b4c24fa17d19c468a76404a367f6afc0005517))
+* token caching ([5972e59](https://github.com/drivecore/mycoder/commit/5972e59ab572040e564d1756ab8a5625215e14dc))
+* use maxTokens in generateTextProps ([bfb9da9](https://github.com/drivecore/mycoder/commit/bfb9da9804d61840344e93cc5bea809e8e16f2ec))
+
+
+### Features
+
+* add back token tracking, system prompt caching. ([ddc04ab](https://github.com/drivecore/mycoder/commit/ddc04ab0778eb2f571897e825c8d8ba17651db09))
+* add showStdIn and showStdout options to shellMessage and shellStart ([aed1b9f](https://github.com/drivecore/mycoder/commit/aed1b9f6ba489da19f2170c136861a7c80ad6e33)), closes [#167](https://github.com/drivecore/mycoder/issues/167)
+* add token caching.  issue 145 ([d78723b](https://github.com/drivecore/mycoder/commit/d78723bb6d0514110088caf7009e196e3f79769e))
+* remove modelProvider and modelName - instant decrepation ([59834dc](https://github.com/drivecore/mycoder/commit/59834dcf932051a5c75624bd6f6ab12254f43769))
+
 # mycoder-agent
 
 ## [0.7.0](https://github.com/drivecore/mycoder/compare/v0.6.1...v0.7.0) (2025-03-10)
