@@ -31,14 +31,6 @@ export interface LLMProvider {
    * @returns Response with text and/or tool calls
    */
   generateText(options: GenerateOptions): Promise<LLMResponse>;
-
-  /**
-   * Get the number of tokens in a given text
-   *
-   * @param text Text to count tokens for
-   * @returns Number of tokens
-   */
-  countTokens(text: string): Promise<number>;
 }
 
 // Provider factory registry

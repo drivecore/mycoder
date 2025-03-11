@@ -3,6 +3,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 
+import { TokenUsage } from '../../tokens.js';
 import { LLMProvider } from '../provider.js';
 import {
   GenerateOptions,
@@ -77,6 +78,15 @@ function addCacheControlToMessages(
   });
 }
 
+function tokenUsageFromMessage(message: Anthropic.Message) {
+  const usage = new TokenUsage();
+  usage.input = message.usage.input_tokens;
+  usage.cacheWrites = message.usage.cache_creation_input_tokens ?? 0;
+  usage.cacheReads = message.usage.cache_read_input_tokens ?? 0;
+  usage.output = message.usage.output_tokens;
+  return usage;
+}
+
 /**
  * Anthropic provider implementation
  */
@@ -115,26 +125,33 @@ export class AnthropicProvider implements LLMProvider {
     const nonSystemMessages = messages.filter((msg) => msg.role !== 'system');
     const formattedMessages = this.formatMessages(nonSystemMessages);
 
+    const tools = addCacheControlToTools(
+      (functions ?? []).map((fn) => ({
+        name: fn.name,
+        description: fn.description,
+        input_schema: fn.parameters as Anthropic.Tool.InputSchema,
+      })),
+    );
+
     try {
       const requestOptions: Anthropic.MessageCreateParams = {
         model: this.model,
         messages: addCacheControlToMessages(formattedMessages),
         temperature,
         max_tokens: maxTokens || 1024,
-        system: systemMessage?.content,
+        system: systemMessage?.content
+          ? [
+              {
+                type: 'text',
+                text: systemMessage?.content,
+                cache_control: { type: 'ephemeral' },
+              },
+            ]
+          : undefined,
         top_p: topP,
+        tools,
         stream: false,
       };
-
-      // Add tools if provided
-      if (functions && functions.length > 0) {
-        const tools = functions.map((fn) => ({
-          name: fn.name,
-          description: fn.description,
-          input_schema: fn.parameters,
-        }));
-        (requestOptions as any).tools = addCacheControlToTools(tools);
-      }
 
       const response = await this.client.messages.create(requestOptions);
 
@@ -143,15 +160,13 @@ export class AnthropicProvider implements LLMProvider {
         response.content.find((c) => c.type === 'text')?.text || '';
       const toolCalls = response.content
         .filter((c) => {
-          const contentType = (c as any).type;
+          const contentType = c.type;
           return contentType === 'tool_use';
         })
         .map((c) => {
-          const toolUse = c as any;
+          const toolUse = c as Anthropic.Messages.ToolUseBlock;
           return {
-            id:
-              toolUse.id ||
-              `tool-${Math.random().toString(36).substring(2, 11)}`,
+            id: toolUse.id,
             name: toolUse.name,
             content: JSON.stringify(toolUse.input),
           };
@@ -160,6 +175,7 @@ export class AnthropicProvider implements LLMProvider {
       return {
         text: content,
         toolCalls: toolCalls,
+        tokenUsage: tokenUsageFromMessage(response),
       };
     } catch (error) {
       throw new Error(
@@ -169,19 +185,11 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   /**
-   * Count tokens in a text using Anthropic's tokenizer
-   * Note: This is a simplified implementation
-   */
-  async countTokens(text: string): Promise<number> {
-    // In a real implementation, you would use Anthropic's tokenizer
-    // This is a simplified approximation
-    return Math.ceil(text.length / 3.5);
-  }
-
-  /**
    * Format messages for Anthropic API
    */
-  private formatMessages(messages: Message[]): any[] {
+  private formatMessages(
+    messages: Message[],
+  ): Anthropic.Messages.MessageParam[] {
     // Format messages for Anthropic API
     return messages.map((msg) => {
       if (msg.role === 'user') {

@@ -2,6 +2,9 @@
  * Core message types for LLM interactions
  */
 
+import { JsonSchema7Type } from 'zod-to-json-schema';
+
+import { TokenUsage } from '../tokens';
 import { ToolCall } from '../types';
 
 /**
@@ -67,7 +70,7 @@ export type Message =
 export interface FunctionDefinition {
   name: string;
   description: string;
-  parameters: Record<string, any>; // JSON Schema object
+  parameters: JsonSchema7Type; // JSON Schema object
 }
 
 /**
@@ -76,6 +79,7 @@ export interface FunctionDefinition {
 export interface LLMResponse {
   text: string;
   toolCalls: ToolCall[];
+  tokenUsage: TokenUsage;
 }
 
 /**

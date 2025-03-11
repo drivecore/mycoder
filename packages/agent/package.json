@@ -44,7 +44,7 @@
   "author": "Ben Houston",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.16.0",
+    "@anthropic-ai/sdk": "^0.37",
     "@mozilla/readability": "^0.5.0",
     "@playwright/test": "^1.50.1",
     "@vitest/browser": "^3.0.5",
