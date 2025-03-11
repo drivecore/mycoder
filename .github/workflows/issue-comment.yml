@@ -45,8 +45,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.name "MyCoder (On behalf of ${{ github.event.comment.user.login }})"
-          git config --global user.email "bot@mycoder.ai"
+          git config --global user.name "Ben Houston (via MyCoder)"
+          git config --global user.email "neuralsoft@gmail.com"
 
       - run:
           pnpm install -g mycoder
