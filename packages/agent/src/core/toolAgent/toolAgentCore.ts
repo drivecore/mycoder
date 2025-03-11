@@ -76,7 +76,12 @@ export const toolAgent = async (
       maxTokens: config.maxTokens,
     };
 
-    const { text, toolCalls } = await generateText(provider, generateOptions);
+    const { text, toolCalls, tokenUsage } = await generateText(
+      provider,
+      generateOptions,
+    );
+
+    tokenTracker.tokenUsage.add(tokenUsage);
 
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
