@@ -17,6 +17,8 @@ export type SharedOptions = {
   readonly profile?: boolean;
   readonly tokenCache?: boolean;
   readonly enableUserPrompt?: boolean;
+  readonly userPrompt?: boolean;
+  readonly githubMode?: boolean;
 };
 
 export const sharedOptions = {
@@ -108,5 +110,16 @@ export const sharedOptions = {
     description:
       'Enable or disable the userPrompt tool (disable for fully automated sessions)',
     default: true,
+  } as const,
+  userPrompt: {
+    type: 'boolean',
+    description:
+      'Alias for enableUserPrompt: enable or disable the userPrompt tool',
+    default: true,
+  } as const,
+  githubMode: {
+    type: 'boolean',
+    description: 'Enable GitHub mode for working with issues and PRs',
+    default: false,
   } as const,
 };
