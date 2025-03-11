@@ -20,6 +20,8 @@ type ProcessState = {
     signaled: boolean;
     exitCode: number | null;
   };
+  showStdIn: boolean;
+  showStdout: boolean;
 };
 
 // Global map to store process state
@@ -36,6 +38,14 @@ const parameterSchema = z.object({
     .describe(
       'Timeout in ms before switching to async mode (default: 10s, which usually is sufficient)',
     ),
+  showStdIn: z
+    .boolean()
+    .optional()
+    .describe('Whether to show the command input in the logs (default: false)'),
+  showStdout: z
+    .boolean()
+    .optional()
+    .describe('Whether to show command output in the logs (default: false)'),
 });
 
 const returnSchema = z.union([
@@ -77,9 +87,17 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { command, timeout = DEFAULT_TIMEOUT },
+    {
+      command,
+      timeout = DEFAULT_TIMEOUT,
+      showStdIn = false,
+      showStdout = false,
+    },
     { logger, workingDirectory },
   ): Promise<ReturnType> => {
+    if (showStdIn) {
+      logger.info(`Command input: ${command}`);
+    }
     logger.verbose(`Starting shell command: ${command}`);
 
     return new Promise((resolve) => {
@@ -100,6 +118,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           stdout: [],
           stderr: [],
           state: { completed: false, signaled: false, exitCode: null },
+          showStdIn,
+          showStdout,
         };
 
         // Initialize combined process state
@@ -111,6 +131,9 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             const output = data.toString();
             processState.stdout.push(output);
             logger.verbose(`[${instanceId}] stdout: ${output.trim()}`);
+            if (processState.showStdout) {
+              logger.info(`[${instanceId}] stdout: ${output.trim()}`);
+            }
           });
 
         if (process.stderr)
@@ -118,6 +141,9 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             const output = data.toString();
             processState.stderr.push(output);
             logger.verbose(`[${instanceId}] stderr: ${output.trim()}`);
+            if (processState.showStdout) {
+              logger.info(`[${instanceId}] stderr: ${output.trim()}`);
+            }
           });
 
         process.on('error', (error) => {
@@ -186,10 +212,18 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (
-    { command, description, timeout = DEFAULT_TIMEOUT },
+    {
+      command,
+      description,
+      timeout = DEFAULT_TIMEOUT,
+      showStdIn = false,
+      showStdout = false,
+    },
     { logger },
   ) => {
-    logger.info(`Running "${command}", ${description} (timeout: ${timeout}ms)`);
+    logger.info(
+      `Running "${command}", ${description} (timeout: ${timeout}ms, showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
+    );
   },
   logReturns: (output, { logger }) => {
     if (output.mode === 'async') {

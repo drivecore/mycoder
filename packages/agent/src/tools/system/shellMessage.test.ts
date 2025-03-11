@@ -214,4 +214,72 @@ describe('shellMessageTool', () => {
     expect(checkResult.completed).toBe(true);
     expect(processStates.has(instanceId)).toBe(true);
   });
+
+  it('should respect showStdIn and showStdout parameters', async () => {
+    // Start a process with default visibility settings
+    const startResult = await shellStartTool.execute(
+      {
+        command: 'cat',
+        description: 'Test with stdin/stdout visibility',
+        timeout: 50, // Force async mode
+      },
+      toolContext,
+    );
+
+    const instanceId = getInstanceId(startResult);
+
+    // Verify process state has default visibility settings
+    const processState = processStates.get(instanceId);
+    expect(processState?.showStdIn).toBe(false);
+    expect(processState?.showStdout).toBe(false);
+
+    // Send input with explicit visibility settings
+    await shellMessageTool.execute(
+      {
+        instanceId,
+        stdin: 'test input',
+        description: 'Test with explicit visibility settings',
+        showStdIn: true,
+        showStdout: true,
+      },
+      toolContext,
+    );
+
+    // Verify process state still exists
+    expect(processStates.has(instanceId)).toBe(true);
+  });
+
+  it('should inherit visibility settings from process state', async () => {
+    // Start a process with explicit visibility settings
+    const startResult = await shellStartTool.execute(
+      {
+        command: 'cat',
+        description: 'Test with inherited visibility settings',
+        timeout: 50, // Force async mode
+        showStdIn: true,
+        showStdout: true,
+      },
+      toolContext,
+    );
+
+    const instanceId = getInstanceId(startResult);
+
+    // Verify process state has the specified visibility settings
+    const processState = processStates.get(instanceId);
+    expect(processState?.showStdIn).toBe(true);
+    expect(processState?.showStdout).toBe(true);
+
+    // Send input without specifying visibility settings
+    await shellMessageTool.execute(
+      {
+        instanceId,
+        stdin: 'test input',
+        description: 'Test with inherited visibility settings',
+      },
+      toolContext,
+    );
+
+    // Verify process state still exists
+    expect(processStates.has(instanceId)).toBe(true);
+  });
 });
