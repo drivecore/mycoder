@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import chalk from 'chalk';
 import { Logger } from 'mycoder-agent';
 
@@ -8,6 +10,7 @@ import {
   updateConfig,
   getConfigAtLevel,
   clearConfigAtLevel,
+  clearConfigKey,
   ConfigLevel,
 } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
@@ -19,6 +22,10 @@ export interface ConfigOptions extends SharedOptions {
   key?: string;
   value?: string;
   all?: boolean;
+  global?: boolean;
+  g?: boolean;
+  verbose?: boolean;
+  v?: boolean;
 }
 
 export const command: CommandModule<SharedOptions, ConfigOptions> = {
@@ -42,6 +49,18 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       })
       .option('all', {
         describe: 'Clear all configuration settings (for clear command)',
+        type: 'boolean',
+        default: false,
+      })
+      .option('global', {
+        alias: 'g',
+        describe: 'Use global configuration instead of project-level',
+        type: 'boolean',
+        default: false,
+      })
+      .option('verbose', {
+        alias: 'v',
+        describe: 'Show detailed information including config file paths',
         type: 'boolean',
         default: false,
       })
@@ -115,6 +134,35 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
     // Handle 'list' command
     if (argv.command === 'list') {
       logger.info('Current configuration:');
+
+      // Show config file locations
+      const {
+        getSettingsDir,
+        getProjectSettingsDir,
+      } = require('../settings/settings.js');
+      const globalConfigPath = path.join(getSettingsDir(), 'config.json');
+      const projectDir = getProjectSettingsDir();
+      const projectConfigPath = projectDir
+        ? path.join(projectDir, 'config.json')
+        : 'Not available';
+
+      logger.info(`Global config file: ${chalk.blue(globalConfigPath)}`);
+      logger.info(`Project config file: ${chalk.blue(projectConfigPath)}`);
+      logger.info('');
+
+      // Show config file paths in verbose mode
+      if (argv.verbose || argv.v) {
+        const { getProjectConfigFile } = await import('../settings/config.js');
+        const { getSettingsDir } = await import('../settings/settings.js');
+        const globalConfigPath = path.join(getSettingsDir(), 'config.json');
+        const projectConfigPath = getProjectConfigFile();
+
+        logger.info(`Global config: ${chalk.blue(globalConfigPath)}`);
+        logger.info(
+          `Project config: ${projectConfigPath ? chalk.blue(projectConfigPath) : chalk.dim('(not set)')}`,
+        );
+        logger.info('');
+      }
       const defaultConfig = getDefaultConfig();
 
       // Get all valid config keys
@@ -276,15 +324,8 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      // Get the current config, create a new object without the specified key
-      const currentConfig = getConfig();
-      const { [argv.key]: _, ...newConfig } = currentConfig as Record<
-        string,
-        any
-      >;
-
-      // Update the config file with the new object
-      updateConfig(newConfig);
+      // Clear the specified key from the configuration at the current level
+      clearConfigKey(argv.key, configLevel);
 
       // Get the default value that will now be used
       const defaultValue =
@@ -297,13 +338,23 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       // Determine where the new value is coming from
       const isDefaultAfterClear =
         JSON.stringify(newValue) === JSON.stringify(defaultValue);
+
+      // Get the actual config values at each level
+      const globalConfig = getConfigAtLevel(ConfigLevel.GLOBAL);
+      const projectConfig = getConfigAtLevel(ConfigLevel.PROJECT);
+
+      // Check if key exists AND has a non-default value in each level
       const afterClearInGlobal =
         !isDefaultAfterClear &&
-        argv.key in getConfigAtLevel(ConfigLevel.GLOBAL);
+        argv.key in globalConfig &&
+        JSON.stringify(globalConfig[argv.key]) !== JSON.stringify(defaultValue);
+
       const afterClearInProject =
         !isDefaultAfterClear &&
         !afterClearInGlobal &&
-        argv.key in getConfigAtLevel(ConfigLevel.PROJECT);
+        argv.key in projectConfig &&
+        JSON.stringify(projectConfig[argv.key]) !==
+          JSON.stringify(defaultValue);
 
       let sourceDisplay = '';
       if (isDefaultAfterClear) {
