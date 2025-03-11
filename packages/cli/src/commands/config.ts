@@ -21,11 +21,9 @@ export interface ConfigOptions extends SharedOptions {
   command: 'get' | 'set' | 'list' | 'clear';
   key?: string;
   value?: string;
-  all?: boolean;
-  global?: boolean;
-  g?: boolean;
-  verbose?: boolean;
-  v?: boolean;
+  all: boolean;  // Has default value in builder, so it's always defined
+  global: boolean;  // Has default value in builder, so it's always defined
+  verbose: boolean;  // Has default value in builder, so it's always defined
 }
 
 export const command: CommandModule<SharedOptions, ConfigOptions> = {
