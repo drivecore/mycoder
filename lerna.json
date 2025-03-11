@@ -1,0 +1,1 @@
+{\n  \"version\": \"independent\",\n  \"npmClient\": \"pnpm\",\n  \"command\": {\n    \"publish\": {\n      \"conventionalCommits\": true,\n      \"message\": \"chore(release): publish\"\n    }\n  },\n  \"packages\": [\"packages/*\"]\n}
