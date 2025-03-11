@@ -172,7 +172,11 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
       const tools = getTools({
         enableUserPrompt:
-          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
+          argv.userPrompt !== undefined
+            ? argv.userPrompt
+            : argv.enableUserPrompt !== undefined
+              ? argv.enableUserPrompt
+              : true,
       });
 
       // Error handling
@@ -209,12 +213,16 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         pageFilter: argv.pageFilter ?? config.pageFilter,
         workingDirectory: '.',
         tokenTracker,
-        githubMode: config.githubMode,
+        githubMode: argv.githubMode ?? config.githubMode,
         customPrompt: config.customPrompt,
         tokenCache:
           argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
         enableUserPrompt:
-          argv.enableUserPrompt !== undefined ? argv.enableUserPrompt : true,
+          argv.userPrompt !== undefined
+            ? argv.userPrompt
+            : argv.enableUserPrompt !== undefined
+              ? argv.enableUserPrompt
+              : true,
       });
 
       const output =

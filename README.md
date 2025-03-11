@@ -36,8 +36,13 @@ mycoder -f prompt.txt
 
 # Disable user prompts for fully automated sessions
 mycoder --enableUserPrompt false "Generate a basic Express.js server"
+# or using the alias
+mycoder --userPrompt false "Generate a basic Express.js server"
 
-# Enable GitHub mode
+# Enable GitHub mode via CLI option (overrides config)
+mycoder --githubMode "Work with GitHub issues and PRs"
+
+# Enable GitHub mode via config
 mycoder config set githubMode true
 ```
 
