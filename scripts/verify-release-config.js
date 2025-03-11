@@ -25,19 +25,34 @@ if (!hasSemanticReleaseMonorepo) {
   process.exit(1);
 }
 
-console.log('Checking root .releaserc.json...');
-// Check root .releaserc.json
-const rootReleaseRc = JSON.parse(
-  fs.readFileSync(path.join(ROOT_DIR, '.releaserc.json'), 'utf8'),
-);
-if (
-  !rootReleaseRc.extends ||
-  rootReleaseRc.extends !== 'semantic-release-monorepo'
-) {
-  console.error(
-    '❌ Root .releaserc.json does not extend semantic-release-monorepo',
+console.log('Checking if root package is private...');
+// Only check for root .releaserc.json if the root package is not private
+if (!rootPackageJson.private) {
+  console.log('Root package is not private, checking root .releaserc.json...');
+  try {
+    // Check root .releaserc.json
+    const rootReleaseRc = JSON.parse(
+      fs.readFileSync(path.join(ROOT_DIR, '.releaserc.json'), 'utf8'),
+    );
+    if (
+      !rootReleaseRc.extends ||
+      rootReleaseRc.extends !== 'semantic-release-monorepo'
+    ) {
+      console.error(
+        '❌ Root .releaserc.json does not extend semantic-release-monorepo',
+      );
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(
+      '❌ Root .releaserc.json is missing but required for non-private root packages',
+    );
+    process.exit(1);
+  }
+} else {
+  console.log(
+    'Root package is private, skipping root .releaserc.json check...',
   );
-  process.exit(1);
 }
 
 console.log('Checking packages...');
