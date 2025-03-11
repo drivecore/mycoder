@@ -24,7 +24,7 @@ jobs:
     # Only run if comment contains '/mycoder' AND commenter is in AUTHORIZED_USERS list
     if: |
       contains(github.event.comment.body, '/mycoder') && 
-      contains(format(',{0},', 'bhouston'), format(',{0},', github.event.comment.user.login))
+      github.event.comment.user.login == 'bhouston'
     steps:
       - name: Extract prompt from comment
         id: extract-prompt
