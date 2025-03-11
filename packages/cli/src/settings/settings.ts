@@ -1,40 +1,58 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import * as process from 'process';
 
-// Global settings directory (in user's home directory)
-const globalSettingsDir = path.join(os.homedir(), '.mycoder');
+// Global settings directory in user's home
+const settingsDir = path.join(os.homedir(), '.mycoder');
 
-/**
- * Get the global settings directory, creating it if it doesn't exist
- */
-export const getGlobalSettingsDir = (): string => {
-  if (!fs.existsSync(globalSettingsDir)) {
-    fs.mkdirSync(globalSettingsDir, { recursive: true });
+// Get the global settings directory, creating it if it doesn't exist
+export const getSettingsDir = (): string => {
+  if (!fs.existsSync(settingsDir)) {
+    fs.mkdirSync(settingsDir, { recursive: true });
   }
-  return globalSettingsDir;
+  return settingsDir;
 };
 
-/**
- * Get the project-level settings directory, creating it if it doesn't exist
- * This will be .mycoder in the current working directory
- */
+// Get the project-level settings directory, creating it if it doesn't exist
 export const getProjectSettingsDir = (): string => {
   const projectSettingsDir = path.join(process.cwd(), '.mycoder');
   if (!fs.existsSync(projectSettingsDir)) {
-    fs.mkdirSync(projectSettingsDir, { recursive: true });
+    try {
+      fs.mkdirSync(projectSettingsDir, { recursive: true });
+    } catch {
+      // If we can't create the directory, return empty string
+      // This will be handled by the config module
+      return '';
+    }
   }
   return projectSettingsDir;
 };
 
-/**
- * For backwards compatibility, alias the global settings dir as the default
- */
-export const getSettingsDir = getGlobalSettingsDir;
+// Check if the project-level settings directory exists and is writable
+export const isProjectSettingsDirWritable = (): boolean => {
+  const projectSettingsDir = path.join(process.cwd(), '.mycoder');
 
-// Consent file is always global
-const consentFile = path.join(globalSettingsDir, 'consent.json');
+  // Check if directory exists
+  if (fs.existsSync(projectSettingsDir)) {
+    try {
+      // Check if directory is writable
+      fs.accessSync(projectSettingsDir, fs.constants.W_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // If directory doesn't exist, check if we can create it
+  try {
+    fs.mkdirSync(projectSettingsDir, { recursive: true });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const consentFile = path.join(settingsDir, 'consent.json');
 
 export const hasUserConsented = (): boolean => {
   return fs.existsSync(consentFile);

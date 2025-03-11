@@ -3,11 +3,23 @@ import * as path from 'path';
 
 import * as deepmerge from 'deepmerge';
 
-import { getGlobalSettingsDir, getProjectSettingsDir } from './settings.js';
+import {
+  getSettingsDir,
+  getProjectSettingsDir,
+  isProjectSettingsDirWritable,
+} from './settings.js';
 
 // File paths for different config levels
-const globalConfigFile = path.join(getGlobalSettingsDir(), 'config.json');
-const projectConfigFile = path.join(getProjectSettingsDir(), 'config.json');
+const globalConfigFile = path.join(getSettingsDir(), 'config.json');
+
+// Export for testing
+export const getProjectConfigFile = (): string => {
+  const projectDir = getProjectSettingsDir();
+  return projectDir ? path.join(projectDir, 'config.json') : '';
+};
+
+// For internal use
+const projectConfigFile = getProjectConfigFile;
 
 // Default configuration
 const defaultConfig = {
@@ -52,7 +64,7 @@ export const getDefaultConfig = (): Config => {
  * @returns The config object or an empty object if the file doesn't exist or is invalid
  */
 const readConfigFile = (filePath: string): Partial<Config> => {
-  if (!fs.existsSync(filePath)) {
+  if (!filePath || !fs.existsSync(filePath)) {
     return {};
   }
   try {
@@ -74,7 +86,7 @@ export const getConfigAtLevel = (level: ConfigLevel): Partial<Config> => {
     case ConfigLevel.GLOBAL:
       return readConfigFile(globalConfigFile);
     case ConfigLevel.PROJECT:
-      return readConfigFile(projectConfigFile);
+      return readConfigFile(projectConfigFile());
     case ConfigLevel.CLI:
       return {}; // CLI options are passed directly from the command
     default:
@@ -124,7 +136,18 @@ export const updateConfig = (
       targetFile = globalConfigFile;
       break;
     case ConfigLevel.PROJECT:
-      targetFile = projectConfigFile;
+      // Check if project config directory is writable
+      if (!isProjectSettingsDirWritable()) {
+        throw new Error(
+          'Cannot write to project configuration directory. Check permissions or use --global flag.',
+        );
+      }
+      targetFile = projectConfigFile();
+      if (!targetFile) {
+        throw new Error(
+          'Cannot determine project configuration file path. Use --global flag instead.',
+        );
+      }
       break;
     default:
       throw new Error(`Cannot update configuration at level: ${level}`);
@@ -157,7 +180,17 @@ export const clearConfigAtLevel = (level: ConfigLevel): Config => {
       targetFile = globalConfigFile;
       break;
     case ConfigLevel.PROJECT:
-      targetFile = projectConfigFile;
+      // Check if project config directory is writable
+      if (!isProjectSettingsDirWritable()) {
+        throw new Error(
+          'Cannot write to project configuration directory. Check permissions or use --global flag.',
+        );
+      }
+      targetFile = projectConfigFile();
+      if (!targetFile) {
+        // If no project config file exists, nothing to clear
+        return getConfig();
+      }
       break;
     default:
       throw new Error(`Cannot clear configuration at level: ${level}`);
@@ -190,7 +223,17 @@ export const clearConfigKey = (
       targetFile = globalConfigFile;
       break;
     case ConfigLevel.PROJECT:
-      targetFile = projectConfigFile;
+      // Check if project config directory is writable
+      if (!isProjectSettingsDirWritable()) {
+        throw new Error(
+          'Cannot write to project configuration directory. Check permissions or use --global flag.',
+        );
+      }
+      targetFile = projectConfigFile();
+      if (!targetFile) {
+        // If no project config file exists, nothing to clear
+        return getConfig();
+      }
       break;
     default:
       throw new Error(`Cannot clear key at configuration level: ${level}`);

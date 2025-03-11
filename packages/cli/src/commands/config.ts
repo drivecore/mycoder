@@ -122,6 +122,39 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       argv.global || argv.g ? ConfigLevel.GLOBAL : ConfigLevel.PROJECT;
     const levelName = configLevel === ConfigLevel.GLOBAL ? 'global' : 'project';
 
+    // Check if project level is writable when needed for operations that write to config
+    if (
+      configLevel === ConfigLevel.PROJECT &&
+      (argv.command === 'set' ||
+        (argv.command === 'clear' && (argv.key || argv.all)))
+    ) {
+      try {
+        // Import directly to avoid circular dependency
+        const { isProjectSettingsDirWritable } = await import(
+          '../settings/settings.js'
+        );
+        if (!isProjectSettingsDirWritable()) {
+          logger.error(
+            chalk.red(
+              'Cannot write to project configuration directory. Check permissions or use --global flag.',
+            ),
+          );
+          logger.info(
+            'You can use the --global (-g) flag to modify global configuration instead.',
+          );
+          return;
+        }
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(
+          chalk.red(
+            `Error checking project directory permissions: ${errorMessage}`,
+          ),
+        );
+        return;
+      }
+    }
+
     // Get merged config for display
     const mergedConfig = getConfig();
 
@@ -287,15 +320,27 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         }
       }
 
-      // Update config at the specified level
-      const updatedConfig = updateConfig(
-        { [argv.key]: parsedValue },
-        configLevel,
-      );
+      try {
+        // Update config at the specified level
+        const updatedConfig = updateConfig(
+          { [argv.key]: parsedValue },
+          configLevel,
+        );
 
-      logger.info(
-        `Updated ${argv.key}: ${chalk.green(updatedConfig[argv.key as keyof typeof updatedConfig])} at ${levelName} level`,
-      );
+        logger.info(
+          `Updated ${argv.key}: ${chalk.green(updatedConfig[argv.key as keyof typeof updatedConfig])} at ${levelName} level`,
+        );
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(
+          chalk.red(`Failed to update configuration: ${errorMessage}`),
+        );
+        if (configLevel === ConfigLevel.PROJECT) {
+          logger.info(
+            'You can use the --global (-g) flag to modify global configuration instead.',
+          );
+        }
+      }
       return;
     }
 
@@ -340,11 +385,23 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
           return;
         }
 
-        // Clear settings at the specified level
-        clearConfigAtLevel(configLevel);
-        logger.info(
-          `All ${levelName} configuration settings have been cleared.`,
-        );
+        try {
+          // Clear settings at the specified level
+          clearConfigAtLevel(configLevel);
+          logger.info(
+            `All ${levelName} configuration settings have been cleared.`,
+          );
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(
+            chalk.red(`Failed to clear configuration: ${errorMessage}`),
+          );
+          if (configLevel === ConfigLevel.PROJECT) {
+            logger.info(
+              'You can use the --global (-g) flag to modify global configuration instead.',
+            );
+          }
+        }
         return;
       }
 
@@ -374,33 +431,45 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      // Clear the key at the specified level
-      clearConfigKey(argv.key, configLevel);
+      try {
+        // Clear the key at the specified level
+        clearConfigKey(argv.key, configLevel);
 
-      // Get the value that will now be used
-      const mergedAfterClear = getConfig();
-      const newValue =
-        mergedAfterClear[argv.key as keyof typeof mergedAfterClear];
+        // Get the value that will now be used
+        const mergedAfterClear = getConfig();
+        const newValue =
+          mergedAfterClear[argv.key as keyof typeof mergedAfterClear];
 
-      // Determine the source of the new value
-      const afterClearInProject =
-        argv.key in getConfigAtLevel(ConfigLevel.PROJECT);
-      const afterClearInGlobal =
-        argv.key in getConfigAtLevel(ConfigLevel.GLOBAL);
-      const isDefaultAfterClear = !afterClearInProject && !afterClearInGlobal;
+        // Determine the source of the new value
+        const afterClearInProject =
+          argv.key in getConfigAtLevel(ConfigLevel.PROJECT);
+        const afterClearInGlobal =
+          argv.key in getConfigAtLevel(ConfigLevel.GLOBAL);
+        const isDefaultAfterClear = !afterClearInProject && !afterClearInGlobal;
 
-      let sourceDisplay = '';
-      if (isDefaultAfterClear) {
-        sourceDisplay = '(default)';
-      } else if (afterClearInProject) {
-        sourceDisplay = '(from project config)';
-      } else if (afterClearInGlobal) {
-        sourceDisplay = '(from global config)';
+        let sourceDisplay = '';
+        if (isDefaultAfterClear) {
+          sourceDisplay = '(default)';
+        } else if (afterClearInProject) {
+          sourceDisplay = '(from project config)';
+        } else if (afterClearInGlobal) {
+          sourceDisplay = '(from global config)';
+        }
+
+        logger.info(
+          `Cleared ${argv.key} at ${levelName} level, now using: ${chalk.green(newValue)} ${sourceDisplay}`,
+        );
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(
+          chalk.red(`Failed to clear configuration key: ${errorMessage}`),
+        );
+        if (configLevel === ConfigLevel.PROJECT) {
+          logger.info(
+            'You can use the --global (-g) flag to modify global configuration instead.',
+          );
+        }
       }
-
-      logger.info(
-        `Cleared ${argv.key} at ${levelName} level, now using: ${chalk.green(newValue)} ${sourceDisplay}`,
-      );
       return;
     }
 
