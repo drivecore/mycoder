@@ -21,7 +21,6 @@
     "gcloud-setup": "gcloud auth application-default login && gcloud config set account \"ben@drivecore.ai\" && gcloud config set project drivecore-primary && gcloud config set run/region us-central1",
     "cli": "cd packages/cli && node --no-deprecation bin/cli.js",
     "prepare": "husky",
-    "semantic-release": "semantic-release",
     "verify-release-config": "node scripts/verify-release-config.js",
     "release": "pnpm verify-release-config && pnpm -r --workspace-concurrency=1 exec -- pnpm exec semantic-release -e semantic-release-monorepo"
   },
