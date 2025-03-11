@@ -75,6 +75,7 @@ export default ts.config(
       '**/.output',
       '**/pnpm-lock.yaml',
       '**/routeTree.gen.ts',
+      'scripts/verify-release-config.js',
     ],
   },
 );

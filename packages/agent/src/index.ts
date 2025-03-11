@@ -25,7 +25,13 @@ export * from './tools/interaction/userPrompt.js';
 // Core
 export * from './core/executeToolCall.js';
 export * from './core/types.js';
-export * from './core/toolAgent/index.js';
+// Tool Agent Core
+export { toolAgent } from './core/toolAgent/toolAgentCore.js';
+export * from './core/toolAgent/config.js';
+export * from './core/toolAgent/messageUtils.js';
+export * from './core/toolAgent/toolExecutor.js';
+export * from './core/toolAgent/tokenTracking.js';
+export * from './core/toolAgent/types.js';
 
 // Utils
 export * from './tools/getTools.js';

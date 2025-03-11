@@ -18,17 +18,20 @@ export const getSettingsDir = (): string => {
 export const getProjectSettingsDir = (): string => {
   // Start with the current directory
   let currentDir = process.cwd();
-  
+
   // Traverse up the directory tree until we find a .mycoder directory or reach the root
   while (currentDir !== path.parse(currentDir).root) {
     const projectSettingsDir = path.join(currentDir, '.mycoder');
-    if (fs.existsSync(projectSettingsDir) && fs.statSync(projectSettingsDir).isDirectory()) {
+    if (
+      fs.existsSync(projectSettingsDir) &&
+      fs.statSync(projectSettingsDir).isDirectory()
+    ) {
       return projectSettingsDir;
     }
     // Move up one directory
     currentDir = path.dirname(currentDir);
   }
-  
+
   // If we're creating a new project config, use the current directory
   return path.join(process.cwd(), '.mycoder');
 };
@@ -39,7 +42,7 @@ export const getProjectSettingsDir = (): string => {
  */
 export const isProjectSettingsDirWritable = (): boolean => {
   const projectDir = getProjectSettingsDir();
-  
+
   // Check if directory exists
   if (fs.existsSync(projectDir)) {
     try {

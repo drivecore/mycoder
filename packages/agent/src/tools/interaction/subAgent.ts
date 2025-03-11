@@ -4,8 +4,8 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   getDefaultSystemPrompt,
   getModel,
-  toolAgent,
-} from '../../core/toolAgent/index.js';
+} from '../../core/toolAgent/config.js';
+import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
 
