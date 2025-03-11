@@ -60,8 +60,8 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none',
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      modelProvider: 'anthropic',
-      modelName: 'claude-3-7-sonnet-20250219',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
       ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
@@ -99,8 +99,8 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none', // Default is none
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      modelProvider: 'anthropic',
-      modelName: 'claude-3-7-sonnet-20250219',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
       ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
@@ -138,8 +138,8 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none',
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      modelProvider: 'anthropic',
-      modelName: 'claude-3-7-sonnet-20250219',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
       ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
@@ -189,8 +189,8 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none', // Default is none
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      modelProvider: 'anthropic',
-      modelName: 'claude-3-7-sonnet-20250219',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
       ollamaBaseUrl: 'http://localhost:11434/api',
     });
 

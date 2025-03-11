@@ -80,9 +80,6 @@ mycoder config set githubMode true
 # Reset a configuration value to its default
 mycoder config clear customPrompt
 
-# Configure model provider and model name
-mycoder config set modelProvider openai
-mycoder config set modelName gpt-4o-2024-05-13
 ```
 
 ### Model Selection
@@ -93,33 +90,9 @@ MyCoder supports Anthropic, OpenAI, xAI/Grok, Mistral AI, and Ollama models. You
 
 ```bash
 # Use Anthropic models [These work the best at this time]
-mycoder config set modelProvider anthropic
-mycoder config set modelName claude-3-7-sonnet-20250219  # or any other Anthropic model
+mycoder config set provider anthropic
+mycoder config set model claude-3-7-sonnet-20250219  # or any other Anthropic model
 
-# Use OpenAI models
-mycoder config set modelProvider openai
-mycoder config set modelName gpt-4o-2024-05-13  # or any other OpenAI model
-
-# Use xAI/Grok models
-mycoder config set modelProvider xai
-mycoder config set modelName grok-1  # or any other xAI model
-
-# Use Mistral AI models
-mycoder config set modelProvider mistral
-mycoder config set modelName mistral-large-latest  # or any other Mistral model
-
-# Use Ollama models (local)
-mycoder config set modelProvider ollama
-mycoder config set modelName llama3-groq-tool-use  # or any other model available in your Ollama instance
-
-# Configure custom Ollama server URL (default is http://localhost:11434/api)
-mycoder config set ollamaBaseUrl http://your-ollama-server:11434/api
-```
-
-You can also specify the model provider and name directly when running a command:
-
-```bash
-mycoder --modelProvider openai --modelName gpt-4o-2024-05-13 "Your prompt here"
 ```
 
 ### Available Configuration Options

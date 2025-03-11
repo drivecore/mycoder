@@ -20,25 +20,25 @@ export type ModelProvider =
  */
 export function getModel(
   provider: ModelProvider,
-  modelName: string,
+  model: string,
   options?: { ollamaBaseUrl?: string },
 ): LLMProvider {
   switch (provider) {
     case 'anthropic':
-      return createProvider('anthropic', modelName);
+      return createProvider('anthropic', model);
     case 'openai':
-      return createProvider('openai', modelName);
+      return createProvider('openai', model);
     case 'ollama':
       if (options?.ollamaBaseUrl) {
-        return createProvider('ollama', modelName, {
+        return createProvider('ollama', model, {
           baseUrl: options.ollamaBaseUrl,
         });
       }
-      return createProvider('ollama', modelName);
+      return createProvider('ollama', model);
     case 'xai':
-      return createProvider('xai', modelName);
+      return createProvider('xai', model);
     case 'mistral':
-      return createProvider('mistral', modelName);
+      return createProvider('mistral', model);
     default:
       throw new Error(`Unknown model provider: ${provider}`);
   }
