@@ -185,14 +185,12 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const agentConfig = {
         ...DEFAULT_CONFIG,
         model: getModel(
-          userModelProvider as
-            | 'anthropic'
+          userModelProvider as 'anthropic' /*
             | 'openai'
             | 'ollama'
             | 'xai'
-            | 'mistral',
+            | 'mistral'*/,
           userModelName,
-          { ollamaBaseUrl: config.ollamaBaseUrl },
         ),
         maxTokens: userMaxTokens,
         temperature: userTemperature,

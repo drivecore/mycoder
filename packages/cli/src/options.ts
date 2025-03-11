@@ -34,7 +34,7 @@ export const sharedOptions = {
   provider: {
     type: 'string',
     description: 'AI model provider to use',
-    choices: ['anthropic', 'openai', 'ollama', 'xai', 'mistral'],
+    choices: ['anthropic' /*, 'openai', 'ollama', 'xai', 'mistral'*/],
   } as const,
   model: {
     type: 'string',

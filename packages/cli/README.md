@@ -101,7 +101,6 @@ mycoder config set model claude-3-7-sonnet-20250219  # or any other Anthropic mo
 - `headless`: Run browser in headless mode with no UI showing (default: `true`)
 - `userSession`: Use user's existing browser session instead of sandboxed session (default: `false`)
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
-- `ollamaBaseUrl`: Base URL for Ollama API (default: `http://localhost:11434/api`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
 - `tokenCache`: Enable token caching for LLM API calls (default: `true`)
 
@@ -116,9 +115,6 @@ mycoder config set userSession true
 
 # Use readability for webpage processing
 mycoder config set pageFilter readability
-
-# Set custom Ollama server URL
-mycoder config set ollamaBaseUrl http://your-ollama-server:11434/api
 
 # Set custom instructions for the agent
 mycoder config set customPrompt "Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible."

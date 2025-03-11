@@ -16,15 +16,11 @@ const defaultConfig = {
   model: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,
   temperature: 0.7,
-  ollamaBaseUrl: 'http://localhost:11434/api',
   customPrompt: '',
   profile: false,
   tokenCache: true,
   // API keys (empty by default)
   ANTHROPIC_API_KEY: '',
-  OPENAI_API_KEY: '',
-  XAI_API_KEY: '',
-  MISTRAL_API_KEY: '',
 };
 
 export type Config = typeof defaultConfig;
