@@ -22,7 +22,8 @@
     "cli": "cd packages/cli && node --no-deprecation bin/cli.js",
     "prepare": "husky",
     "semantic-release": "semantic-release",
-    "release": "semantic-release"
+    "verify-release-config": "node scripts/verify-release-config.js",
+    "release": "pnpm verify-release-config && npx lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -51,9 +52,11 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
+    "lerna": "^8.2.1",
     "lint-staged": "^15.4.3",
     "prettier": "^3.5.1",
     "semantic-release": "^24.2.3",
+    "semantic-release-monorepo": "^8.0.2",
     "typescript-eslint": "^8.23.0"
   },
   "pnpm": {

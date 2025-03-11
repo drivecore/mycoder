@@ -29,7 +29,8 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "clean:all": "rimraf node_modules dist",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
+    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
+    "semantic-release": "semantic-release -e semantic-release-monorepo"
   },
   "keywords": [
     "ai",
