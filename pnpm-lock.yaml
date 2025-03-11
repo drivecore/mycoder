@@ -12,6 +12,9 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
     devDependencies:
+      '@anolilab/semantic-release-pnpm':
+        specifier: ^1.1.10
+        version: 1.1.10(@types/node@18.19.80)(yaml@2.7.0)
       '@commitlint/cli':
         specifier: ^19.7.1
         version: 19.8.0(@types/node@18.19.80)(typescript@5.8.2)
@@ -193,6 +196,17 @@ importers:
         version: 3.0.8(@types/node@18.19.80)(@vitest/browser@3.0.8)(jiti@2.4.2)(jsdom@26.0.0)(msw@2.7.3(@types/node@18.19.80)(typescript@5.8.2))(yaml@2.7.0)
 
 packages:
+
+  '@anolilab/rc@1.1.6':
+    resolution: {integrity: sha512-jqalzF9dYCN8EYVgqCeZG9IEMFIgi3A8xv8bIsXIxrBW9hapJIzpa0ZT0JS1XQUVxOh7mV51dLFHmjevCGu6xg==}
+    engines: {node: '>=18.* <=23.*'}
+
+  '@anolilab/semantic-release-pnpm@1.1.10':
+    resolution: {integrity: sha512-gvZx4eKjDyAZF52pjiQc6ic8TKJ1IyT7UYy5dyIrx8rQhOC2mTL6EwNh9ayxS7TmPED5nK5qvz77u+1GH4f9fA==}
+    engines: {node: '>=18.* <=23.*'}
+
+  '@antfu/install-pkg@1.0.0':
+    resolution: {integrity: sha512-xvX6P/lo1B3ej0OsaErAjqgFYzYVcJpamjLAFLYh9vRJngBrMoUG7aVnrGTeqM7yxbyTD5p3F2+0/QUEh8Vzhw==}
 
   '@anthropic-ai/sdk@0.37.0':
     resolution: {integrity: sha512-tHjX2YbkUBwEgg0JZU3EFSSAQPoK4qQR/NFYa8Vtzd5UAyXzZksCw2In69Rml4R/TyHPBfRYaLK35XiOe33pjw==}
@@ -1168,6 +1182,26 @@ packages:
   '@typescript-eslint/visitor-keys@8.26.1':
     resolution: {integrity: sha512-AjOC3zfnxd6S4Eiy3jwktJPclqhFHNyd8L6Gycf9WUPoKZpgM5PjkxY1X7uSy61xVpiJDhhk7XT2NVsN3ALTWg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@visulima/fs@3.1.2':
+    resolution: {integrity: sha512-LZ9GLLxVfuaFzOGb2zp4GOqyT7TcLmnEShayrb1S2n0WuA3Pfig8fx42xaHyPTZ1p4pI3ncDNTmbyg1BIYM9rw==}
+    engines: {node: '>=18.0.0 <=23.x'}
+    os: [darwin, linux, win32]
+    peerDependencies:
+      yaml: ^2.7.0
+    peerDependenciesMeta:
+      yaml:
+        optional: true
+
+  '@visulima/package@3.5.3':
+    resolution: {integrity: sha512-FeUgWy0ZkrZ9tCfKRR6yTg11IsE9fwXRnzjovbMHK4SPi01BvyMIWYKUqHG6t3RCO87Qcl6PvIup+zP8+wdM8w==}
+    engines: {node: '>=18.0.0 <=23.x'}
+    os: [darwin, linux, win32]
+
+  '@visulima/path@1.3.5':
+    resolution: {integrity: sha512-9kK3QgVxuR/XkafDCANEuJjQsoKIXZxh4ejmlCm7cWgnaH9uFTzSwU/8ifMEg4cjYDcBYeRAGDq1zBrC03ZY1w==}
+    engines: {node: '>=18.0.0 <=23.x'}
+    os: [darwin, linux, win32]
 
   '@vitest/browser@3.0.8':
     resolution: {integrity: sha512-ARAGav2gJE/t+qF44fOwJlK0dK8ZJEYjZ725ewHzN6liBAJSCt9elqv/74iwjl5RJzel00k/wufJB7EEu+MJEw==}
@@ -2299,6 +2333,10 @@ packages:
     resolution: {integrity: sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
+  ini@5.0.0:
+    resolution: {integrity: sha512-+N0ngpO3e7cRUWOJAS7qw0IZIVc6XPrW4MlFBdD066F2L4k1L6ker3hLqSq7iXxU5tgS4WGkIUElWn5vogAEnw==}
+    engines: {node: ^18.17.0 || >=20.5.0}
+
   internal-slot@1.1.0:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
@@ -2787,6 +2825,10 @@ packages:
     resolution: {integrity: sha512-V6gygoYb/5EmNI+MEGrWkC+e6+Rr7mTmfHrxDbLzxQogBkgzo76rkok0Am6thgSF7Mv2nLOajAJj5vDJZEFn7g==}
     engines: {node: ^16.14.0 || >=18.0.0}
 
+  normalize-package-data@7.0.0:
+    resolution: {integrity: sha512-k6U0gKRIuNCTkwHGZqblCfLfBRh+w1vI6tBo+IeJwq2M8FUiOqhX7GH+GArQGScA7azd1WfyRCvxoXDO3hQDIA==}
+    engines: {node: ^18.17.0 || >=20.5.0}
+
   normalize-url@8.0.1:
     resolution: {integrity: sha512-IO9QvjUMWxPQQhs60oOu10CRkWCiZzSUkzbXGGV9pviYl1fXYcvkzQ5jV9z8Y6un8ARoVRl4EtC6v6jNqbaJ/w==}
     engines: {node: '>=14.16'}
@@ -3009,6 +3051,9 @@ packages:
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
+  package-manager-detector@0.2.11:
+    resolution: {integrity: sha512-BEnLolu+yuz22S56CU1SUKq3XC3PkwD5wv4ikR4MfGvnRVcmzXR9DwSlW2fEamyTPyXHomBJRzgapeuBvRNzJQ==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -3200,6 +3245,9 @@ packages:
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
+
+  quansync@0.2.8:
+    resolution: {integrity: sha512-4+saucphJMazjt7iOM27mbFCk+D9dd/zmgMDCzRZ8MEoBfYp7lAvoN38et/phRQF6wOPMy/OROBGgoWeSKyluA==}
 
   querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
@@ -3694,6 +3742,10 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  ts-deepmerge@7.0.2:
+    resolution: {integrity: sha512-akcpDTPuez4xzULo5NwuoKwYRtjQJ9eoNfBACiBMaXwNAx7B1PKfe5wqUFJuW5uKzQ68YjDFwPaWHDG1KnFGsA==}
+    engines: {node: '>=14.13.1'}
+
   tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
 
@@ -4053,6 +4105,36 @@ packages:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
 snapshots:
+
+  '@anolilab/rc@1.1.6(yaml@2.7.0)':
+    dependencies:
+      '@visulima/fs': 3.1.2(yaml@2.7.0)
+      '@visulima/path': 1.3.5
+      ini: 5.0.0
+      ts-deepmerge: 7.0.2
+    transitivePeerDependencies:
+      - yaml
+
+  '@anolilab/semantic-release-pnpm@1.1.10(@types/node@18.19.80)(yaml@2.7.0)':
+    dependencies:
+      '@anolilab/rc': 1.1.6(yaml@2.7.0)
+      '@semantic-release/error': 4.0.0
+      '@visulima/fs': 3.1.2(yaml@2.7.0)
+      '@visulima/package': 3.5.3(@types/node@18.19.80)(yaml@2.7.0)
+      '@visulima/path': 1.3.5
+      execa: 9.5.2
+      ini: 5.0.0
+      normalize-url: 8.0.1
+      registry-auth-token: 5.1.0
+      semver: 7.7.1
+    transitivePeerDependencies:
+      - '@types/node'
+      - yaml
+
+  '@antfu/install-pkg@1.0.0':
+    dependencies:
+      package-manager-detector: 0.2.11
+      tinyexec: 0.3.2
 
   '@anthropic-ai/sdk@0.37.0(encoding@0.1.13)':
     dependencies:
@@ -5140,6 +5222,25 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.26.1
       eslint-visitor-keys: 4.2.0
+
+  '@visulima/fs@3.1.2(yaml@2.7.0)':
+    dependencies:
+      '@visulima/path': 1.3.5
+    optionalDependencies:
+      yaml: 2.7.0
+
+  '@visulima/package@3.5.3(@types/node@18.19.80)(yaml@2.7.0)':
+    dependencies:
+      '@antfu/install-pkg': 1.0.0
+      '@inquirer/confirm': 5.1.7(@types/node@18.19.80)
+      '@visulima/fs': 3.1.2(yaml@2.7.0)
+      '@visulima/path': 1.3.5
+      normalize-package-data: 7.0.0
+    transitivePeerDependencies:
+      - '@types/node'
+      - yaml
+
+  '@visulima/path@1.3.5': {}
 
   '@vitest/browser@3.0.8(@testing-library/dom@10.4.0)(@types/node@18.19.80)(playwright@1.51.0)(typescript@5.8.2)(vite@6.2.1(@types/node@18.19.80)(jiti@2.4.2)(yaml@2.7.0))(vitest@3.0.8)':
     dependencies:
@@ -6419,6 +6520,8 @@ snapshots:
 
   ini@4.1.1: {}
 
+  ini@5.0.0: {}
+
   internal-slot@1.1.0:
     dependencies:
       es-errors: 1.3.0
@@ -6904,6 +7007,12 @@ snapshots:
       semver: 7.7.1
       validate-npm-package-license: 3.0.4
 
+  normalize-package-data@7.0.0:
+    dependencies:
+      hosted-git-info: 8.0.2
+      semver: 7.7.1
+      validate-npm-package-license: 3.0.4
+
   normalize-url@8.0.1: {}
 
   npm-run-path@4.0.1:
@@ -7048,6 +7157,10 @@ snapshots:
   p-try@2.2.0: {}
 
   package-json-from-dist@1.0.1: {}
+
+  package-manager-detector@0.2.11:
+    dependencies:
+      quansync: 0.2.8
 
   parent-module@1.0.1:
     dependencies:
@@ -7203,6 +7316,8 @@ snapshots:
       punycode: 2.3.1
 
   punycode@2.3.1: {}
+
+  quansync@0.2.8: {}
 
   querystringify@2.2.0: {}
 
@@ -7777,6 +7892,8 @@ snapshots:
   ts-api-utils@2.0.1(typescript@5.8.2):
     dependencies:
       typescript: 5.8.2
+
+  ts-deepmerge@7.0.2: {}
 
   tsconfig-paths@3.15.0:
     dependencies:

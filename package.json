@@ -34,6 +34,7 @@
     "rimraf": "^6.0.1"
   },
   "devDependencies": {
+    "@anolilab/semantic-release-pnpm": "^1.1.10",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
     "@eslint/js": "^9",
