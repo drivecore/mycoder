@@ -160,13 +160,6 @@ export const textEditorTool: Tool<Parameters, ReturnType> = {
       }
 
       case 'create': {
-        // Check if file already exists
-        if (fsSync.existsSync(absolutePath)) {
-          throw new Error(
-            `File already exists: ${filePath}. Use str_replace to modify it.`,
-          );
-        }
-
         if (!file_text) {
           throw new Error('file_text parameter is required for create command');
         }
@@ -174,15 +167,29 @@ export const textEditorTool: Tool<Parameters, ReturnType> = {
         // Create parent directories if they don't exist
         await fs.mkdir(path.dirname(absolutePath), { recursive: true });
 
-        // Create the file
-        await fs.writeFile(absolutePath, file_text, 'utf8');
+        // Check if file already exists
+        const fileExists = fsSync.existsSync(absolutePath);
 
-        // Store initial state for undo
-        fileStateHistory[absolutePath] = [file_text];
+        if (fileExists) {
+          // Save current state for undo if file exists
+          const currentContent = await fs.readFile(absolutePath, 'utf8');
+          if (!fileStateHistory[absolutePath]) {
+            fileStateHistory[absolutePath] = [];
+          }
+          fileStateHistory[absolutePath].push(currentContent);
+        } else {
+          // Initialize history for new files
+          fileStateHistory[absolutePath] = [];
+        }
+
+        // Create or overwrite the file
+        await fs.writeFile(absolutePath, file_text, 'utf8');
 
         return {
           success: true,
-          message: `File created: ${filePath}`,
+          message: fileExists
+            ? `File overwritten: ${filePath}`
+            : `File created: ${filePath}`,
         };
       }
 
