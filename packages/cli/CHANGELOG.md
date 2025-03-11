@@ -1,3 +1,22 @@
+# mycoder-v1.0.0 (2025-03-11)
+
+
+### Bug Fixes
+
+* add deepmerge to cli package.json ([ab66377](https://github.com/drivecore/mycoder/commit/ab66377342c9f23fa874d2776e73d365141e8801))
+* don't save consent when using --userWarning=false ([41cf69d](https://github.com/drivecore/mycoder/commit/41cf69dee22acc31cd0f2aa9f80e36cd867fb20b))
+* **monorepo:** implement semantic-release-monorepo for proper versioning of sub-packages ([96c6284](https://github.com/drivecore/mycoder/commit/96c62848fbc3a4c1c591f3fd6202486e6461c4f2))
+* update hierarchical configuration system to fix failing tests ([93d949c](https://github.com/drivecore/mycoder/commit/93d949c03b7ebe96bad36713f6476c38d2a35224))
+
+
+### Features
+
+* add --githubMode and --userPrompt as boolean CLI options that override config settings ([0390f94](https://github.com/drivecore/mycoder/commit/0390f94651e40de93a8cb9486a056a0b9cb2e165))
+* add CLI options for automated usage scenarios ([00419bc](https://github.com/drivecore/mycoder/commit/00419bc3e060db6d0c18fc72e2d7b6957791c875))
+* add maxTokens and temperature config options to CLI ([b461d3b](https://github.com/drivecore/mycoder/commit/b461d3b71b686d7679ecac62c0c66cc5a1df8fec)), closes [#118](https://github.com/drivecore/mycoder/issues/118)
+* implement hierarchical configuration system ([84d73d1](https://github.com/drivecore/mycoder/commit/84d73d1e6324670890a203f455fe257aeb6ed07a)), closes [#153](https://github.com/drivecore/mycoder/issues/153)
+* remove modelProvider and modelName - instant decrepation ([59834dc](https://github.com/drivecore/mycoder/commit/59834dcf932051a5c75624bd6f6ab12254f43769))
+
 # mycoder
 
 ## [0.7.0](https://github.com/drivecore/mycoder/compare/v0.6.1...v0.7.0) (2025-03-10)
