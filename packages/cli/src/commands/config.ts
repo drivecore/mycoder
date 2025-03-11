@@ -145,7 +145,8 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
           return;
         }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         logger.error(
           chalk.red(
             `Error checking project directory permissions: ${errorMessage}`,
@@ -331,7 +332,8 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
           `Updated ${argv.key}: ${chalk.green(updatedConfig[argv.key as keyof typeof updatedConfig])} at ${levelName} level`,
         );
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         logger.error(
           chalk.red(`Failed to update configuration: ${errorMessage}`),
         );
@@ -392,7 +394,8 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
             `All ${levelName} configuration settings have been cleared.`,
           );
         } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           logger.error(
             chalk.red(`Failed to clear configuration: ${errorMessage}`),
           );
@@ -460,7 +463,8 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
           `Cleared ${argv.key} at ${levelName} level, now using: ${chalk.green(newValue)} ${sourceDisplay}`,
         );
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         logger.error(
           chalk.red(`Failed to clear configuration key: ${errorMessage}`),
         );
