@@ -1,13 +1,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import * as deepmerge from 'deepmerge';
+import deepmerge from 'deepmerge';
 
 import {
   getSettingsDir,
   getProjectSettingsDir,
   isProjectSettingsDirWritable,
 } from './settings.js';
+
+// Configuration levels enum
+export enum ConfigLevel {
+  DEFAULT = 'default',
+  GLOBAL = 'global',
+  PROJECT = 'project',
+  CLI = 'cli',
+}
 
 // File paths for different config levels
 const globalConfigFile = path.join(getSettingsDir(), 'config.json');
@@ -41,19 +49,7 @@ const defaultConfig = {
 
 export type Config = typeof defaultConfig;
 
-/**
- * Config level specifier
- */
-export enum ConfigLevel {
-  DEFAULT = 'default',
-  GLOBAL = 'global',
-  PROJECT = 'project',
-  CLI = 'cli',
-}
-
-/**
- * Export the default config for use in other functions
- */
+// Export the default config for use in other functions
 export const getDefaultConfig = (): Config => {
   return { ...defaultConfig };
 };
@@ -71,7 +67,7 @@ export const readConfigFile = (filePath: string): Partial<Config> => {
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(fileContent);
   } catch {
-    return {};
+    return defaultConfig;
   }
 };
 
@@ -293,7 +289,12 @@ export const clearConfigKey = (
  * @returns The default configuration that will now be used
  */
 export const clearAllConfig = (): Config => {
+  // Clear both global and project configs for backwards compatibility
   clearConfigAtLevel(ConfigLevel.GLOBAL);
-  clearConfigAtLevel(ConfigLevel.PROJECT);
+  try {
+    clearConfigAtLevel(ConfigLevel.PROJECT);
+  } catch {
+    // Ignore errors when clearing project config
+  }
   return getDefaultConfig();
 };

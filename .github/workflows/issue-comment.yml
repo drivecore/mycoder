@@ -4,10 +4,16 @@ on:
   issue_comment:
     types: [created]
 
+# Top-level permissions apply to all jobs - this is the maximum allowed for GITHUB_TOKEN
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  contents: write # Required for checkout, commit, push
+  issues: write # Required for issue comments
+  pull-requests: write # Required for creating PRs
+  discussions: write # Added for more interaction capabilities
+  statuses: write # Added for creating commit statuses
+  checks: write # Added for creating check runs
+  actions: read # Added for inspecting workflow runs
+  packages: read # Added in case you need to access GitHub packages
 
 env:
   PNPM_VERSION: 10.2.1
@@ -15,22 +21,14 @@ env:
 jobs:
   process-comment:
     runs-on: ubuntu-latest
-    if: contains(github.event.comment.body, '/mycoder')
+    # Only run if comment contains '/mycoder' AND commenter is in AUTHORIZED_USERS list
+    if: |
+      contains(github.event.comment.body, '/mycoder') && 
+      contains(format(',{0},', 'bhouston'), format(',{0},', github.event.comment.user.login))
     steps:
       - name: Extract prompt from comment
         id: extract-prompt
         run: |
-          COMMENT="${{ github.event.comment.body }}"
-          if [[ "$COMMENT" =~ "/mycoder "(.+) ]]; then
-            PROMPT="${BASH_REMATCH[1]}"
-          elif [[ "$COMMENT" =~ "/mycoder" ]]; then
-            # If just /mycoder with no text after, use a default prompt
-            PROMPT="Please review this issue and suggest next steps."
-          else
-            echo "No valid /mycoder command found"
-            exit 1
-          fi
-          echo "prompt=$PROMPT" >> $GITHUB_OUTPUT
           echo "comment_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
           echo "comment_id=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
 
@@ -45,11 +43,25 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - run: pnpm install -g mycoder
+      - name: Configure Git
+        run: |
+          git config --global user.name "MyCoder (On behalf of ${{ github.event.comment.user.login }})"
+          git config --global user.email "bot@mycoder.ai"
+
+      - run:
+          pnpm install -g mycoder
+
+          # Auth GitHub CLI with the token
+      - name: Configure GitHub CLI
+        run: |
+          # First try with GITHUB_TOKEN
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          # Verify auth status
+          gh auth status
 
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           echo "Running MyCoder for issue #${{ github.event.issue.number }} with prompt: ${{ steps.extract-prompt.outputs.prompt }}"
-          mycoder --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} the user asked: '${{ steps.extract-prompt.outputs.prompt }}' in comment ${{ steps.extract-prompt.outputs.comment_url }}. Please address this request. If you create a PR or take actions outside the scope of this issue, please report back to the issue with a comment explaining what you did."
+          mycoder --userWarning false --upgradeCheck false --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} in comment ${{ steps.extract-prompt.outputs.comment_url }} the user invoked the mycoder CLI via /mycoder.  Can you try to do what they requested or if it is unclear, respond with a comment to that affect to encourage them to be more clear."

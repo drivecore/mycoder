@@ -57,9 +57,13 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       `MyCoder v${packageInfo.version} - AI-powered coding assistant`,
     );
 
-    await checkForUpdates(logger);
+    // Skip version check if upgradeCheck is false
+    if (argv.upgradeCheck !== false) {
+      await checkForUpdates(logger);
+    }
 
-    if (!hasUserConsented()) {
+    // Skip user consent check if userWarning is false
+    if (!hasUserConsented() && argv.userWarning !== false) {
       const readline = createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -81,6 +85,10 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         logger.info('User did not consent. Exiting.');
         throw new Error('User did not consent');
       }
+    } else if (!hasUserConsented() && argv.userWarning === false) {
+      // Just skip the consent check without saving consent when userWarning is false
+      logger.debug('Skipping user consent check due to --userWarning=false');
+      // Note: We don't save consent here, just bypassing the check for this session
     }
 
     const tokenTracker = new TokenTracker(

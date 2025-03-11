@@ -16,6 +16,8 @@ export type SharedOptions = {
   readonly enableUserPrompt?: boolean;
   readonly userPrompt?: boolean;
   readonly githubMode?: boolean;
+  readonly userWarning?: boolean;
+  readonly upgradeCheck?: boolean;
 };
 
 export const sharedOptions = {
@@ -105,6 +107,17 @@ export const sharedOptions = {
   githubMode: {
     type: 'boolean',
     description: 'Enable GitHub mode for working with issues and PRs',
+    default: false,
+  } as const,
+  userWarning: {
+    type: 'boolean',
+    description:
+      'Skip user consent check for current session (does not save consent)',
+    default: false,
+  } as const,
+  upgradeCheck: {
+    type: 'boolean',
+    description: 'Disable version upgrade check (for automated/remote usage)',
     default: false,
   } as const,
 };

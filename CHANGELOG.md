@@ -1,9 +1,20 @@
+# [0.9.0](https://github.com/drivecore/mycoder/compare/v0.8.0...v0.9.0) (2025-03-11)
+
+
+### Bug Fixes
+
+* don't save consent when using --userWarning=false ([41cf69d](https://github.com/drivecore/mycoder/commit/41cf69dee22acc31cd0f2aa9f80e36cd867fb20b))
+
+
+### Features
+
+* add CLI options for automated usage scenarios ([00419bc](https://github.com/drivecore/mycoder/commit/00419bc3e060db6d0c18fc72e2d7b6957791c875))
+
 # [0.8.0](https://github.com/drivecore/mycoder/compare/v0.7.0...v0.8.0) (2025-03-11)
 
 ### Features
 
 - add --githubMode and --userPrompt as boolean CLI options that override config settings ([0390f94](https://github.com/drivecore/mycoder/commit/0390f94651e40de93a8cb9486a056a0b9cb2e165))
-- implement hierarchical configuration system with project and global levels ([#153](https://github.com/drivecore/mycoder/issues/153))
 - remove modelProvider and modelName - instant decrepation ([59834dc](https://github.com/drivecore/mycoder/commit/59834dcf932051a5c75624bd6f6ab12254f43769))
 
 # [0.7.0](https://github.com/drivecore/mycoder/compare/v0.6.1...v0.7.0) (2025-03-10)

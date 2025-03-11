@@ -32,6 +32,12 @@ mycoder "Implement a React component that displays a list of items"
 # Run with a prompt from a file
 mycoder -f prompt.txt
 
+# Disable user prompts for fully automated sessions
+mycoder --userPrompt false "Generate a basic Express.js server"
+
+# Disable user consent warning and version upgrade check for automated environments
+mycoder --userWarning false --upgradeCheck false "Generate a basic Express.js server"
+
 # Enable GitHub mode
 mycoder config set githubMode true
 ```
@@ -103,6 +109,14 @@ mycoder config set model claude-3-7-sonnet-20250219  # or any other Anthropic mo
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
 - `tokenCache`: Enable token caching for LLM API calls (default: `true`)
+
+### CLI-Only Options
+
+These options are available only as command-line parameters and are not stored in the configuration:
+
+- `userWarning`: Skip user consent check for current session without saving consent (default: `true`)
+- `upgradeCheck`: Disable version upgrade check for automated/remote usage (default: `true`)
+- `userPrompt`/`enableUserPrompt`: Enable or disable the userPrompt tool (default: `true`)
 
 Example:
 

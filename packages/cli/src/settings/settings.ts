@@ -2,10 +2,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-// Global settings directory in user's home
 const settingsDir = path.join(os.homedir(), '.mycoder');
 
-// Get the global settings directory, creating it if it doesn't exist
 export const getSettingsDir = (): string => {
   if (!fs.existsSync(settingsDir)) {
     fs.mkdirSync(settingsDir, { recursive: true });
@@ -13,42 +11,54 @@ export const getSettingsDir = (): string => {
   return settingsDir;
 };
 
-// Get the project-level settings directory, creating it if it doesn't exist
+/**
+ * Gets the project-level settings directory
+ * @returns The project settings directory path, or empty string if not in a project
+ */
 export const getProjectSettingsDir = (): string => {
-  const projectSettingsDir = path.join(process.cwd(), '.mycoder');
-  if (!fs.existsSync(projectSettingsDir)) {
-    try {
-      fs.mkdirSync(projectSettingsDir, { recursive: true });
-    } catch {
-      // If we can't create the directory, return empty string
-      // This will be handled by the config module
-      return '';
+  // Start with the current directory
+  let currentDir = process.cwd();
+  
+  // Traverse up the directory tree until we find a .mycoder directory or reach the root
+  while (currentDir !== path.parse(currentDir).root) {
+    const projectSettingsDir = path.join(currentDir, '.mycoder');
+    if (fs.existsSync(projectSettingsDir) && fs.statSync(projectSettingsDir).isDirectory()) {
+      return projectSettingsDir;
     }
+    // Move up one directory
+    currentDir = path.dirname(currentDir);
   }
-  return projectSettingsDir;
+  
+  // If we're creating a new project config, use the current directory
+  return path.join(process.cwd(), '.mycoder');
 };
 
-// Check if the project-level settings directory exists and is writable
+/**
+ * Checks if the project settings directory is writable
+ * @returns True if the directory exists and is writable, or can be created
+ */
 export const isProjectSettingsDirWritable = (): boolean => {
-  const projectSettingsDir = path.join(process.cwd(), '.mycoder');
-
+  const projectDir = getProjectSettingsDir();
+  
   // Check if directory exists
-  if (fs.existsSync(projectSettingsDir)) {
+  if (fs.existsSync(projectDir)) {
     try {
-      // Check if directory is writable
-      fs.accessSync(projectSettingsDir, fs.constants.W_OK);
+      // Try to write a test file to check permissions
+      const testFile = path.join(projectDir, '.write-test');
+      fs.writeFileSync(testFile, '');
+      fs.unlinkSync(testFile);
       return true;
     } catch {
       return false;
     }
-  }
-
-  // If directory doesn't exist, check if we can create it
-  try {
-    fs.mkdirSync(projectSettingsDir, { recursive: true });
-    return true;
-  } catch {
-    return false;
+  } else {
+    // Directory doesn't exist yet, check if we can create it
+    try {
+      fs.mkdirSync(projectDir, { recursive: true });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };
 

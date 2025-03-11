@@ -8,10 +8,8 @@ import {
   getConfig,
   getDefaultConfig,
   updateConfig,
-  clearAllConfig,
   getConfigAtLevel,
   clearConfigAtLevel,
-  clearConfigKey,
   ConfigLevel,
 } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
@@ -42,8 +40,6 @@ export interface ConfigOptions extends SharedOptions {
   key?: string;
   value?: string;
   all?: boolean;
-  global?: boolean;
-  g?: boolean; // Alias for global
 }
 
 export const command: CommandModule<SharedOptions, ConfigOptions> = {
@@ -70,12 +66,6 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         type: 'boolean',
         default: false,
       })
-      .option('global', {
-        alias: 'g',
-        describe: 'Use global configuration instead of project-level',
-        type: 'boolean',
-        default: false,
-      })
       .example('$0 config list', 'List all configuration values')
       .example(
         '$0 config get githubMode',
@@ -92,23 +82,7 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       )
       .example(
         '$0 config clear --all',
-        'Clear all project-level configuration settings',
-      )
-      .example(
-        '$0 config set githubMode true --global',
-        'Enable GitHub mode in global configuration',
-      )
-      .example(
-        '$0 config set model claude-3-haiku-20240307 -g',
-        'Set model in global configuration using short flag',
-      )
-      .example(
-        '$0 config list --global',
-        'List all global configuration settings',
-      )
-      .example(
-        '$0 config clear --all --global',
-        'Clear all global configuration settings',
+        'Clear all configuration settings',
       ) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   },
   handler: async (argv: ArgumentsCamelCase<ConfigOptions>) => {
@@ -157,55 +131,31 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
     }
 
     // Get merged config for display
-    const mergedConfig = getConfig();
-
-    // Get level-specific configs for reference
-    const defaultConfig = getConfigAtLevel(ConfigLevel.DEFAULT);
-    const globalConfig = getConfigAtLevel(ConfigLevel.GLOBAL);
-    const projectConfig = getConfigAtLevel(ConfigLevel.PROJECT);
+    const config = getConfig();
 
     // Handle 'list' command
     if (argv.command === 'list') {
       logger.info('Current configuration:');
+      const defaultConfig = getDefaultConfig();
 
       // Get all valid config keys
       const validKeys = Object.keys(defaultConfig);
 
       // Filter and sort config entries
-      const configEntries = Object.entries(mergedConfig)
+      const configEntries = Object.entries(config)
         .filter(([key]) => validKeys.includes(key))
         .sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
 
-      // Display config entries with source indicators
+      // Display config entries with default indicators
       configEntries.forEach(([key, value]) => {
-        const inProject = key in projectConfig;
-        const inGlobal = key in globalConfig;
-        const isDefault = !inProject && !inGlobal;
-
-        let valueDisplay = '';
-        let sourceDisplay = '';
-
-        if (isDefault) {
-          valueDisplay = chalk.dim(`${value} (default)`);
-        } else if (inProject) {
-          valueDisplay = chalk.green(`${value}`);
-          sourceDisplay = chalk.blue(' [project]');
-        } else if (inGlobal) {
-          valueDisplay = chalk.yellow(`${value}`);
-          sourceDisplay = chalk.magenta(' [global]');
-        }
-
-        logger.info(`  ${key}: ${valueDisplay}${sourceDisplay}`);
+        const isDefault =
+          JSON.stringify(value) ===
+          JSON.stringify(defaultConfig[key as keyof typeof defaultConfig]);
+        const valueDisplay = isDefault
+          ? chalk.dim(`${value} (default)`)
+          : chalk.green(value);
+        logger.info(`  ${key}: ${valueDisplay}`);
       });
-
-      logger.info('');
-      logger.info('Configuration levels (in order of precedence):');
-      logger.info('  CLI options (highest)');
-      logger.info(
-        '  Project config (.mycoder/config.json in current directory)',
-      );
-      logger.info('  Global config (~/.mycoder/config.json)');
-      logger.info('  Default values (lowest)');
       return;
     }
 
@@ -216,29 +166,10 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      // Check if the key exists in the merged config
-      if (argv.key in mergedConfig) {
-        const value = mergedConfig[argv.key as keyof typeof mergedConfig];
-
-        // Determine the source of this value
-        const inProject = argv.key in projectConfig;
-        const inGlobal = argv.key in globalConfig;
-        const isDefault = !inProject && !inGlobal;
-
-        let valueDisplay = '';
-        let sourceDisplay = '';
-
-        if (isDefault) {
-          valueDisplay = chalk.dim(`${value} (default)`);
-        } else if (inProject) {
-          valueDisplay = chalk.green(`${value}`);
-          sourceDisplay = chalk.blue(' [project]');
-        } else if (inGlobal) {
-          valueDisplay = chalk.yellow(`${value}`);
-          sourceDisplay = chalk.magenta(' [global]');
-        }
-
-        logger.info(`${argv.key}: ${valueDisplay}${sourceDisplay}`);
+      if (argv.key in config) {
+        logger.info(
+          `${argv.key}: ${chalk.green(config[argv.key as keyof typeof config])}`,
+        );
       } else {
         logger.error(`Configuration key '${argv.key}' not found`);
       }
@@ -297,15 +228,11 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       let parsedValue: string | boolean | number = argv.value;
 
       // Check if config already exists to determine type
-      if (argv.key in mergedConfig) {
-        if (
-          typeof mergedConfig[argv.key as keyof typeof mergedConfig] ===
-          'boolean'
-        ) {
+      if (argv.key in config) {
+        if (typeof config[argv.key as keyof typeof config] === 'boolean') {
           parsedValue = argv.value.toLowerCase() === 'true';
         } else if (
-          typeof mergedConfig[argv.key as keyof typeof mergedConfig] ===
-          'number'
+          typeof config[argv.key as keyof typeof config] === 'number'
         ) {
           parsedValue = Number(argv.value);
         }
@@ -350,37 +277,10 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
     if (argv.command === 'clear') {
       // Check if --all flag is provided
       if (argv.all) {
-        const confirmMessage = `Are you sure you want to clear all ${levelName} configuration settings? This action cannot be undone.`;
-
-        if (configLevel === ConfigLevel.GLOBAL && !argv.global && !argv.g) {
-          // If no level was explicitly specified and we're using the default (project),
-          // ask if they want to clear all levels
-          const clearAllLevels = await confirm(
-            'Do you want to clear both project and global configuration? (No will clear only project config)',
-          );
-
-          if (clearAllLevels) {
-            // Confirm before clearing all levels
-            const isConfirmed = await confirm(
-              'Are you sure you want to clear ALL configuration settings (both project and global)? This action cannot be undone.',
-            );
-
-            if (!isConfirmed) {
-              logger.info('Operation cancelled.');
-              return;
-            }
-
-            // Clear all settings at all levels
-            clearAllConfig();
-            logger.info(
-              'All configuration settings (both project and global) have been cleared. Default values will be used.',
-            );
-            return;
-          }
-        }
-
-        // Confirm before clearing the specified level
-        const isConfirmed = await confirm(confirmMessage);
+        // Confirm with the user before clearing all settings
+        const isConfirmed = await confirm(
+          'Are you sure you want to clear all configuration settings? This action cannot be undone.',
+        );
 
         if (!isConfirmed) {
           logger.info('Operation cancelled.');
@@ -417,12 +317,9 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
 
       const defaultConfig = getDefaultConfig();
 
-      // Check if the key exists at the specified level
-      const levelConfig = getConfigAtLevel(configLevel);
-      if (!(argv.key in levelConfig)) {
-        logger.error(
-          `Configuration key '${argv.key}' not found at ${levelName} level`,
-        );
+      // Check if the key exists in the config
+      if (!(argv.key in config)) {
+        logger.error(`Configuration key '${argv.key}' not found`);
         return;
       }
 
@@ -434,46 +331,47 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         return;
       }
 
-      try {
-        // Clear the key at the specified level
-        clearConfigKey(argv.key, configLevel);
+      // Get the current config, create a new object without the specified key
+      const currentConfig = getConfig();
+      const { [argv.key]: _, ...newConfig } = currentConfig as Record<
+        string,
+        any
+      >;
 
-        // Get the value that will now be used
-        const mergedAfterClear = getConfig();
-        const newValue =
-          mergedAfterClear[argv.key as keyof typeof mergedAfterClear];
+      // Update the config file with the new object
+      updateConfig(newConfig);
 
-        // Determine the source of the new value
-        const afterClearInProject =
-          argv.key in getConfigAtLevel(ConfigLevel.PROJECT);
-        const afterClearInGlobal =
-          argv.key in getConfigAtLevel(ConfigLevel.GLOBAL);
-        const isDefaultAfterClear = !afterClearInProject && !afterClearInGlobal;
+      // Get the default value that will now be used
+      const defaultValue =
+        defaultConfig[argv.key as keyof typeof defaultConfig];
 
-        let sourceDisplay = '';
-        if (isDefaultAfterClear) {
-          sourceDisplay = '(default)';
-        } else if (afterClearInProject) {
-          sourceDisplay = '(from project config)';
-        } else if (afterClearInGlobal) {
-          sourceDisplay = '(from global config)';
-        }
+      // Get the effective config after clearing
+      const updatedConfig = getConfig();
+      const newValue = updatedConfig[argv.key as keyof typeof updatedConfig];
 
-        logger.info(
-          `Cleared ${argv.key} at ${levelName} level, now using: ${chalk.green(newValue)} ${sourceDisplay}`,
-        );
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        logger.error(
-          chalk.red(`Failed to clear configuration key: ${errorMessage}`),
-        );
-        if (configLevel === ConfigLevel.PROJECT) {
-          logger.info(
-            'You can use the --global (-g) flag to modify global configuration instead.',
-          );
-        }
+      // Determine where the new value is coming from
+      const isDefaultAfterClear =
+        JSON.stringify(newValue) === JSON.stringify(defaultValue);
+      const afterClearInGlobal =
+        !isDefaultAfterClear &&
+        argv.key in getConfigAtLevel(ConfigLevel.GLOBAL);
+      const afterClearInProject =
+        !isDefaultAfterClear &&
+        !afterClearInGlobal &&
+        argv.key in getConfigAtLevel(ConfigLevel.PROJECT);
+
+      let sourceDisplay = '';
+      if (isDefaultAfterClear) {
+        sourceDisplay = '(default)';
+      } else if (afterClearInProject) {
+        sourceDisplay = '(from project config)';
+      } else if (afterClearInGlobal) {
+        sourceDisplay = '(from global config)';
       }
+
+      logger.info(
+        `Cleared ${argv.key} at ${levelName} level, now using: ${chalk.green(newValue)} ${sourceDisplay}`,
+      );
       return;
     }
 
