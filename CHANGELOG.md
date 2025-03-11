@@ -1,3 +1,11 @@
+# [0.8.0](https://github.com/drivecore/mycoder/compare/v0.7.0...v0.8.0) (2025-03-11)
+
+
+### Features
+
+* add --githubMode and --userPrompt as boolean CLI options that override config settings ([0390f94](https://github.com/drivecore/mycoder/commit/0390f94651e40de93a8cb9486a056a0b9cb2e165))
+* remove modelProvider and modelName - instant decrepation ([59834dc](https://github.com/drivecore/mycoder/commit/59834dcf932051a5c75624bd6f6ab12254f43769))
+
 # [0.7.0](https://github.com/drivecore/mycoder/compare/v0.6.1...v0.7.0) (2025-03-10)
 
 
