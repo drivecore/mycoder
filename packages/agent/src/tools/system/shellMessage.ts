@@ -58,13 +58,13 @@ const parameterSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Whether to show the input in the logs (default: false or value from shellStart)',
+      'Whether to show the input to the user, or keep the output clean (default: false or value from shellStart)',
     ),
   showStdout: z
     .boolean()
     .optional()
     .describe(
-      'Whether to show output in the logs (default: false or value from shellStart)',
+      'Whether to show output to the user, or keep the output clean (default: false or value from shellStart)',
     ),
 });
 

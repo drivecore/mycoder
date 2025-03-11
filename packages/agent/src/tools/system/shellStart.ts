@@ -41,11 +41,15 @@ const parameterSchema = z.object({
   showStdIn: z
     .boolean()
     .optional()
-    .describe('Whether to show the command input in the logs (default: false)'),
+    .describe(
+      'Whether to show the command input to the user, or keep the output clean (default: false)',
+    ),
   showStdout: z
     .boolean()
     .optional()
-    .describe('Whether to show command output in the logs (default: false)'),
+    .describe(
+      'Whether to show command output to the user, or keep the output clean (default: false)',
+    ),
 });
 
 const returnSchema = z.union([

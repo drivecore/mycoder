@@ -57,13 +57,16 @@ function addCacheControlToMessages(
     if (typeof m.content === 'string') {
       return {
         ...m,
-        content: [
-          {
-            type: 'text',
-            text: m.content,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
+        content:
+          i >= messages.length - 2
+            ? [
+                {
+                  type: 'text',
+                  text: m.content,
+                  cache_control: { type: 'ephemeral' },
+                },
+              ]
+            : m.content,
       };
     }
     return {
