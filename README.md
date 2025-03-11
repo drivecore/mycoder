@@ -85,6 +85,9 @@ pnpm build
 
 # Run tests
 pnpm test
+
+# Create a commit with interactive prompt
+pnpm commit
 ```
 
 ## Release Process
