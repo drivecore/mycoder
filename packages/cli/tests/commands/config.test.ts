@@ -6,6 +6,8 @@ import {
   getConfig,
   getDefaultConfig,
   updateConfig,
+  getConfigAtLevel,
+  clearConfigAtLevel,
 } from '../../src/settings/config.js';
 
 // Mock dependencies
@@ -13,12 +15,21 @@ vi.mock('../../src/settings/config.js', () => ({
   getConfig: vi.fn(),
   getDefaultConfig: vi.fn(),
   updateConfig: vi.fn(),
+  getConfigAtLevel: vi.fn(),
+  clearConfigAtLevel: vi.fn(),
+  ConfigLevel: {
+    DEFAULT: 'default',
+    GLOBAL: 'global',
+    PROJECT: 'project',
+    CLI: 'cli',
+  },
 }));
 
 vi.mock('mycoder-agent', () => ({
   Logger: vi.fn().mockImplementation(() => ({
     info: vi.fn(),
     error: vi.fn(),
+    warn: vi.fn(),
   })),
   LogLevel: {
     debug: 0,
@@ -33,14 +44,26 @@ vi.mock('../../src/utils/nameToLogIndex.js', () => ({
   nameToLogIndex: vi.fn().mockReturnValue(2), // info level
 }));
 
-// Skip tests for now - they need to be rewritten for the new command structure
-describe.skip('Config Command', () => {
-  let mockLogger: { info: jest.Mock; error: jest.Mock };
+// Mock readline/promises
+vi.mock('readline/promises', () => ({
+  createInterface: vi.fn().mockImplementation(() => ({
+    question: vi.fn().mockResolvedValue('y'),
+    close: vi.fn(),
+  })),
+}));
+
+describe('Config Command', () => {
+  let mockLogger: {
+    info: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    warn: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockLogger = {
       info: vi.fn(),
       error: vi.fn(),
+      warn: vi.fn(),
     };
     vi.mocked(Logger).mockImplementation(() => mockLogger as unknown as Logger);
     vi.mocked(getConfig).mockReturnValue({ githubMode: false });
@@ -52,6 +75,7 @@ describe.skip('Config Command', () => {
       githubMode: false,
       ...config,
     }));
+    vi.mocked(getConfigAtLevel).mockReturnValue({});
   });
 
   afterEach(() => {
@@ -60,42 +84,13 @@ describe.skip('Config Command', () => {
 
   it('should list all configuration values', async () => {
     await command.handler!({
-      _: ['config', 'config', 'list'],
+      _: ['config', 'list'],
       logLevel: 'info',
       interactive: false,
       command: 'list',
+      global: false,
+      g: false,
     } as any);
-    it('should filter out invalid config keys in list command', async () => {
-      // Mock getConfig to return config with invalid keys
-      vi.mocked(getConfig).mockReturnValue({
-        githubMode: false,
-        invalidKey: 'some value',
-      } as any);
-
-      // Mock getDefaultConfig to return only valid keys
-      vi.mocked(getDefaultConfig).mockReturnValue({
-        githubMode: false,
-      });
-
-      await command.handler!({
-        _: ['config', 'config', 'list'],
-        logLevel: 'info',
-        interactive: false,
-        command: 'list',
-      } as any);
-
-      expect(getConfig).toHaveBeenCalled();
-      expect(getDefaultConfig).toHaveBeenCalled();
-
-      // Should show the valid key
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('githubMode'),
-      );
-
-      // Should not show the invalid key
-      const infoCallArgs = mockLogger.info.mock.calls.flat();
-      expect(infoCallArgs.join()).not.toContain('invalidKey');
-    });
 
     expect(getConfig).toHaveBeenCalled();
     expect(mockLogger.info).toHaveBeenCalledWith('Current configuration:');
@@ -104,13 +99,49 @@ describe.skip('Config Command', () => {
     );
   });
 
+  it('should filter out invalid config keys in list command', async () => {
+    // Mock getConfig to return config with invalid keys
+    vi.mocked(getConfig).mockReturnValue({
+      githubMode: false,
+      invalidKey: 'some value',
+    } as any);
+
+    // Mock getDefaultConfig to return only valid keys
+    vi.mocked(getDefaultConfig).mockReturnValue({
+      githubMode: false,
+    });
+
+    await command.handler!({
+      _: ['config', 'list'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'list',
+      global: false,
+      g: false,
+    } as any);
+
+    expect(getConfig).toHaveBeenCalled();
+    expect(getDefaultConfig).toHaveBeenCalled();
+
+    // Should show the valid key
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('githubMode'),
+    );
+
+    // Should not show the invalid key
+    const infoCallArgs = mockLogger.info.mock.calls.flat();
+    expect(infoCallArgs.join()).not.toContain('invalidKey');
+  });
+
   it('should get a configuration value', async () => {
     await command.handler!({
-      _: ['config', 'config', 'get', 'githubMode'],
+      _: ['config', 'get', 'githubMode'],
       logLevel: 'info',
       interactive: false,
       command: 'get',
       key: 'githubMode',
+      global: false,
+      g: false,
     } as any);
 
     expect(getConfig).toHaveBeenCalled();
@@ -121,11 +152,13 @@ describe.skip('Config Command', () => {
 
   it('should show error when getting non-existent key', async () => {
     await command.handler!({
-      _: ['config', 'config', 'get', 'nonExistentKey'],
+      _: ['config', 'get', 'nonExistentKey'],
       logLevel: 'info',
       interactive: false,
       command: 'get',
       key: 'nonExistentKey',
+      global: false,
+      g: false,
     } as any);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -135,15 +168,17 @@ describe.skip('Config Command', () => {
 
   it('should set a configuration value', async () => {
     await command.handler!({
-      _: ['config', 'config', 'set', 'githubMode', 'true'],
+      _: ['config', 'set', 'githubMode', 'true'],
       logLevel: 'info',
       interactive: false,
       command: 'set',
       key: 'githubMode',
       value: 'true',
+      global: false,
+      g: false,
     } as any);
 
-    expect(updateConfig).toHaveBeenCalledWith({ githubMode: true });
+    expect(updateConfig).toHaveBeenCalledWith({ githubMode: true }, 'project');
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Updated'),
     );
@@ -151,11 +186,13 @@ describe.skip('Config Command', () => {
 
   it('should handle missing key for set command', async () => {
     await command.handler!({
-      _: ['config', 'config', 'set'],
+      _: ['config', 'set'],
       logLevel: 'info',
       interactive: false,
       command: 'set',
       key: undefined,
+      global: false,
+      g: false,
     } as any);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -165,12 +202,14 @@ describe.skip('Config Command', () => {
 
   it('should handle missing value for set command', async () => {
     await command.handler!({
-      _: ['config', 'config', 'set', 'githubMode'],
+      _: ['config', 'set', 'githubMode'],
       logLevel: 'info',
       interactive: false,
       command: 'set',
       key: 'githubMode',
       value: undefined,
+      global: false,
+      g: false,
     } as any);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -178,27 +217,144 @@ describe.skip('Config Command', () => {
     );
   });
 
-  it('should validate key exists in default config for set command', async () => {
+  it('should warn when setting non-standard key', async () => {
+    // Mock getDefaultConfig to return config without the key
+    vi.mocked(getDefaultConfig).mockReturnValue({
+      customPrompt: '',
+    });
+
     await command.handler!({
-      _: ['config', 'config', 'set', 'invalidKey', 'value'],
+      _: ['config', 'set', 'nonStandardKey', 'value'],
       logLevel: 'info',
       interactive: false,
       command: 'set',
-      key: 'invalidKey',
+      key: 'nonStandardKey',
       value: 'value',
+      global: false,
+      g: false,
+    } as any);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('not a standard configuration key'),
+    );
+    // Should still update the config
+    expect(updateConfig).toHaveBeenCalled();
+  });
+
+  it('should clear a configuration value', async () => {
+    // Mock getConfig to include the key we want to clear
+    vi.mocked(getConfig).mockReturnValue({
+      githubMode: false,
+      customPrompt: 'custom value',
+    });
+
+    // Mock getDefaultConfig to include the key we want to clear
+    vi.mocked(getDefaultConfig).mockReturnValue({
+      githubMode: false,
+      customPrompt: '',
+    });
+
+    await command.handler!({
+      _: ['config', 'clear', 'customPrompt'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'clear',
+      key: 'customPrompt',
+      global: false,
+      g: false,
+      all: false,
+    } as any);
+
+    // Verify success message
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Cleared customPrompt'),
+    );
+  });
+
+  it('should handle missing key for clear command', async () => {
+    await command.handler!({
+      _: ['config', 'clear'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'clear',
+      key: undefined,
+      global: false,
+      g: false,
+      all: false,
     } as any);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid configuration key'),
+      expect.stringContaining('Key is required'),
+    );
+  });
+
+  it('should clear all project configuration with --all flag', async () => {
+    await command.handler!({
+      _: ['config', 'clear'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'clear',
+      all: true,
+      global: false,
+      g: false,
+    } as any);
+
+    expect(clearConfigAtLevel).toHaveBeenCalledWith('project');
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'project configuration settings have been cleared',
+      ),
+    );
+  });
+
+  it('should clear all global configuration with --all --global flags', async () => {
+    await command.handler!({
+      _: ['config', 'clear'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'clear',
+      all: true,
+      global: true,
+      g: false,
+    } as any);
+
+    expect(clearConfigAtLevel).toHaveBeenCalledWith('global');
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'global configuration settings have been cleared',
+      ),
+    );
+  });
+
+  it('should handle non-existent key for clear command', async () => {
+    vi.mocked(getConfig).mockReturnValue({
+      githubMode: false,
+    });
+
+    await command.handler!({
+      _: ['config', 'clear', 'nonExistentKey'],
+      logLevel: 'info',
+      interactive: false,
+      command: 'clear',
+      key: 'nonExistentKey',
+      global: false,
+      g: false,
+      all: false,
+    } as any);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('not found'),
     );
   });
 
   it('should handle unknown command', async () => {
     await command.handler!({
-      _: ['config', 'config', 'unknown'],
+      _: ['config', 'unknown'],
       logLevel: 'info',
       interactive: false,
       command: 'unknown' as any,
+      global: false,
+      g: false,
     } as any);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -220,10 +376,12 @@ describe.skip('Config Command', () => {
     });
 
     await command.handler!({
-      _: ['config', 'config', 'list'],
+      _: ['config', 'list'],
       logLevel: 'info',
       interactive: false,
       command: 'list',
+      global: false,
+      g: false,
     } as any);
 
     expect(getConfig).toHaveBeenCalled();
@@ -236,56 +394,42 @@ describe.skip('Config Command', () => {
         expect.stringContaining('(default)'),
     );
 
-    // Check for custom indicator
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('customPrompt') &&
-        expect.stringContaining('(custom)'),
+    // Check for custom value
+    const infoCallArgs = mockLogger.info.mock.calls.flat();
+    const customPromptCall = infoCallArgs.find(
+      (arg) => typeof arg === 'string' && arg.includes('customPrompt'),
     );
+    expect(customPromptCall).toBeDefined();
+    expect(customPromptCall).not.toContain('(default)');
   });
 
-  it('should clear a configuration value', async () => {
+  it('should use global config when --global flag is provided', async () => {
     await command.handler!({
-      _: ['config', 'config', 'clear', 'customPrompt'],
+      _: ['config', 'set', 'githubMode', 'true'],
       logLevel: 'info',
       interactive: false,
-      command: 'clear',
-      key: 'customPrompt',
+      command: 'set',
+      key: 'githubMode',
+      value: 'true',
+      global: true,
+      g: false,
     } as any);
 
-    // Verify updateConfig was called with an object that doesn't include the key
-    expect(updateConfig).toHaveBeenCalled();
-
-    // Verify success message
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('Cleared customPrompt'),
-    );
+    expect(updateConfig).toHaveBeenCalledWith({ githubMode: true }, 'global');
   });
 
-  it('should handle missing key for clear command', async () => {
+  it('should use global config when -g flag is provided', async () => {
     await command.handler!({
-      _: ['config', 'config', 'clear'],
+      _: ['config', 'set', 'githubMode', 'true'],
       logLevel: 'info',
       interactive: false,
-      command: 'clear',
-      key: undefined,
+      command: 'set',
+      key: 'githubMode',
+      value: 'true',
+      global: false,
+      g: true,
     } as any);
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Key is required'),
-    );
-  });
-
-  it('should handle non-existent key for clear command', async () => {
-    await command.handler!({
-      _: ['config', 'config', 'clear', 'nonExistentKey'],
-      logLevel: 'info',
-      interactive: false,
-      command: 'clear',
-      key: 'nonExistentKey',
-    } as any);
-
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('not found'),
-    );
+    expect(updateConfig).toHaveBeenCalledWith({ githubMode: true }, 'global');
   });
 });

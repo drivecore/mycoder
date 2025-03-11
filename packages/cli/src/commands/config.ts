@@ -1,5 +1,3 @@
-import { createInterface } from 'readline/promises';
-
 import chalk from 'chalk';
 import { Logger } from 'mycoder-agent';
 
@@ -13,25 +11,6 @@ import {
   ConfigLevel,
 } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
-
-/**
- * Prompts the user for confirmation with a yes/no question
- * @param question The question to ask the user
- * @returns True if the user confirmed, false otherwise
- */
-async function confirm(question: string): Promise<boolean> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  try {
-    const answer = await rl.question(`${question} (y/N): `);
-    return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
-  } finally {
-    rl.close();
-  }
-}
 
 import type { CommandModule, ArgumentsCamelCase } from 'yargs';
 
@@ -200,30 +179,6 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         // Continue with the operation instead of returning
       }
 
-      // Check if this is an API key and add a warning
-      if (argv.key.includes('API_KEY')) {
-        logger.warn(
-          chalk.yellow(
-            'Warning: Storing API keys in configuration is less secure than using environment variables.',
-          ),
-        );
-        logger.warn(
-          chalk.yellow(
-            'Your API key will be stored in plaintext in the configuration file.',
-          ),
-        );
-
-        // Ask for confirmation
-        const isConfirmed = await confirm(
-          'Do you want to continue storing your API key in the configuration?',
-        );
-
-        if (!isConfirmed) {
-          logger.info('Operation cancelled.');
-          return;
-        }
-      }
-
       // Parse the value based on current type or infer boolean/number
       let parsedValue: string | boolean | number = argv.value;
 
@@ -277,16 +232,6 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
     if (argv.command === 'clear') {
       // Check if --all flag is provided
       if (argv.all) {
-        // Confirm with the user before clearing all settings
-        const isConfirmed = await confirm(
-          'Are you sure you want to clear all configuration settings? This action cannot be undone.',
-        );
-
-        if (!isConfirmed) {
-          logger.info('Operation cancelled.');
-          return;
-        }
-
         try {
           // Clear settings at the specified level
           clearConfigAtLevel(configLevel);

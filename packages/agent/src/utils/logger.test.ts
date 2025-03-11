@@ -9,7 +9,7 @@ describe('Logger', () => {
     // Setup console spies before each test
     consoleSpy = {
       log: vi.spyOn(console, 'log').mockImplementation(() => {}),
-      info: vi.spyOn(console, 'log').mockImplementation(() => {}),
+      info: vi.spyOn(console, 'info').mockImplementation(() => {}),
       warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
       error: vi.spyOn(console, 'error').mockImplementation(() => {}),
     };
