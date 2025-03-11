@@ -54,6 +54,18 @@ const parameterSchema = z.object({
   description: z
     .string()
     .describe('The reason for this shell interaction (max 80 chars)'),
+  showStdIn: z
+    .boolean()
+    .optional()
+    .describe(
+      'Whether to show the input in the logs (default: false or value from shellStart)',
+    ),
+  showStdout: z
+    .boolean()
+    .optional()
+    .describe(
+      'Whether to show output in the logs (default: false or value from shellStart)',
+    ),
 });
 
 const returnSchema = z
@@ -82,7 +94,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { instanceId, stdin, signal },
+    { instanceId, stdin, signal, showStdIn, showStdout },
     { logger },
   ): Promise<ReturnType> => {
     logger.verbose(
@@ -115,6 +127,14 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
         if (!processState.process.stdin?.writable) {
           throw new Error('Process stdin is not available');
         }
+
+        // Determine whether to show stdin (prefer explicit parameter, fall back to process state)
+        const shouldShowStdIn =
+          showStdIn !== undefined ? showStdIn : processState.showStdIn;
+        if (shouldShowStdIn) {
+          logger.info(`[${instanceId}] stdin: ${stdin}`);
+        }
+
         processState.process.stdin.write(`${stdin}\n`);
       }
 
@@ -130,11 +150,22 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
       processState.stderr = [];
 
       logger.verbose('Interaction completed successfully');
+
+      // Determine whether to show stdout (prefer explicit parameter, fall back to process state)
+      const shouldShowStdout =
+        showStdout !== undefined ? showStdout : processState.showStdout;
+
       if (stdout) {
         logger.verbose(`stdout: ${stdout.trim()}`);
+        if (shouldShowStdout) {
+          logger.info(`[${instanceId}] stdout: ${stdout.trim()}`);
+        }
       }
       if (stderr) {
         logger.verbose(`stderr: ${stderr.trim()}`);
+        if (shouldShowStdout) {
+          logger.info(`[${instanceId}] stderr: ${stderr.trim()}`);
+        }
       }
 
       return {
@@ -168,8 +199,17 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
 
   logParameters: (input, { logger }) => {
     const processState = processStates.get(input.instanceId);
+    const showStdIn =
+      input.showStdIn !== undefined
+        ? input.showStdIn
+        : processState?.showStdIn || false;
+    const showStdout =
+      input.showStdout !== undefined
+        ? input.showStdout
+        : processState?.showStdout || false;
+
     logger.info(
-      `Interacting with shell command "${processState ? processState.command : '<unknown instanceId>'}", ${input.description}`,
+      `Interacting with shell command "${processState ? processState.command : '<unknown instanceId>'}", ${input.description} (showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
     );
   },
   logReturns: () => {},

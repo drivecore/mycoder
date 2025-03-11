@@ -158,4 +158,37 @@ describe('shellStartTool', () => {
 
     expect(result.mode).toBe('sync');
   });
+
+  it('should store showStdIn and showStdout settings in process state', async () => {
+    const result = await shellStartTool.execute(
+      {
+        command: 'echo "test"',
+        description: 'Test with stdout visibility',
+        showStdIn: true,
+        showStdout: true,
+      },
+      toolContext,
+    );
+
+    expect(result.mode).toBe('sync');
+
+    // For async mode, check the process state directly
+    const asyncResult = await shellStartTool.execute(
+      {
+        command: 'sleep 1',
+        description: 'Test with stdin/stdout visibility in async mode',
+        timeout: 50, // Force async mode
+        showStdIn: true,
+        showStdout: true,
+      },
+      toolContext,
+    );
+
+    if (asyncResult.mode === 'async') {
+      const processState = processStates.get(asyncResult.instanceId);
+      expect(processState).toBeDefined();
+      expect(processState?.showStdIn).toBe(true);
+      expect(processState?.showStdout).toBe(true);
+    }
+  });
 });
