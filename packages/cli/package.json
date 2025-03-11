@@ -27,10 +27,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ci": "vitest --run --coverage",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
-    "semantic-release": "semantic-release -e semantic-release-monorepo"
+    "semantic-release": "pnpm exec semantic-release -e semantic-release-monorepo"
   },
   "keywords": [
     "ai",

@@ -52,4 +52,3 @@ Commit messages are used to:
 2. Generate changelog entries
 3. Create GitHub releases
 
-The process is automated through GitHub Actions and uses changesets for release management.
