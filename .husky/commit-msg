@@ -1,2 +1,2 @@
 # Validate commit message with commitlint
-# npx --no -- commitlint --edit $1
+pnpm exec commitlint --edit $1
