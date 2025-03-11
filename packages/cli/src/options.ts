@@ -111,7 +111,8 @@ export const sharedOptions = {
   } as const,
   userWarning: {
     type: 'boolean',
-    description: 'Disable user consent check (for automated/remote usage)',
+    description:
+      'Skip user consent check for current session (does not save consent)',
     default: false,
   } as const,
   upgradeCheck: {

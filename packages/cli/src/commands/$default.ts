@@ -86,9 +86,9 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         throw new Error('User did not consent');
       }
     } else if (!hasUserConsented() && argv.userWarning === false) {
-      // Auto-save consent when userWarning is false
+      // Just skip the consent check without saving consent when userWarning is false
       logger.debug('Skipping user consent check due to --userWarning=false');
-      saveUserConsent();
+      // Note: We don't save consent here, just bypassing the check for this session
     }
 
     const tokenTracker = new TokenTracker(

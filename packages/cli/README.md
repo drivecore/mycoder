@@ -114,7 +114,7 @@ mycoder config set model claude-3-7-sonnet-20250219  # or any other Anthropic mo
 
 These options are available only as command-line parameters and are not stored in the configuration:
 
-- `userWarning`: Disable user consent check for automated/remote usage (default: `true`)
+- `userWarning`: Skip user consent check for current session without saving consent (default: `true`)
 - `upgradeCheck`: Disable version upgrade check for automated/remote usage (default: `true`)
 - `userPrompt`/`enableUserPrompt`: Enable or disable the userPrompt tool (default: `true`)
 
