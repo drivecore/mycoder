@@ -1,9 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { getSettingsDir } from './settings.js';
+import * as deepmerge from 'deepmerge';
 
-const configFile = path.join(getSettingsDir(), 'config.json');
+import { getGlobalSettingsDir, getProjectSettingsDir } from './settings.js';
+
+// File paths for different config levels
+const globalConfigFile = path.join(getGlobalSettingsDir(), 'config.json');
+const projectConfigFile = path.join(getProjectSettingsDir(), 'config.json');
 
 // Default configuration
 const defaultConfig = {
@@ -25,36 +29,197 @@ const defaultConfig = {
 
 export type Config = typeof defaultConfig;
 
-// Export the default config for use in other functions
+/**
+ * Config level specifier
+ */
+export enum ConfigLevel {
+  DEFAULT = 'default',
+  GLOBAL = 'global',
+  PROJECT = 'project',
+  CLI = 'cli',
+}
+
+/**
+ * Export the default config for use in other functions
+ */
 export const getDefaultConfig = (): Config => {
   return { ...defaultConfig };
 };
 
-export const getConfig = (): Config => {
-  if (!fs.existsSync(configFile)) {
-    return defaultConfig;
+/**
+ * Read a config file from disk
+ * @param filePath Path to the config file
+ * @returns The config object or an empty object if the file doesn't exist or is invalid
+ */
+const readConfigFile = (filePath: string): Partial<Config> => {
+  if (!fs.existsSync(filePath)) {
+    return {};
   }
   try {
-    return JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
   } catch {
-    return defaultConfig;
+    return {};
   }
-};
-
-export const updateConfig = (config: Partial<Config>): Config => {
-  const currentConfig = getConfig();
-  const updatedConfig = { ...currentConfig, ...config };
-  fs.writeFileSync(configFile, JSON.stringify(updatedConfig, null, 2));
-  return updatedConfig;
 };
 
 /**
- * Clears all configuration settings by removing the config file
+ * Get configuration from a specific level
+ * @param level The configuration level to retrieve
+ * @returns The configuration at the specified level
+ */
+export const getConfigAtLevel = (level: ConfigLevel): Partial<Config> => {
+  switch (level) {
+    case ConfigLevel.DEFAULT:
+      return getDefaultConfig();
+    case ConfigLevel.GLOBAL:
+      return readConfigFile(globalConfigFile);
+    case ConfigLevel.PROJECT:
+      return readConfigFile(projectConfigFile);
+    case ConfigLevel.CLI:
+      return {}; // CLI options are passed directly from the command
+    default:
+      return {};
+  }
+};
+
+/**
+ * Get the merged configuration from all levels
+ * @param cliOptions Optional CLI options to include in the merge
+ * @returns The merged configuration with all levels applied
+ */
+export const getConfig = (cliOptions: Partial<Config> = {}): Config => {
+  // Start with default config
+  const defaultConf = getDefaultConfig();
+
+  // Read global config
+  const globalConf = getConfigAtLevel(ConfigLevel.GLOBAL);
+
+  // Read project config
+  const projectConf = getConfigAtLevel(ConfigLevel.PROJECT);
+
+  // Merge in order of precedence: default < global < project < cli
+  return deepmerge.all([
+    defaultConf,
+    globalConf,
+    projectConf,
+    cliOptions,
+  ]) as Config;
+};
+
+/**
+ * Update configuration at a specific level
+ * @param config Configuration changes to apply
+ * @param level The level at which to apply the changes
+ * @returns The new merged configuration after the update
+ */
+export const updateConfig = (
+  config: Partial<Config>,
+  level: ConfigLevel = ConfigLevel.PROJECT,
+): Config => {
+  let targetFile: string;
+
+  // Determine which file to update
+  switch (level) {
+    case ConfigLevel.GLOBAL:
+      targetFile = globalConfigFile;
+      break;
+    case ConfigLevel.PROJECT:
+      targetFile = projectConfigFile;
+      break;
+    default:
+      throw new Error(`Cannot update configuration at level: ${level}`);
+  }
+
+  // Read current config at the target level
+  const currentLevelConfig = readConfigFile(targetFile);
+
+  // Merge the update with the current config at this level
+  const updatedLevelConfig = { ...currentLevelConfig, ...config };
+
+  // Write the updated config back to the file
+  fs.writeFileSync(targetFile, JSON.stringify(updatedLevelConfig, null, 2));
+
+  // Return the new merged configuration
+  return getConfig();
+};
+
+/**
+ * Clears configuration settings at a specific level
+ * @param level The level at which to clear settings
+ * @returns The new merged configuration after clearing
+ */
+export const clearConfigAtLevel = (level: ConfigLevel): Config => {
+  let targetFile: string;
+
+  // Determine which file to clear
+  switch (level) {
+    case ConfigLevel.GLOBAL:
+      targetFile = globalConfigFile;
+      break;
+    case ConfigLevel.PROJECT:
+      targetFile = projectConfigFile;
+      break;
+    default:
+      throw new Error(`Cannot clear configuration at level: ${level}`);
+  }
+
+  // Remove the config file if it exists
+  if (fs.existsSync(targetFile)) {
+    fs.unlinkSync(targetFile);
+  }
+
+  // Return the new merged configuration
+  return getConfig();
+};
+
+/**
+ * Clears a specific key from configuration at a specific level
+ * @param key The key to clear
+ * @param level The level from which to clear the key
+ * @returns The new merged configuration after clearing
+ */
+export const clearConfigKey = (
+  key: string,
+  level: ConfigLevel = ConfigLevel.PROJECT,
+): Config => {
+  let targetFile: string;
+
+  // Determine which file to update
+  switch (level) {
+    case ConfigLevel.GLOBAL:
+      targetFile = globalConfigFile;
+      break;
+    case ConfigLevel.PROJECT:
+      targetFile = projectConfigFile;
+      break;
+    default:
+      throw new Error(`Cannot clear key at configuration level: ${level}`);
+  }
+
+  // Read current config at the target level
+  const currentLevelConfig = readConfigFile(targetFile);
+
+  // Skip if the key doesn't exist
+  if (!(key in currentLevelConfig)) {
+    return getConfig();
+  }
+
+  // Create a new config without the specified key
+  const { [key]: _, ...newConfig } = currentLevelConfig as Record<string, any>;
+
+  // Write the updated config back to the file
+  fs.writeFileSync(targetFile, JSON.stringify(newConfig, null, 2));
+
+  // Return the new merged configuration
+  return getConfig();
+};
+
+/**
+ * For backwards compatibility - clears all configuration
  * @returns The default configuration that will now be used
  */
 export const clearAllConfig = (): Config => {
-  if (fs.existsSync(configFile)) {
-    fs.unlinkSync(configFile);
-  }
-  return defaultConfig;
+  clearConfigAtLevel(ConfigLevel.GLOBAL);
+  clearConfigAtLevel(ConfigLevel.PROJECT);
+  return getDefaultConfig();
 };
