@@ -50,8 +50,19 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Debug - Show recent commits
+        run: git log -n 10 --pretty=format:"%h %s" --date=short
+
+      - name: Debug - Run verify-release-config
+        run: pnpm verify-release-config
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "neuralsoft@gmail.com"
+          git config --global user.name "Ben Houston (via GitHub Actions)"
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm semantic-release
+        run: pnpm release

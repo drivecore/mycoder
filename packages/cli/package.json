@@ -1,7 +1,7 @@
 {
   "name": "mycoder",
   "description": "A command line tool using agent that can do arbitrary tasks, including coding tasks",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "type": "module",
   "bin": "./bin/cli.js",
   "main": "./dist/index.js",
@@ -27,10 +27,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ci": "vitest --run --coverage",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
-    "semantic-release": "semantic-release -e semantic-release-monorepo"
+    "semantic-release": "pnpm exec semantic-release -e semantic-release-monorepo"
   },
   "keywords": [
     "ai",

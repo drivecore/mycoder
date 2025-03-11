@@ -1,6 +1,6 @@
 {
   "name": "mycoder-agent",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "description": "Agent module for mycoder - an AI-powered software development assistant",
   "type": "module",
   "main": "dist/index.js",
@@ -29,8 +29,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "clean:all": "rimraf node_modules dist",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
-    "semantic-release": "semantic-release -e semantic-release-monorepo"
+    "semantic-release": "pnpm exec semantic-release -e semantic-release-monorepo"
   },
   "keywords": [
     "ai",
