@@ -72,8 +72,12 @@ This project and everyone participating in it is governed by our Code of Conduct
 4. Commit your changes:
 
    ```bash
-   git commit
+   pnpm commit
    ```
+
+   This will launch an interactive prompt to help you create a properly formatted commit message.
+
+   Alternatively, you can use the regular git commit command, but we recommend using `pnpm commit` for better guidance.
 
    We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for our commit messages:
 
@@ -108,7 +112,7 @@ This project and everyone participating in it is governed by our Code of Conduct
    Closes #123
    ```
 
-   We have set up a commit message template and commitlint to help you follow this convention.
+   We have set up a commit message template, commitizen, and commitlint to help you follow this convention. Using `pnpm commit` will guide you through the process of creating a properly formatted commit message.
 
 5. Push to your fork and create a Pull Request
 
