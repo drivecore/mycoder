@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Since we can't reliably check the commit message in pre-commit (it might not exist yet),
+# we'll skip the validation here and let the commit-msg hook handle it.
+# This script now acts as a placeholder to maintain the hook order.
+echo "Proceeding with pre-commit checks..."
+exit 0

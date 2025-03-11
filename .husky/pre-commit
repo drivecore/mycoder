@@ -1,8 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
 echo "Running pre-commit checks..."
 
 # Run lint-staged for code formatting and linting
 echo "Running lint-staged..."
 pnpm lint-staged
+
+# Note: We've moved the commit message validation to happen in the commit-msg hook
+# which runs BEFORE the expensive operations below. This addresses GitHub issue #166.
 
 # Run build to ensure project builds successfully
 echo "Running build checks..."
