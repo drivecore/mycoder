@@ -100,7 +100,6 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
     const result = await toolAgent(prompt, tools, config, {
       ...context,
       workingDirectory: workingDirectory ?? context.workingDirectory,
-      customPrompt: context.customPrompt,
     });
     return { response: result.result };
   },
