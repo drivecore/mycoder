@@ -60,9 +60,12 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none',
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      provider: 'anthropic',
-      model: 'claude-3-7-sonnet-20250219',
-      ollamaBaseUrl: 'http://localhost:11434/api',
+      maxTokens: 0,
+      temperature: 0,
+      customPrompt: '',
+      profile: false,
+      tokenCache: false,
+      ANTHROPIC_API_KEY: '',
     });
 
     // Create minimal args (no headless, userSession, or pageFilter specified)
@@ -99,9 +102,6 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none', // Default is none
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      provider: 'anthropic',
-      model: 'claude-3-7-sonnet-20250219',
-      ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
     // Create args with explicit values (overriding defaults)
@@ -138,9 +138,6 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none',
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      provider: 'anthropic',
-      model: 'claude-3-7-sonnet-20250219',
-      ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
     // Create minimal args (no headless, userSession, or pageFilter specified)
@@ -189,9 +186,6 @@ describe('Config Defaults for CLI Options', () => {
       pageFilter: 'none', // Default is none
       provider: 'anthropic',
       model: 'claude-3-7-sonnet-20250219',
-      provider: 'anthropic',
-      model: 'claude-3-7-sonnet-20250219',
-      ollamaBaseUrl: 'http://localhost:11434/api',
     });
 
     // Create args with explicit values (overriding defaults)

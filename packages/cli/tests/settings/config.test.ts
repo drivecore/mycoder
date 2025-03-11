@@ -43,19 +43,13 @@ describe('Config', () => {
         pageFilter: 'none',
         provider: 'anthropic',
         model: 'claude-3-7-sonnet-20250219',
-        provider: 'anthropic',
-        model: 'claude-3-7-sonnet-20250219',
         maxTokens: 4096,
         temperature: 0.7,
-        ollamaBaseUrl: 'http://localhost:11434/api',
         profile: false,
         customPrompt: '',
         tokenCache: true,
         // API keys
         ANTHROPIC_API_KEY: '',
-        OPENAI_API_KEY: '',
-        XAI_API_KEY: '',
-        MISTRAL_API_KEY: '',
       });
       expect(fs.existsSync).toHaveBeenCalledWith(mockConfigFile);
     });
@@ -87,19 +81,13 @@ describe('Config', () => {
         pageFilter: 'none',
         provider: 'anthropic',
         model: 'claude-3-7-sonnet-20250219',
-        provider: 'anthropic',
-        model: 'claude-3-7-sonnet-20250219',
         maxTokens: 4096,
         temperature: 0.7,
-        ollamaBaseUrl: 'http://localhost:11434/api',
         profile: false,
         customPrompt: '',
         tokenCache: true,
         // API keys
         ANTHROPIC_API_KEY: '',
-        OPENAI_API_KEY: '',
-        XAI_API_KEY: '',
-        MISTRAL_API_KEY: '',
       });
     });
   });

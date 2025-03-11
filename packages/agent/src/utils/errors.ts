@@ -7,6 +7,7 @@ export const providerConfig: Record<
     keyName: 'ANTHROPIC_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/anthropic',
   },
+  /*
   openai: {
     keyName: 'OPENAI_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/openai',
@@ -18,9 +19,9 @@ export const providerConfig: Record<
   mistral: {
     keyName: 'MISTRAL_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/mistral',
-  },
+  },*/
   // No API key needed for ollama as it uses a local server
-  ollama: undefined,
+  //ollama: undefined,
 };
 
 /**

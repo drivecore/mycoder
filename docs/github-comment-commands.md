@@ -74,7 +74,7 @@ For this feature to work in your repository:
 1. The GitHub Action workflow must be present in your repository
 2. You need to configure the necessary API keys as GitHub secrets:
    - `GITHUB_TOKEN` (automatically provided)
-   - `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `XAI_API_KEY`, or `MISTRAL_API_KEY` (depending on your preferred model)
+   - `ANTHROPIC_API_KEY` (depending on your preferred model)
 
 ## Limitations
 
