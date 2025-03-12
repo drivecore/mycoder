@@ -20,10 +20,9 @@ import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 import { SharedOptions } from '../options.js';
 import { captureException } from '../sentry/index.js';
 import { getConfigFromArgv, loadConfig } from '../settings/config.js';
-import { checkGitHubTools, getGitHubModeWarning } from '../utils/githubTools.js';
+import { checkGitCli } from '../utils/gitCliCheck.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
 import { checkForUpdates, getPackageInfo } from '../utils/versionCheck.js';
-import { checkGitCli } from '../utils/gitCliCheck.js';
 
 import type { CommandModule, Argv } from 'yargs';
 
@@ -73,8 +72,14 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         if (!gitCliCheck.gitAvailable || !gitCliCheck.ghAvailable) {
           logger.warn('GitHub mode requires git and gh CLI tools to be installed.');
           logger.warn('Please install the missing tools or disable GitHub mode with --githubMode false');
+          // Disable GitHub mode if git or gh CLI is not available
+          logger.info('Disabling GitHub mode due to missing CLI tools.');
+          config.githubMode = false;
         } else if (!gitCliCheck.ghAuthenticated) {
           logger.warn('GitHub CLI is not authenticated. Please run "gh auth login" to authenticate.');
+          // Disable GitHub mode if gh CLI is not authenticated
+          logger.info('Disabling GitHub mode due to unauthenticated GitHub CLI.');
+          config.githubMode = false;
         }
       } else {
         logger.info('GitHub mode is enabled and all required CLI tools are available.');

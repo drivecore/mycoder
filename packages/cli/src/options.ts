@@ -88,7 +88,8 @@ export const sharedOptions = {
   } as const,
   githubMode: {
     type: 'boolean',
-    description: 'Enable GitHub mode for working with issues and PRs',
+    description: 'Enable GitHub mode for working with issues and PRs (requires git and gh CLI tools)',
+    default: true,
   } as const,
   upgradeCheck: {
     type: 'boolean',

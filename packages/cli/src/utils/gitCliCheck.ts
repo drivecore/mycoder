@@ -21,7 +21,7 @@ async function checkGitAvailable(): Promise<boolean> {
   try {
     await execAsync('git --version');
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -33,7 +33,7 @@ async function checkGhAvailable(): Promise<boolean> {
   try {
     await execAsync('gh --version');
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -45,7 +45,7 @@ async function checkGhAuthenticated(): Promise<boolean> {
   try {
     const { stdout } = await execAsync('gh auth status');
     return stdout.includes('Logged in to');
-  } catch (error) {
+  } catch {
     return false;
   }
 }
