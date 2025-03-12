@@ -13,8 +13,8 @@ export default {
   //model: 'claude-3-7-sonnet-20250219',
   //provider: 'openai',
   //model: 'gpt-4o',
-  provider: 'ollama',
-  model: 'medragondot/Sky-T1-32B-Preview:latest',
+  //provider: 'ollama',
+  //  model: 'medragondot/Sky-T1-32B-Preview:latest',
   maxTokens: 4096,
   temperature: 0.7,
 

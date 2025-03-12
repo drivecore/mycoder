@@ -62,30 +62,44 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
     // Check for git and gh CLI tools if GitHub mode is enabled
     if (config.githubMode) {
-      logger.debug('GitHub mode is enabled, checking for git and gh CLI tools...');
+      logger.debug(
+        'GitHub mode is enabled, checking for git and gh CLI tools...',
+      );
       const gitCliCheck = await checkGitCli(logger);
-      
+
       if (gitCliCheck.errors.length > 0) {
-        logger.warn('GitHub mode is enabled but there are issues with git/gh CLI tools:');
-        gitCliCheck.errors.forEach(error => logger.warn(`- ${error}`));
-        
+        logger.warn(
+          'GitHub mode is enabled but there are issues with git/gh CLI tools:',
+        );
+        gitCliCheck.errors.forEach((error) => logger.warn(`- ${error}`));
+
         if (!gitCliCheck.gitAvailable || !gitCliCheck.ghAvailable) {
-          logger.warn('GitHub mode requires git and gh CLI tools to be installed.');
-          logger.warn('Please install the missing tools or disable GitHub mode with --githubMode false');
+          logger.warn(
+            'GitHub mode requires git and gh CLI tools to be installed.',
+          );
+          logger.warn(
+            'Please install the missing tools or disable GitHub mode with --githubMode false',
+          );
           // Disable GitHub mode if git or gh CLI is not available
           logger.info('Disabling GitHub mode due to missing CLI tools.');
           config.githubMode = false;
         } else if (!gitCliCheck.ghAuthenticated) {
-          logger.warn('GitHub CLI is not authenticated. Please run "gh auth login" to authenticate.');
+          logger.warn(
+            'GitHub CLI is not authenticated. Please run "gh auth login" to authenticate.',
+          );
           // Disable GitHub mode if gh CLI is not authenticated
-          logger.info('Disabling GitHub mode due to unauthenticated GitHub CLI.');
+          logger.info(
+            'Disabling GitHub mode due to unauthenticated GitHub CLI.',
+          );
           config.githubMode = false;
         }
       } else {
-        logger.info('GitHub mode is enabled and all required CLI tools are available.');
+        logger.info(
+          'GitHub mode is enabled and all required CLI tools are available.',
+        );
       }
     }
-    
+
     const tokenTracker = new TokenTracker(
       'Root',
       undefined,

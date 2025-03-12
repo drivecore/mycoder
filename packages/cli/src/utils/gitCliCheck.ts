@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+
 import { Logger } from 'mycoder-agent';
 
 const execAsync = promisify(exec);
@@ -78,11 +79,13 @@ export async function checkGitCli(logger?: Logger): Promise<GitCliCheckResult> {
   if (!result.gitAvailable) {
     result.errors.push('Git CLI is not available. Please install git.');
   }
-  
+
   if (!result.ghAvailable) {
     result.errors.push('GitHub CLI is not available. Please install gh CLI.');
   } else if (!result.ghAuthenticated) {
-    result.errors.push('GitHub CLI is not authenticated. Please run "gh auth login".');
+    result.errors.push(
+      'GitHub CLI is not authenticated. Please run "gh auth login".',
+    );
   }
 
   return result;
