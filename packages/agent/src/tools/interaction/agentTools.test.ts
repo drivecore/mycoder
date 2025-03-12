@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { agentMessageTool } from '../agentMessage.js';
-import { agentStartTool, agentStates } from '../agentStart.js';
+import { TokenTracker } from '../../core/tokens.js';
+import { ToolContext } from '../../core/types.js';
+import { MockLogger } from '../../utils/mockLogger.js';
+
+import { agentMessageTool } from './agentMessage.js';
+import { agentStartTool, agentStates } from './agentStart.js';
 
 // Mock the toolAgent function
-vi.mock('../../../core/toolAgent/toolAgentCore.js', () => ({
+vi.mock('../../core/toolAgent/toolAgentCore.js', () => ({
   toolAgent: vi.fn().mockResolvedValue({
     result: 'Mock agent result',
     interactions: 1,
@@ -12,20 +16,14 @@ vi.mock('../../../core/toolAgent/toolAgentCore.js', () => ({
 }));
 
 // Mock context
-const mockContext = {
-  logger: {
-    info: vi.fn(),
-    verbose: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    warn: vi.fn(),
-  },
-  tokenTracker: {
-    tokenUsage: {
-      add: vi.fn(),
-    },
-  },
+const mockContext: ToolContext = {
+  logger: new MockLogger(),
+  tokenTracker: new TokenTracker(),
   workingDirectory: '/test',
+  headless: true,
+  userSession: false,
+  pageFilter: 'none',
+  githubMode: false,
 };
 
 describe('Agent Tools', () => {
@@ -46,7 +44,7 @@ describe('Agent Tools', () => {
 
       // Verify the agent state was created
       expect(agentStates.has(result.instanceId)).toBe(true);
-      
+
       const state = agentStates.get(result.instanceId);
       expect(state).toHaveProperty('goal', 'Test the agent tools');
       expect(state).toHaveProperty('prompt');
@@ -116,7 +114,7 @@ describe('Agent Tools', () => {
 
       expect(messageResult).toHaveProperty('terminated', true);
       expect(messageResult).toHaveProperty('completed', true);
-      
+
       // Verify the agent state was updated
       const state = agentStates.get(startResult.instanceId);
       expect(state).toHaveProperty('aborted', true);

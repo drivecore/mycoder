@@ -7,7 +7,8 @@ import {
   getModel,
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
-import { Tool, ToolAgentResult, ToolContext } from '../../core/types.js';
+import { ToolAgentResult } from '../../core/toolAgent/types.js';
+import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
 
 // Define AgentState type
@@ -48,7 +49,9 @@ const parameterSchema = z.object({
   enableUserPrompt: z
     .boolean()
     .optional()
-    .describe('Whether to allow the sub-agent to use the userPrompt tool (default: false)'),
+    .describe(
+      'Whether to allow the sub-agent to use the userPrompt tool (default: false)',
+    ),
 });
 
 const returnSchema = z.object({
@@ -130,13 +133,14 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     agentStates.set(instanceId, agentState);
 
     // Start the agent in a separate promise that we don't await
+    // eslint-disable-next-line promise/catch-or-return
     Promise.resolve().then(async () => {
       try {
         const result = await toolAgent(prompt, tools, subAgentConfig, {
           ...context,
           workingDirectory: workingDirectory ?? context.workingDirectory,
         });
-        
+
         // Update agent state with the result
         const state = agentStates.get(instanceId);
         if (state && !state.aborted) {
@@ -152,6 +156,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           state.error = error instanceof Error ? error.message : String(error);
         }
       }
+      return true;
     });
 
     return {

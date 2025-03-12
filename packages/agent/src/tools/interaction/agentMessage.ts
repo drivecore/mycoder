@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
+
 import { agentStates } from './agentStart.js';
 
 const parameterSchema = z.object({
@@ -21,9 +22,17 @@ const parameterSchema = z.object({
 
 const returnSchema = z.object({
   output: z.string().describe('The current output from the sub-agent'),
-  completed: z.boolean().describe('Whether the sub-agent has completed its task'),
-  error: z.string().optional().describe('Error message if the sub-agent encountered an error'),
-  terminated: z.boolean().optional().describe('Whether the sub-agent was terminated by this message'),
+  completed: z
+    .boolean()
+    .describe('Whether the sub-agent has completed its task'),
+  error: z
+    .string()
+    .optional()
+    .describe('Error message if the sub-agent encountered an error'),
+  terminated: z
+    .boolean()
+    .optional()
+    .describe('Whether the sub-agent was terminated by this message'),
 });
 
 type Parameters = z.infer<typeof parameterSchema>;
@@ -66,7 +75,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       if (terminate) {
         agentState.aborted = true;
         agentState.completed = true;
-        
+
         return {
           output: agentState.output || 'Sub-agent terminated before completion',
           completed: true,
@@ -78,14 +87,17 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       // In a more advanced implementation, this could inject the guidance
       // into the agent's execution context
       if (guidance) {
-        logger.info(`Guidance provided to sub-agent ${instanceId}: ${guidance}`);
+        logger.info(
+          `Guidance provided to sub-agent ${instanceId}: ${guidance}`,
+        );
         // This is a placeholder for future implementation
         // In a real implementation, we would need to interrupt the agent's
         // execution and inject this guidance
       }
 
       // Get the current output
-      const output = agentState.result?.result || agentState.output || 'No output yet';
+      const output =
+        agentState.result?.result || agentState.output || 'No output yet';
 
       return {
         output,
@@ -104,7 +116,9 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       }
 
       const errorMessage = String(error);
-      logger.error(`Unknown error during sub-agent interaction: ${errorMessage}`);
+      logger.error(
+        `Unknown error during sub-agent interaction: ${errorMessage}`,
+      );
       return {
         output: '',
         completed: false,
