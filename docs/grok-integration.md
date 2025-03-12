@@ -1,6 +1,6 @@
-# Grok/XAI Integration
+# Grok/XAI Integration (Experimental)
 
-MyCoder supports [Grok](https://grok.x.ai/) models from xAI as an alternative to Anthropic's Claude models.
+MyCoder supports [Grok](https://grok.x.ai/) models from xAI as an alternative to Anthropic's Claude models. This integration is experimental and may require additional configuration based on your access to the Grok API.
 
 ## Configuration
 
@@ -71,6 +71,9 @@ If you encounter issues with the Grok integration, check the following:
 2. Verify that you're using a valid model name
 3. Check that your account has access to the specified model
 4. Ensure your API key has not expired or been revoked
+5. Verify that your Grok API access is fully set up
+
+> **Note:** The Grok API is still evolving, and the integration uses the Anthropic-compatible API format. If you encounter 404 errors, it may indicate that your API access needs to be configured differently or that the API endpoints have changed.
 
 For more detailed logs, run MyCoder with increased verbosity:
 
