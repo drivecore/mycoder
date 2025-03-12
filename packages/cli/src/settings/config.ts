@@ -275,9 +275,17 @@ export const clearConfigKey = (
   }
 
   // Create a new config without the specified key
-  const { [key]: _, ...newConfig } = currentLevelConfig as Record<string, any>;
+  const { [key]: removedValue, ...newConfig } = currentLevelConfig as Record<
+    string,
+    any
+  >;
+  console.log(`Removed value for key ${key}:`, removedValue);
 
   // Write the updated config back to the file
+  console.log(`Clearing key ${key} from ${targetFile}`);
+  console.log(`Original config:`, JSON.stringify(currentLevelConfig, null, 2));
+  console.log(`New config without key:`, JSON.stringify(newConfig, null, 2));
+
   fs.writeFileSync(targetFile, JSON.stringify(newConfig, null, 2));
 
   // Return the new merged configuration
