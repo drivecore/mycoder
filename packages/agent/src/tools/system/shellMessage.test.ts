@@ -15,7 +15,7 @@ const toolContext: ToolContext = {
   userSession: false,
   pageFilter: 'simple',
   tokenTracker: new TokenTracker(),
-  githubMode: false,
+  githubMode: true,
 };
 
 // Helper function to get instanceId from shellStart result

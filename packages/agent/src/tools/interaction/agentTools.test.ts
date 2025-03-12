@@ -23,7 +23,7 @@ const mockContext: ToolContext = {
   headless: true,
   userSession: false,
   pageFilter: 'none',
-  githubMode: false,
+  githubMode: true,
 };
 
 describe('Agent Tools', () => {

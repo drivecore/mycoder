@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { backgroundToolRegistry, BackgroundToolStatus, BackgroundToolType } from '../../core/backgroundTools.js';
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
   getModel,
@@ -70,7 +73,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
     const { logger, agentId } = context;
-    
+
     // Validate parameters
     const {
       description,
@@ -79,9 +82,12 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       workingDirectory,
       relevantFilesDirectories,
     } = parameterSchema.parse(params);
-    
+
     // Register this sub-agent with the background tool registry
-    const subAgentId = backgroundToolRegistry.registerAgent(agentId || 'unknown', goal);
+    const subAgentId = backgroundToolRegistry.registerAgent(
+      agentId || 'unknown',
+      goal,
+    );
     logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
 
     // Construct a well-structured prompt
@@ -109,19 +115,29 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
         ...context,
         workingDirectory: workingDirectory ?? context.workingDirectory,
       });
-      
+
       // Update background tool registry with completed status
-      backgroundToolRegistry.updateToolStatus(subAgentId, BackgroundToolStatus.COMPLETED, {
-        result: result.result.substring(0, 100) + (result.result.length > 100 ? '...' : '')
-      });
-      
+      backgroundToolRegistry.updateToolStatus(
+        subAgentId,
+        BackgroundToolStatus.COMPLETED,
+        {
+          result:
+            result.result.substring(0, 100) +
+            (result.result.length > 100 ? '...' : ''),
+        },
+      );
+
       return { response: result.result };
     } catch (error) {
       // Update background tool registry with error status
-      backgroundToolRegistry.updateToolStatus(subAgentId, BackgroundToolStatus.ERROR, {
-        error: error instanceof Error ? error.message : String(error)
-      });
-      
+      backgroundToolRegistry.updateToolStatus(
+        subAgentId,
+        BackgroundToolStatus.ERROR,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
+
       throw error;
     }
   },
