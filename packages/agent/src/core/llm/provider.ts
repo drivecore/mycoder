@@ -3,6 +3,7 @@
  */
 
 import { AnthropicProvider } from './providers/anthropic.js';
+import { XAIProvider } from './providers/xai.js';
 import { ProviderOptions, GenerateOptions, LLMResponse } from './types.js';
 
 /**
@@ -39,6 +40,7 @@ const providerFactories: Record<
   (model: string, options: ProviderOptions) => LLMProvider
 > = {
   anthropic: (model, options) => new AnthropicProvider(model, options),
+  xai: (model, options) => new XAIProvider(model, options),
 };
 
 /**

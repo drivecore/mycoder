@@ -35,6 +35,7 @@
     "rimraf": "^6.0.1"
   },
   "devDependencies": {
+    "@ai-sdk/xai": "^1.1.13",
     "@anolilab/semantic-release-pnpm": "^1.1.10",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
