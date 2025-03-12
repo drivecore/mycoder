@@ -58,6 +58,7 @@ GitHub mode is **enabled by default** but requires the Git and GitHub CLI tools 
 - GitHub CLI (`gh`) must be installed and authenticated
 
 MyCoder will automatically check for these requirements when GitHub mode is enabled and will:
+
 - Warn you if any requirements are missing
 - Automatically disable GitHub mode if the required tools are not available or not authenticated
 
@@ -75,7 +76,7 @@ mycoder --githubMode false  # Disable GitHub mode
 ```js
 // mycoder.config.js
 export default {
-  githubMode: true,  // Enable GitHub mode (default)
+  githubMode: true, // Enable GitHub mode (default)
   // other configuration options...
 };
 ```
