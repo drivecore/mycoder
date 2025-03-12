@@ -15,7 +15,6 @@ export type SharedOptions = {
   readonly tokenCache?: boolean;
   readonly userPrompt?: boolean;
   readonly githubMode?: boolean;
-  readonly userWarning?: boolean;
   readonly upgradeCheck?: boolean;
   readonly ollamaBaseUrl?: string;
 };

@@ -40,7 +40,7 @@ mycoder --userPrompt false "Generate a basic Express.js server"
 mycoder --userPrompt false "Generate a basic Express.js server"
 
 # Disable user consent warning and version upgrade check for automated environments
-mycoder --userWarning false --upgradeCheck false "Generate a basic Express.js server"
+mycoder --upgradeCheck false "Generate a basic Express.js server"
 
 # Enable GitHub mode via CLI option (overrides config file)
 mycoder --githubMode "Work with GitHub issues and PRs"

@@ -36,7 +36,7 @@ mycoder -f prompt.txt
 mycoder --userPrompt false "Generate a basic Express.js server"
 
 # Disable user consent warning and version upgrade check for automated environments
-mycoder --userWarning false --upgradeCheck false "Generate a basic Express.js server"
+mycoder --upgradeCheck false "Generate a basic Express.js server"
 
 # Enable GitHub mode via CLI option (overrides config file)
 mycoder --githubMode true
@@ -163,7 +163,6 @@ export default {
 
 These options are available only as command-line parameters and are not stored in the configuration:
 
-- `userWarning`: Skip user consent check for current session without saving consent (default: `true`)
 - `upgradeCheck`: Disable version upgrade check for automated/remote usage (default: `true`)
 - `userPrompt`: Enable or disable the userPrompt tool (default: `true`)
 
