@@ -21,6 +21,19 @@ export type Config = {
   tokenUsage: boolean;
 
   ollamaBaseUrl: string;
+  
+  // MCP configuration
+  mcp?: {
+    servers?: Array<{
+      name: string;
+      url: string;
+      auth?: {
+        type: 'bearer';
+        token: string;
+      };
+    }>;
+    defaultResources?: string[];
+  };
 };
 
 // Default configuration
@@ -51,6 +64,12 @@ const defaultConfig: Config = {
 
   // Ollama configuration
   ollamaBaseUrl: 'http://localhost:11434',
+  
+  // MCP configuration
+  mcp: {
+    servers: [],
+    defaultResources: [],
+  },
 };
 
 export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {

@@ -35,6 +35,8 @@ export * from './core/toolAgent/toolExecutor.js';
 export * from './core/toolAgent/tokenTracking.js';
 export * from './core/toolAgent/types.js';
 export * from './core/llm/provider.js';
+// MCP
+export * from './core/mcp/index.js';
 
 // Utils
 export * from './tools/getTools.js';

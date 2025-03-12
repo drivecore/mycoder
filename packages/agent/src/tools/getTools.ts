@@ -14,15 +14,20 @@ import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
 import { shellStartTool } from './system/shellStart.js';
 import { sleepTool } from './system/sleep.js';
+import { McpTool } from './mcp.js';
 
 // Import these separately to avoid circular dependencies
 
+import { McpConfig } from '../core/mcp/types.js';
+
 interface GetToolsOptions {
   userPrompt?: boolean;
+  mcpConfig?: McpConfig;
 }
 
 export function getTools(options?: GetToolsOptions): Tool[] {
   const userPrompt = options?.userPrompt !== false; // Default to true if not specified
+  const mcpConfig = options?.mcpConfig || { servers: [], defaultResources: [] };
 
   // Force cast to Tool type to avoid TypeScript issues
   const tools: Tool[] = [
@@ -43,6 +48,12 @@ export function getTools(options?: GetToolsOptions): Tool[] {
   // Only include userPrompt tool if enabled
   if (userPrompt) {
     tools.push(userPromptTool as unknown as Tool);
+  }
+
+  // Add MCP tool if we have any servers configured
+  if (mcpConfig.servers && mcpConfig.servers.length > 0) {
+    const mcpTool = new McpTool(mcpConfig);
+    tools.push(mcpTool as unknown as Tool);
   }
 
   return tools;
