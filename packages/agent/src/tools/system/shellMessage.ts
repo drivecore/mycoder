@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 
@@ -99,7 +96,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, stdin, signal, showStdIn, showStdout },
-    { logger },
+    { logger, backgroundTools },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Interacting with shell process ${instanceId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
@@ -122,7 +119,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           processState.state.signaled = true;
 
           // Update background tool registry if signal failed
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.ERROR,
             {
@@ -142,7 +139,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           signal === 'SIGKILL' ||
           signal === 'SIGINT'
         ) {
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.TERMINATED,
             {
@@ -151,7 +148,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
             },
           );
         } else {
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.RUNNING,
             {

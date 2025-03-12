@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
@@ -75,7 +72,7 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, actionType, url, selector, selectorType, text },
-    { logger, pageFilter },
+    { logger, pageFilter, backgroundTools },
   ): Promise<ReturnType> => {
     // Validate action format
 
@@ -190,7 +187,7 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
           browserSessions.delete(instanceId);
 
           // Update background tool registry when browser is explicitly closed
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.COMPLETED,
             {
@@ -210,14 +207,10 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
       logger.error('Browser action failed:', { error });
 
       // Update background tool registry with error status if action fails
-      backgroundToolRegistry.updateToolStatus(
-        instanceId,
-        BackgroundToolStatus.ERROR,
-        {
-          error: errorToString(error),
-          actionType,
-        },
-      );
+      backgroundTools.updateToolStatus(instanceId, BackgroundToolStatus.ERROR, {
+        error: errorToString(error),
+        actionType,
+      });
 
       return {
         status: 'error',

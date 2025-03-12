@@ -3,10 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
@@ -46,7 +43,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { url, timeout = 30000 },
-    { logger, headless, userSession, pageFilter, agentId },
+    { logger, headless, userSession, pageFilter, backgroundTools },
   ): Promise<ReturnType> => {
     logger.verbose(`Starting browser session${url ? ` at ${url}` : ''}`);
     logger.verbose(
@@ -58,7 +55,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       const instanceId = uuidv4();
 
       // Register this browser session with the background tool registry
-      backgroundToolRegistry.registerBrowser(agentId || 'unknown', url);
+      backgroundTools.registerBrowser(url);
 
       // Launch browser
       const launchOptions = {
@@ -99,7 +96,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       browser.on('disconnected', () => {
         browserSessions.delete(instanceId);
         // Update background tool registry when browser disconnects
-        backgroundToolRegistry.updateToolStatus(
+        backgroundTools.updateToolStatus(
           instanceId,
           BackgroundToolStatus.TERMINATED,
         );
@@ -146,7 +143,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       logger.verbose(`Content length: ${content.length} characters`);
 
       // Update background tool registry with running status
-      backgroundToolRegistry.updateToolStatus(
+      backgroundTools.updateToolStatus(
         instanceId,
         BackgroundToolStatus.RUNNING,
         {

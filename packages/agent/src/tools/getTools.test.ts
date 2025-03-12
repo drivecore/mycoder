@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
+import { BackgroundTools } from '../core/backgroundTools.js';
 import { TokenTracker } from '../core/tokens.js';
 import { ToolContext } from '../core/types.js';
 import { MockLogger } from '../utils/mockLogger.js';
@@ -19,6 +20,7 @@ export const getMockToolContext = (): ToolContext => ({
   model: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,
   temperature: 0.7,
+  backgroundTools: new BackgroundTools('test'),
 });
 
 describe('getTools', () => {

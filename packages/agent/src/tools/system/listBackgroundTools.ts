@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 
 const parameterSchema = z.object({
@@ -52,14 +49,14 @@ export const listBackgroundToolsTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { status = 'all', type = 'all', verbose = false },
-    { logger, agentId },
+    { logger, backgroundTools },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Listing background tools with status: ${status}, type: ${type}, verbose: ${verbose}`,
     );
 
     // Get all tools for this agent
-    const tools = backgroundToolRegistry.getToolsByAgent(agentId || 'unknown');
+    const tools = backgroundTools.getTools();
 
     // Filter by status if specified
     const filteredByStatus =
