@@ -1,3 +1,10 @@
+# [mycoder-v1.1.1](https://github.com/drivecore/mycoder/compare/mycoder-v1.1.0...mycoder-v1.1.1) (2025-03-12)
+
+
+### Bug Fixes
+
+* remove userWarning option from docs and Github Action. ([35617c1](https://github.com/drivecore/mycoder/commit/35617c19a4a03ba5c170b93d035bdf99ddb81544))
+
 # [mycoder-v1.1.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.0.0...mycoder-v1.1.0) (2025-03-12)
 
 
