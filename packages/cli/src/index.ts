@@ -6,7 +6,7 @@ import yargs, { CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { command as defaultCommand } from './commands/$default.js';
-import { command as configCommand } from './commands/config.js';
+import { command as initCommand } from './commands/init.js';
 import { command as testProfileCommand } from './commands/test-profile.js';
 import { command as testSentryCommand } from './commands/test-sentry.js';
 import { command as toolsCommand } from './commands/tools.js';
@@ -59,7 +59,7 @@ const main = async () => {
       testSentryCommand,
       testProfileCommand,
       toolsCommand,
-      configCommand,
+      initCommand,
     ] as CommandModule[])
     .strict()
     .showHelpOnFail(true)

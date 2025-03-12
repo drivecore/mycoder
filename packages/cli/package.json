@@ -47,6 +47,7 @@
   "dependencies": {
     "@sentry/node": "^9.3.0",
     "chalk": "^5",
+    "cosmiconfig": "^9.0.0",
     "deepmerge": "^4.3.1",
     "dotenv": "^16",
     "mycoder-agent": "workspace:*",

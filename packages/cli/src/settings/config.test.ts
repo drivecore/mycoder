@@ -1,83 +1,58 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { describe, it, expect, vi } from 'vitest';
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { getConfig, getDefaultConfig, Config } from './config';
+import * as configLoader from './config-loader';
 
-// Mock modules
-vi.mock('fs', () => ({
-  existsSync: vi.fn(),
-  readFileSync: vi.fn(),
-  writeFileSync: vi.fn(),
-  unlinkSync: vi.fn(),
+// Mock the config-loader module
+vi.mock('./config-loader', () => ({
+  loadConfig: vi.fn(),
 }));
 
-vi.mock('path', () => ({
-  join: vi.fn(),
-}));
+describe('config', () => {
+  it('getConfig should call loadConfig with CLI options', () => {
+    const mockConfig: Config = {
+      githubMode: true,
+      headless: false,
+      userSession: false,
+      pageFilter: 'none',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
+      maxTokens: 4096,
+      temperature: 0.7,
+      customPrompt: '',
+      profile: false,
+      tokenCache: true,
+      ANTHROPIC_API_KEY: '',
+    };
+    vi.mocked(configLoader.loadConfig).mockReturnValue(mockConfig);
 
-// Mock settings module
-vi.mock('./settings.js', () => ({
-  getSettingsDir: vi.fn().mockReturnValue('/test/home/dir/.mycoder'),
-  getProjectSettingsDir: vi.fn().mockReturnValue('/test/project/dir/.mycoder'),
-  isProjectSettingsDirWritable: vi.fn().mockReturnValue(true),
-}));
+    const cliOptions = { headless: false };
+    const result = getConfig(cliOptions);
 
-// Import after mocking
-import { readConfigFile } from './config.js';
-
-describe('Hierarchical Configuration', () => {
-  // Mock file paths
-  const mockGlobalConfigPath = '/test/home/dir/.mycoder/config.json';
-  const mockProjectConfigPath = '/test/project/dir/.mycoder/config.json';
-
-  // Mock config data
-  const mockGlobalConfig = {
-    provider: 'openai',
-    model: 'gpt-4',
-  };
-
-  const mockProjectConfig = {
-    model: 'claude-3-opus',
-  };
-
-  beforeEach(() => {
-    vi.resetAllMocks();
-
-    // Set environment
-    process.env.VITEST = 'true';
-
-    // Mock path.join
-    vi.mocked(path.join).mockImplementation((...args) => {
-      if (args.includes('/test/home/dir/.mycoder')) {
-        return mockGlobalConfigPath;
-      }
-      if (args.includes('/test/project/dir/.mycoder')) {
-        return mockProjectConfigPath;
-      }
-      return args.join('/');
-    });
-
-    // Mock fs.existsSync
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-
-    // Mock fs.readFileSync
-    vi.mocked(fs.readFileSync).mockImplementation((filePath) => {
-      if (filePath === mockGlobalConfigPath) {
-        return JSON.stringify(mockGlobalConfig);
-      }
-      if (filePath === mockProjectConfigPath) {
-        return JSON.stringify(mockProjectConfig);
-      }
-      return '';
-    });
+    expect(configLoader.loadConfig).toHaveBeenCalledWith(cliOptions);
+    expect(result).toEqual(mockConfig);
   });
 
-  // Only test the core function that's actually testable
-  it('should read config files correctly', () => {
-    const globalConfig = readConfigFile(mockGlobalConfigPath);
-    expect(globalConfig).toEqual(mockGlobalConfig);
+  it('getDefaultConfig should call loadConfig with no arguments', () => {
+    const mockConfig: Config = {
+      githubMode: true,
+      headless: true,
+      userSession: false,
+      pageFilter: 'none',
+      provider: 'anthropic',
+      model: 'claude-3-7-sonnet-20250219',
+      maxTokens: 4096,
+      temperature: 0.7,
+      customPrompt: '',
+      profile: false,
+      tokenCache: true,
+      ANTHROPIC_API_KEY: '',
+    };
+    vi.mocked(configLoader.loadConfig).mockReturnValue(mockConfig);
 
-    const projectConfig = readConfigFile(mockProjectConfigPath);
-    expect(projectConfig).toEqual(mockProjectConfig);
+    const result = getDefaultConfig();
+
+    expect(configLoader.loadConfig).toHaveBeenCalledWith();
+    expect(result).toEqual(mockConfig);
   });
 });

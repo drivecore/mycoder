@@ -71,22 +71,51 @@ Requirements for GitHub mode:
 
 ## Configuration
 
-MyCoder stores configuration in `~/.mycoder/config.json`. You can manage configuration using the `config` command:
+MyCoder uses a configuration file in your project directory. To create a default configuration file, run:
 
 ```bash
-# List all configuration
-mycoder config list
+# Create a default configuration file
+mycoder init
 
-# Get a specific configuration value
-mycoder config get githubMode
-
-# Set a configuration value
-mycoder config set githubMode true
-
-# Reset a configuration value to its default
-mycoder config clear customPrompt
-
+# Force overwrite an existing configuration file
+mycoder init --force
 ```
+
+This will create a `mycoder.config.js` file in your current directory with default settings that you can customize.
+
+Example configuration file:
+
+```javascript
+// mycoder.config.js
+export default {
+  // GitHub integration
+  githubMode: true,
+  
+  // Browser settings
+  headless: true,
+  userSession: false,
+  pageFilter: 'none', // 'simple', 'none', or 'readability'
+  
+  // Model settings
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
+  maxTokens: 4096,
+  temperature: 0.7,
+  
+  // Custom settings
+  customPrompt: '',
+  profile: false,
+  tokenCache: true,
+  
+  // API keys (better to use environment variables for these)
+  // ANTHROPIC_API_KEY: 'your-api-key',
+};
+```
+
+MyCoder will search for configuration in the following places (in order of precedence):
+1. CLI options (e.g., `--githubMode true`)
+2. Configuration file (`mycoder.config.js`, `.mycoderrc`, etc.)
+3. Default values
 
 ### Model Selection
 
