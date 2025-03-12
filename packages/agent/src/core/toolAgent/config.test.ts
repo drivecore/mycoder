@@ -6,13 +6,17 @@ import { getModel } from './config.js';
 
 describe('createProvider', () => {
   it('should return the correct model for anthropic', () => {
-    const model = createProvider('anthropic', 'claude-3-7-sonnet-20250219');
+    const model = createProvider('anthropic', 'claude-3-7-sonnet-20250219', {
+      apiKey: 'sk-proj-1234567890',
+    });
     expect(model).toBeDefined();
     expect(model.provider).toBe('anthropic.messages');
   });
 
   it('should return the correct model for openai', () => {
-    const model = createProvider('openai', 'gpt-4o-2024-05-13');
+    const model = createProvider('openai', 'gpt-4o-2024-05-13', {
+      apiKey: 'sk-proj-1234567890',
+    });
     expect(model).toBeDefined();
     expect(model.provider).toBe('openai.chat');
   });

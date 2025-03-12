@@ -97,17 +97,7 @@ Requirements for GitHub mode:
 
 MyCoder is configured using a `mycoder.config.js` file in your project root, similar to ESLint and other modern JavaScript tools. This file exports a configuration object with your preferred settings.
 
-To create a default configuration file, run:
-
-```bash
-# Create a default configuration file
-mycoder init
-
-# Force overwrite an existing configuration file
-mycoder init --force
-```
-
-This will create a `mycoder.config.js` file in your current directory with default settings that you can customize.
+You can create a `mycoder.config.js` file in your project root with your preferred settings.
 
 Example configuration file:
 
