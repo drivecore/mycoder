@@ -105,7 +105,8 @@ export class XAIProvider implements LLMProvider {
   constructor(model: string, options: XAIOptions = {}) {
     this.model = model;
     this.apiKey = options.apiKey || process.env.XAI_API_KEY || '';
-    this.baseUrl = options.baseUrl || 'https://api.x.ai/v1';
+    // Use Claude-compatible endpoint
+    this.baseUrl = options.baseUrl || 'https://api.anthropic.com';
 
     if (!this.apiKey) {
       throw new Error('XAI API key is required');
