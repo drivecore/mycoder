@@ -21,9 +21,9 @@ export interface ConfigOptions extends SharedOptions {
   command: 'get' | 'set' | 'list' | 'clear';
   key?: string;
   value?: string;
-  all: boolean;  // Has default value in builder, so it's always defined
-  global: boolean;  // Has default value in builder, so it's always defined
-  verbose: boolean;  // Has default value in builder, so it's always defined
+  all: boolean; // Has default value in builder, so it's always defined
+  global: boolean; // Has default value in builder, so it's always defined
+  verbose: boolean; // Has default value in builder, so it's always defined
 }
 
 export const command: CommandModule<SharedOptions, ConfigOptions> = {
@@ -134,10 +134,9 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
       logger.info('Current configuration:');
 
       // Show config file locations
-      const {
-        getSettingsDir,
-        getProjectSettingsDir,
-      } = require('../settings/settings.js');
+      const { getSettingsDir, getProjectSettingsDir } = await import(
+        '../settings/settings.js'
+      );
       const globalConfigPath = path.join(getSettingsDir(), 'config.json');
       const projectDir = getProjectSettingsDir();
       const projectConfigPath = projectDir

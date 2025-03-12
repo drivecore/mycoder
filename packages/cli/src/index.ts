@@ -83,10 +83,10 @@ await main()
   .finally(async () => {
     // Report timings if profiling is enabled
     await reportTimings();
-    
+
     // Clean up all resources before exit
     await cleanupResources();
-    
+
     // Setup a force exit as a failsafe
     // This ensures the process will exit even if there are lingering handles
     setupForceExit(5000);

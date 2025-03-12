@@ -14,12 +14,12 @@ export class BrowserManager {
     headless: true,
     defaultTimeout: 30000,
   };
-  
+
   constructor() {
     // Store a reference to the instance globally for cleanup
     // This allows the CLI to access the instance for cleanup
     (globalThis as any).__BROWSER_MANAGER__ = this;
-    
+
     // Set up cleanup handlers for graceful shutdown
     this.setupGlobalCleanup();
   }
@@ -92,7 +92,7 @@ export class BrowserManager {
     // No need to add individual process handlers for each session
     // We'll handle all sessions in the global cleanup
   }
-  
+
   /**
    * Sets up global cleanup handlers for all browser sessions
    */
@@ -103,7 +103,7 @@ export class BrowserManager {
         console.error('Error closing browser sessions:', err);
       });
     });
-    
+
     // Use exit for synchronous cleanup (as a fallback)
     process.on('exit', () => {
       // Can only do synchronous operations here
@@ -111,15 +111,20 @@ export class BrowserManager {
         try {
           // Attempt synchronous close - may not fully work
           session.browser.close();
+          // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
           // Ignore errors during exit
         }
       }
     });
-    
+
     // Handle SIGINT (Ctrl+C)
     process.on('SIGINT', () => {
-      this.closeAllSessions().catch(() => {})
+      // eslint-disable-next-line promise/catch-or-return
+      this.closeAllSessions()
+        .catch(() => {
+          return false;
+        })
         .finally(() => {
           // Give a moment for cleanup to complete
           setTimeout(() => process.exit(0), 500);

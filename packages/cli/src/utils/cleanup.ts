@@ -6,11 +6,13 @@ import { BrowserManager, processStates } from 'mycoder-agent';
  */
 export async function cleanupResources(): Promise<void> {
   console.log('Cleaning up resources before exit...');
-  
+
   // 1. Clean up browser sessions
   try {
     // Get the BrowserManager instance - this is a singleton
-    const browserManager = (globalThis as any).__BROWSER_MANAGER__ as BrowserManager | undefined;
+    const browserManager = (globalThis as any).__BROWSER_MANAGER__ as
+      | BrowserManager
+      | undefined;
     if (browserManager) {
       console.log('Closing all browser sessions...');
       await browserManager.closeAllSessions();
@@ -18,7 +20,7 @@ export async function cleanupResources(): Promise<void> {
   } catch (error) {
     console.error('Error closing browser sessions:', error);
   }
-  
+
   // 2. Clean up shell processes
   try {
     if (processStates.size > 0) {
@@ -34,6 +36,7 @@ export async function cleanupResources(): Promise<void> {
                 if (!state.state.completed) {
                   state.process.kill('SIGKILL');
                 }
+                // eslint-disable-next-line unused-imports/no-unused-vars
               } catch (e) {
                 // Ignore errors on forced kill
               }
@@ -47,10 +50,10 @@ export async function cleanupResources(): Promise<void> {
   } catch (error) {
     console.error('Error terminating shell processes:', error);
   }
-  
+
   // 3. Give async operations a moment to complete
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  
+
   console.log('Cleanup completed');
 }
 

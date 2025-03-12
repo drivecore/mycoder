@@ -8,6 +8,7 @@ import {
   updateConfig,
   getConfigAtLevel,
   clearConfigAtLevel,
+  clearConfigKey,
 } from '../../src/settings/config.js';
 
 // Mock dependencies
@@ -17,6 +18,7 @@ vi.mock('../../src/settings/config.js', () => ({
   updateConfig: vi.fn(),
   getConfigAtLevel: vi.fn(),
   clearConfigAtLevel: vi.fn(),
+  clearConfigKey: vi.fn(),
   ConfigLevel: {
     DEFAULT: 'default',
     GLOBAL: 'global',
@@ -76,6 +78,8 @@ describe('Config Command', () => {
       ...config,
     }));
     vi.mocked(getConfigAtLevel).mockReturnValue({});
+    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: false }));
+    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: false }));
   });
 
   afterEach(() => {
