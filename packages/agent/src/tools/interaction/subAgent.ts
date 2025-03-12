@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import {
-  backgroundToolRegistry,
+  BackgroundTools,
   BackgroundToolStatus,
 } from '../../core/backgroundTools.js';
 import {
@@ -69,7 +69,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
-    const { logger, agentId } = context;
+    const { logger, backgroundTools } = context;
 
     // Validate parameters
     const {
@@ -81,11 +81,14 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
     } = parameterSchema.parse(params);
 
     // Register this sub-agent with the background tool registry
-    const subAgentId = backgroundToolRegistry.registerAgent(
-      agentId || 'unknown',
-      goal,
-    );
+    const subAgentId = backgroundTools.registerAgent(goal);
     logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
+
+    const localContext = {
+      ...context,
+      workingDirectory: workingDirectory ?? context.workingDirectory,
+      backgroundTools: new BackgroundTools(`subAgent: ${goal}`),
+    };
 
     // Construct a well-structured prompt
     const prompt = [
@@ -108,13 +111,10 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
     };
 
     try {
-      const result = await toolAgent(prompt, tools, config, {
-        ...context,
-        workingDirectory: workingDirectory ?? context.workingDirectory,
-      });
+      const result = await toolAgent(prompt, tools, config, localContext);
 
       // Update background tool registry with completed status
-      backgroundToolRegistry.updateToolStatus(
+      backgroundTools.updateToolStatus(
         subAgentId,
         BackgroundToolStatus.COMPLETED,
         {
@@ -127,13 +127,9 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       return { response: result.result };
     } catch (error) {
       // Update background tool registry with error status
-      backgroundToolRegistry.updateToolStatus(
-        subAgentId,
-        BackgroundToolStatus.ERROR,
-        {
-          error: error instanceof Error ? error.message : String(error),
-        },
-      );
+      backgroundTools.updateToolStatus(subAgentId, BackgroundToolStatus.ERROR, {
+        error: error instanceof Error ? error.message : String(error),
+      });
 
       throw error;
     }

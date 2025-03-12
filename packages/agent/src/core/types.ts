@@ -3,6 +3,7 @@ import { JsonSchema7Type } from 'zod-to-json-schema';
 
 import { Logger } from '../utils/logger.js';
 
+import { BackgroundTools } from './backgroundTools.js';
 import { TokenTracker } from './tokens.js';
 import { ModelProvider } from './toolAgent/config.js';
 
@@ -26,6 +27,7 @@ export type ToolContext = {
   model: string;
   maxTokens: number;
   temperature: number;
+  backgroundTools: BackgroundTools;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

@@ -39,11 +39,15 @@ export const toolAgent = async (
 
   logger.debug('User message:', initialPrompt);
 
+  const localContext = {
+    ...context,
+  };
+
   // Get the system prompt once at the start
-  const systemPrompt = config.getSystemPrompt(context);
+  const systemPrompt = config.getSystemPrompt(localContext);
 
   // Create the LLM provider
-  const provider = createProvider(context.provider, context.model);
+  const provider = createProvider(localContext.provider, localContext.model);
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.verbose(
@@ -74,8 +78,8 @@ export const toolAgent = async (
     const generateOptions = {
       messages: messagesWithSystem,
       functions: functionDefinitions,
-      temperature: context.temperature,
-      maxTokens: context.maxTokens,
+      temperature: localContext.temperature,
+      maxTokens: localContext.maxTokens,
     };
 
     const { text, toolCalls, tokenUsage } = await generateText(
@@ -123,7 +127,7 @@ export const toolAgent = async (
 
       // Execute the tools and get results
       const { sequenceCompleted, completionResult, respawn } =
-        await executeTools(toolCalls, tools, messages, context);
+        await executeTools(toolCalls, tools, messages, localContext);
 
       if (respawn) {
         logger.info('Respawning agent with new context');

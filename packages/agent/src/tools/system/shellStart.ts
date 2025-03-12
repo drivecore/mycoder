@@ -4,10 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 
@@ -102,7 +99,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       showStdIn = false,
       showStdout = false,
     },
-    { logger, workingDirectory, agentId },
+    { logger, workingDirectory, backgroundTools },
   ): Promise<ReturnType> => {
     if (showStdIn) {
       logger.info(`Command input: ${command}`);
@@ -115,7 +112,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         const instanceId = uuidv4();
 
         // Register this shell process with the background tool registry
-        backgroundToolRegistry.registerShell(agentId || 'unknown', command);
+        backgroundTools.registerShell(command);
 
         let hasResolved = false;
 
@@ -164,7 +161,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           processState.state.completed = true;
 
           // Update background tool registry with error status
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.ERROR,
             {
@@ -198,7 +195,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             code === 0
               ? BackgroundToolStatus.COMPLETED
               : BackgroundToolStatus.ERROR;
-          backgroundToolRegistry.updateToolStatus(instanceId, status, {
+          backgroundTools.updateToolStatus(instanceId, status, {
             exitCode: code,
             signaled: signal !== null,
           });
