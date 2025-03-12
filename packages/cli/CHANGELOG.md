@@ -1,3 +1,23 @@
+# [mycoder-v1.1.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.0.0...mycoder-v1.1.0) (2025-03-12)
+
+
+### Bug Fixes
+
+* implement resource cleanup to prevent CLI hanging issue ([d33e729](https://github.com/drivecore/mycoder/commit/d33e7298686a30661ee8b36f2fdffb16f5f3da71)), closes [#141](https://github.com/drivecore/mycoder/issues/141)
+* llm choice working well for openai, anthropic and ollama ([68d34ab](https://github.com/drivecore/mycoder/commit/68d34abf8a73ed533a072359ce334a9364753425))
+* remove unreliable init command and createDefaultConfigFile function ([5559567](https://github.com/drivecore/mycoder/commit/5559567d1986e828983f5975495bee89fcd91772)), closes [#225](https://github.com/drivecore/mycoder/issues/225)
+* replace @semantic-release/npm with @anolilab/semantic-release-pnpm to properly resolve workspace references ([bacb51f](https://github.com/drivecore/mycoder/commit/bacb51f637f2b2d3b1039bdfdbd33e3d704b6cde))
+
+
+### Features
+
+* add git and gh CLI tools availability check ([8996f36](https://github.com/drivecore/mycoder/commit/8996f3609d3d13a62dd9943bfe2e846508a70336)), closes [#217](https://github.com/drivecore/mycoder/issues/217)
+* add Ollama configuration options ([d5c3a96](https://github.com/drivecore/mycoder/commit/d5c3a96ce9463c98504c2a346796400df36bf3b0))
+* **cli:** Add checking for git and gh CLI tools in GitHub mode ([5443185](https://github.com/drivecore/mycoder/commit/54431854e1e02de2a3c6bf993b114993739dcca1)), closes [#217](https://github.com/drivecore/mycoder/issues/217)
+* **llm:** add OpenAI support to LLM abstraction ([7bda811](https://github.com/drivecore/mycoder/commit/7bda811658e15b8dd41135cd9b2b90e9ea925e15))
+* **refactor:** agent ([a2f59c2](https://github.com/drivecore/mycoder/commit/a2f59c2f51643a44d6e1ff0c16b319deb1adc3f2))
+* Replace config CLI commands with config file-based approach ([#215](https://github.com/drivecore/mycoder/issues/215)) ([8dffcef](https://github.com/drivecore/mycoder/commit/8dffcef10c123c05ef6970c465c4d8b3f0475622))
+
 # mycoder-v1.0.0 (2025-03-11)
 
 ### Bug Fixes
