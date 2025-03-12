@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 
 import * as dotenv from 'dotenv';
 import sourceMapSupport from 'source-map-support';
-import yargs, { CommandModule } from 'yargs';
+import yargs, { ArgumentsCamelCase, CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { command as defaultCommand } from './commands/$default.js';
@@ -10,9 +10,9 @@ import { command as initCommand } from './commands/init.js';
 import { command as testProfileCommand } from './commands/test-profile.js';
 import { command as testSentryCommand } from './commands/test-sentry.js';
 import { command as toolsCommand } from './commands/tools.js';
-import { sharedOptions } from './options.js';
+import { SharedOptions, sharedOptions } from './options.js';
 import { initSentry, captureException } from './sentry/index.js';
-import { getConfig } from './settings/config.js';
+import { getConfigFromArgv, loadConfig } from './settings/config.js';
 import { cleanupResources, setupForceExit } from './utils/cleanup.js';
 import { enableProfiling, mark, reportTimings } from './utils/performance.js';
 
@@ -66,10 +66,12 @@ const main = async () => {
     .help().argv;
 
   // Get config to check for profile setting
-  const config = getConfig();
+  const config = await loadConfig(
+    getConfigFromArgv(argv as ArgumentsCamelCase<SharedOptions>),
+  );
 
   // Enable profiling if --profile flag is set or if enabled in config
-  enableProfiling(Boolean(argv.profile) || Boolean(config.profile));
+  enableProfiling(config.profile);
   mark('After yargs setup');
 };
 

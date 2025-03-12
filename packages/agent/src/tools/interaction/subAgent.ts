@@ -104,7 +104,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       .filter(Boolean)
       .join('\n');
 
-    const tools = getTools({ enableUserPrompt: false });
+    const tools = getTools({ userPrompt: false });
 
     // Update config if timeout is specified
     const config: AgentConfig = {

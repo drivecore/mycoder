@@ -1,5 +1,4 @@
 import * as fs from 'fs/promises';
-import { createInterface } from 'readline/promises';
 
 import chalk from 'chalk';
 import {
@@ -19,9 +18,8 @@ import {
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 
 import { SharedOptions } from '../options.js';
-import { initSentry, captureException } from '../sentry/index.js';
-import { getConfig } from '../settings/config.js';
-import { hasUserConsented, saveUserConsent } from '../settings/settings.js';
+import { captureException } from '../sentry/index.js';
+import { getConfigFromArgv, loadConfig } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
 import { checkForUpdates, getPackageInfo } from '../utils/versionCheck.js';
 
@@ -41,110 +39,67 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
     }) as Argv<DefaultArgs>;
   },
   handler: async (argv) => {
-    // Initialize Sentry with custom DSN if provided
-    if (argv.sentryDsn) {
-      initSentry(argv.sentryDsn);
-    }
+    const packageInfo = getPackageInfo();
+
+    // Get configuration for model provider and name
+    const config = await loadConfig(getConfigFromArgv(argv));
 
     const logger = new Logger({
       name: 'Default',
-      logLevel: nameToLogIndex(argv.logLevel),
+      logLevel: nameToLogIndex(config.logLevel),
       customPrefix: subAgentTool.logPrefix,
     });
-
-    const packageInfo = getPackageInfo();
 
     logger.info(
       `MyCoder v${packageInfo.version} - AI-powered coding assistant`,
     );
 
     // Skip version check if upgradeCheck is false
-    if (argv.upgradeCheck !== false) {
+    if (config.upgradeCheck !== false) {
       await checkForUpdates(logger);
     }
-
-    // Skip user consent check if userWarning is false
-    if (!hasUserConsented() && argv.userWarning !== false) {
-      const readline = createInterface({
-        input: process.stdin,
-        output: process.stdout,
-      });
-
-      logger.warn(
-        'This tool can do anything on your command line that you ask it to.',
-        'It can delete files, install software, and even send data to remote servers.',
-        'It is a powerful tool that should be used with caution.',
-        'Do you consent to using this tool at your own risk? (y/N)',
-      );
-
-      const answer = (await readline.question('> ')).trim().toLowerCase();
-      readline.close();
-
-      if (answer === 'y' || answer === 'yes') {
-        saveUserConsent();
-      } else {
-        logger.info('User did not consent. Exiting.');
-        throw new Error('User did not consent');
-      }
-    } else if (!hasUserConsented() && argv.userWarning === false) {
-      // Just skip the consent check without saving consent when userWarning is false
-      logger.debug('Skipping user consent check due to --userWarning=false');
-      // Note: We don't save consent here, just bypassing the check for this session
-    }
-
     const tokenTracker = new TokenTracker(
       'Root',
       undefined,
-      argv.tokenUsage ? LogLevel.info : LogLevel.debug,
+      config.tokenUsage ? LogLevel.info : LogLevel.debug,
     );
+    // Use command line option if provided, otherwise use config value
+    tokenTracker.tokenCache = config.tokenCache;
 
     try {
-      // Get configuration for model provider and name
-      const userConfig = getConfig();
-      // Use command line option if provided, otherwise use config value
-      tokenTracker.tokenCache =
-        argv.tokenCache !== undefined ? argv.tokenCache : userConfig.tokenCache;
-
-      const userModelProvider = argv.provider || userConfig.provider;
-      const userModelName = argv.model || userConfig.model;
-      const userMaxTokens = argv.maxTokens || userConfig.maxTokens;
-      const userTemperature = argv.temperature || userConfig.temperature;
-
       // Early API key check based on model provider
       const providerSettings =
-        providerConfig[userModelProvider as keyof typeof providerConfig];
+        providerConfig[config.provider as keyof typeof providerConfig];
 
       if (providerSettings) {
         const { keyName } = providerSettings;
 
         // First check if the API key is in the config
-        const configApiKey = userConfig[
-          keyName as keyof typeof userConfig
-        ] as string;
+        const configApiKey = config[keyName as keyof typeof config] as string;
         // Then fall back to environment variable
         const envApiKey = process.env[keyName];
         // Use config key if available, otherwise use env key
         const apiKey = configApiKey || envApiKey;
 
         if (!apiKey) {
-          logger.error(getProviderApiKeyError(userModelProvider));
-          throw new Error(`${userModelProvider} API key not found`);
+          logger.error(getProviderApiKeyError(config.provider));
+          throw new Error(`${config.provider} API key not found`);
         }
 
         // If we're using a key from config, set it as an environment variable
         // This ensures it's available to the provider libraries
         if (configApiKey && !envApiKey) {
           process.env[keyName] = configApiKey;
-          logger.debug(`Using ${keyName} from configuration`);
+          logger.info(`Using ${keyName} from configuration`);
         }
-      } else if (userModelProvider === 'ollama') {
+      } else if (config.provider === 'ollama') {
         // For Ollama, we check if the base URL is set
-        const ollamaBaseUrl = argv.ollamaBaseUrl || userConfig.ollamaBaseUrl;
-        logger.debug(`Using Ollama with base URL: ${ollamaBaseUrl}`);
+        const ollamaBaseUrl = argv.ollamaBaseUrl || config.ollamaBaseUrl;
+        logger.info(`Using Ollama with base URL: ${ollamaBaseUrl}`);
       } else {
         // Unknown provider
-        logger.error(`Unknown provider: ${userModelProvider}`);
-        throw new Error(`Unknown provider: ${userModelProvider}`);
+        logger.info(`Unknown provider: ${config.provider}`);
+        throw new Error(`Unknown provider: ${config.provider}`);
       }
 
       let prompt: string | undefined;
@@ -179,12 +134,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       ].join('\n');
 
       const tools = getTools({
-        enableUserPrompt:
-          argv.userPrompt !== undefined
-            ? argv.userPrompt
-            : argv.enableUserPrompt !== undefined
-              ? argv.enableUserPrompt
-              : true,
+        userPrompt: config.userPrompt,
       });
 
       // Error handling
@@ -195,38 +145,31 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         );
         process.exit(0);
       });
-      const config = await getConfig();
 
       // Create a config with the selected model
       const agentConfig: AgentConfig = {
         ...DEFAULT_CONFIG,
-        provider: userModelProvider as ModelProvider,
-        model: userModelName,
-        maxTokens: userMaxTokens,
-        temperature: userTemperature,
+        provider: config.provider as ModelProvider,
+        model: config.model,
+        maxTokens: config.maxTokens,
+        temperature: config.temperature,
       };
 
       console.log('agentConfig', agentConfig);
 
       const result = await toolAgent(prompt, tools, agentConfig, {
         logger,
-        headless: argv.headless ?? config.headless,
-        userSession: argv.userSession ?? config.userSession,
-        pageFilter: argv.pageFilter ?? config.pageFilter,
+        headless: config.headless,
+        userSession: config.userSession,
+        pageFilter: config.pageFilter,
         workingDirectory: '.',
         tokenTracker,
-        githubMode: argv.githubMode ?? config.githubMode,
+        githubMode: config.githubMode,
         customPrompt: config.customPrompt,
-        tokenCache:
-          argv.tokenCache !== undefined ? argv.tokenCache : config.tokenCache,
-        enableUserPrompt:
-          argv.userPrompt !== undefined
-            ? argv.userPrompt
-            : argv.enableUserPrompt !== undefined
-              ? argv.enableUserPrompt
-              : true,
-        provider: userModelProvider as ModelProvider,
-        model: userModelName,
+        tokenCache: config.tokenCache,
+        userPrompt: config.userPrompt,
+        provider: config.provider as ModelProvider,
+        model: config.model,
       });
 
       const output =

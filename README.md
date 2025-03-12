@@ -35,19 +35,53 @@ mycoder "Implement a React component that displays a list of items"
 mycoder -f prompt.txt
 
 # Disable user prompts for fully automated sessions
-mycoder --enableUserPrompt false "Generate a basic Express.js server"
+mycoder --userPrompt false "Generate a basic Express.js server"
 # or using the alias
 mycoder --userPrompt false "Generate a basic Express.js server"
 
 # Disable user consent warning and version upgrade check for automated environments
 mycoder --userWarning false --upgradeCheck false "Generate a basic Express.js server"
 
-# Enable GitHub mode via CLI option (overrides config)
+# Enable GitHub mode via CLI option (overrides config file)
 mycoder --githubMode "Work with GitHub issues and PRs"
-
-# Enable GitHub mode via config
-mycoder config set githubMode true
 ```
+
+## Configuration
+
+MyCoder is configured using a `mycoder.config.js` file in your project root, similar to ESLint and other modern JavaScript tools. This file exports a configuration object with your preferred settings.
+
+### Creating a Configuration File
+
+Create a `mycoder.config.js` file in your project root:
+
+```js
+// mycoder.config.js
+export default {
+  // GitHub integration
+  githubMode: true,
+  
+  // Browser settings
+  headless: true,
+  userSession: false,
+  pageFilter: 'none', // 'simple', 'none', or 'readability'
+  
+  // Model settings
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
+  maxTokens: 4096,
+  temperature: 0.7,
+  
+  // Custom settings
+  customPrompt: '',
+  profile: false,
+  tokenCache: true,
+  
+  // Ollama configuration (if using local models)
+  ollamaBaseUrl: 'http://localhost:11434',
+};
+```
+
+CLI arguments will override settings in your configuration file.
 
 ### GitHub Comment Commands
 

@@ -38,8 +38,8 @@ mycoder --userPrompt false "Generate a basic Express.js server"
 # Disable user consent warning and version upgrade check for automated environments
 mycoder --userWarning false --upgradeCheck false "Generate a basic Express.js server"
 
-# Enable GitHub mode
-mycoder config set githubMode true
+# Enable GitHub mode via CLI option (overrides config file)
+mycoder --githubMode true
 ```
 
 ## GitHub Mode
@@ -54,14 +54,34 @@ MyCoder includes a GitHub mode that enables the agent to work with GitHub issues
 
 To enable GitHub mode:
 
+1. Via CLI option (overrides config file):
 ```bash
-mycoder config set githubMode true
+mycoder --githubMode true
+```
+
+2. Via configuration file:
+```js
+// mycoder.config.js
+export default {
+  githubMode: true,
+  // other configuration options...
+};
 ```
 
 To disable GitHub mode:
 
+1. Via CLI option:
 ```bash
-mycoder config set githubMode false
+mycoder --githubMode false
+```
+
+2. Via configuration file:
+```js
+// mycoder.config.js
+export default {
+  githubMode: false,
+  // other configuration options...
+};
 ```
 
 Requirements for GitHub mode:
@@ -71,7 +91,9 @@ Requirements for GitHub mode:
 
 ## Configuration
 
-MyCoder uses a configuration file in your project directory. To create a default configuration file, run:
+MyCoder is configured using a `mycoder.config.js` file in your project root, similar to ESLint and other modern JavaScript tools. This file exports a configuration object with your preferred settings.
+
+To create a default configuration file, run:
 
 ```bash
 # Create a default configuration file
@@ -122,13 +144,23 @@ MyCoder will search for configuration in the following places (in order of prece
 
 NOTE: Anthropic Claude 3.7 works the best by far in our testing.
 
-MyCoder supports Anthropic, OpenAI, xAI/Grok, Mistral AI, and Ollama models. You can configure which model provider and model name to use with the following commands:
+MyCoder supports Anthropic, OpenAI, xAI/Grok, Mistral AI, and Ollama models. You can configure which model provider and model name to use either via CLI options or in your configuration file:
 
 ```bash
-# Use Anthropic models [These work the best at this time]
-mycoder config set provider anthropic
-mycoder config set model claude-3-7-sonnet-20250219  # or any other Anthropic model
+# Via CLI options (overrides config file)
+mycoder --provider anthropic --model claude-3-7-sonnet-20250219 "Your prompt here"
+```
 
+Or in your configuration file:
+
+```js
+// mycoder.config.js
+export default {
+  // Model settings
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',  // or any other Anthropic model
+  // other configuration options...
+};
 ```
 
 ### Available Configuration Options
@@ -146,25 +178,34 @@ These options are available only as command-line parameters and are not stored i
 
 - `userWarning`: Skip user consent check for current session without saving consent (default: `true`)
 - `upgradeCheck`: Disable version upgrade check for automated/remote usage (default: `true`)
-- `userPrompt`/`enableUserPrompt`: Enable or disable the userPrompt tool (default: `true`)
+- `userPrompt`: Enable or disable the userPrompt tool (default: `true`)
 
-Example:
+Example configuration in `mycoder.config.js`:
+
+```js
+// mycoder.config.js
+export default {
+  // Browser settings
+  headless: false,  // Show browser UI
+  userSession: true,  // Use existing browser session
+  pageFilter: 'readability',  // Use readability for webpage processing
+  
+  // Custom settings
+  customPrompt: "Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.",
+  tokenCache: false,  // Disable token caching for LLM API calls
+  
+  // Other configuration options...
+};
+```
+
+You can also set these options via CLI arguments (which will override the config file):
 
 ```bash
-# Set browser to show UI
-mycoder config set headless false
+# Set browser to show UI for this session only
+mycoder --headless false "Your prompt here"
 
-# Use existing browser session
-mycoder config set userSession true
-
-# Use readability for webpage processing
-mycoder config set pageFilter readability
-
-# Set custom instructions for the agent
-mycoder config set customPrompt "Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible."
-
-# Disable token caching for LLM API calls
-mycoder config set tokenCache false
+# Use existing browser session for this session only
+mycoder --userSession true "Your prompt here"
 ```
 
 ## Environment Variables

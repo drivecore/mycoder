@@ -20,7 +20,7 @@ export type ToolContext = {
   githubMode: boolean;
   customPrompt?: string;
   tokenCache?: boolean;
-  enableUserPrompt?: boolean;
+  userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
   provider: ModelProvider;
   model: string;

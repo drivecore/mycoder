@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { Logger } from 'mycoder-agent';
 
 import { SharedOptions } from '../options.js';
-import { createDefaultConfigFile } from '../settings/config-loader.js';
+import { createDefaultConfigFile } from '../settings/config.js';
 import { nameToLogIndex } from '../utils/nameToLogIndex.js';
 
 import type { CommandModule, ArgumentsCamelCase } from 'yargs';

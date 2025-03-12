@@ -39,7 +39,7 @@ const { instanceId } = agentStart({
   projectContext: 'Context about the problem or environment',
   workingDirectory: '/path/to/working/directory', // optional
   relevantFilesDirectories: 'src/**/*.ts', // optional
-  enableUserPrompt: false, // optional, default: false
+  userPrompt: false, // optional, default: false
 });
 ```
 

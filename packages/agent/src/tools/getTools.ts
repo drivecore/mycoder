@@ -18,11 +18,11 @@ import { sleepTool } from './system/sleep.js';
 // Import these separately to avoid circular dependencies
 
 interface GetToolsOptions {
-  enableUserPrompt?: boolean;
+  userPrompt?: boolean;
 }
 
 export function getTools(options?: GetToolsOptions): Tool[] {
-  const enableUserPrompt = options?.enableUserPrompt !== false; // Default to true if not specified
+  const userPrompt = options?.userPrompt !== false; // Default to true if not specified
 
   // Force cast to Tool type to avoid TypeScript issues
   const tools: Tool[] = [
@@ -41,7 +41,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
   ];
 
   // Only include userPrompt tool if enabled
-  if (enableUserPrompt) {
+  if (userPrompt) {
     tools.push(userPromptTool as unknown as Tool);
   }
 

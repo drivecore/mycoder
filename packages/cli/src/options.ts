@@ -13,7 +13,6 @@ export type SharedOptions = {
   readonly temperature?: number;
   readonly profile?: boolean;
   readonly tokenCache?: boolean;
-  readonly enableUserPrompt?: boolean;
   readonly userPrompt?: boolean;
   readonly githubMode?: boolean;
   readonly userWarning?: boolean;
@@ -26,13 +25,12 @@ export const sharedOptions = {
     type: 'string',
     alias: 'l',
     description: 'Set minimum logging level',
-    default: 'info',
+
     choices: ['debug', 'verbose', 'info', 'warn', 'error'],
   } as const,
   profile: {
     type: 'boolean',
     description: 'Enable performance profiling of CLI startup',
-    default: false,
   } as const,
   provider: {
     type: 'string',
@@ -65,61 +63,36 @@ export const sharedOptions = {
   tokenUsage: {
     type: 'boolean',
     description: 'Output token usage at info log level',
-    default: false,
   } as const,
   headless: {
     type: 'boolean',
     description: 'Use browser in headless mode with no UI showing',
-    default: true,
   } as const,
   userSession: {
     type: 'boolean',
     description:
       "Use user's existing browser session instead of sandboxed session",
-    default: false,
   } as const,
   pageFilter: {
     type: 'string',
     description: 'Method to process webpage content',
-    default: 'none',
     choices: ['simple', 'none', 'readability'],
-  } as const,
-  sentryDsn: {
-    type: 'string',
-    description: 'Custom Sentry DSN for error tracking',
-    hidden: true,
   } as const,
   tokenCache: {
     type: 'boolean',
     description: 'Enable token caching for LLM API calls',
   } as const,
-  enableUserPrompt: {
-    type: 'boolean',
-    description:
-      'Enable or disable the userPrompt tool (disable for fully automated sessions)',
-    default: true,
-  } as const,
   userPrompt: {
     type: 'boolean',
-    description:
-      'Alias for enableUserPrompt: enable or disable the userPrompt tool',
-    default: true,
+    description: 'Alias for userPrompt: enable or disable the userPrompt tool',
   } as const,
   githubMode: {
     type: 'boolean',
     description: 'Enable GitHub mode for working with issues and PRs',
-    default: false,
-  } as const,
-  userWarning: {
-    type: 'boolean',
-    description:
-      'Skip user consent check for current session (does not save consent)',
-    default: false,
   } as const,
   upgradeCheck: {
     type: 'boolean',
     description: 'Disable version upgrade check (for automated/remote usage)',
-    default: false,
   } as const,
   ollamaBaseUrl: {
     type: 'string',

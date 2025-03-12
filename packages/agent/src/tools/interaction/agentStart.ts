@@ -50,7 +50,7 @@ const parameterSchema = z.object({
     .string()
     .optional()
     .describe('A list of files, which may include ** or * wildcard characters'),
-  enableUserPrompt: z
+  userPrompt: z
     .boolean()
     .optional()
     .describe(
@@ -104,7 +104,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       projectContext,
       workingDirectory,
       relevantFilesDirectories,
-      enableUserPrompt = false,
+      userPrompt = false,
     } = parameterSchema.parse(params);
 
     // Create an instance ID
@@ -127,7 +127,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       .filter(Boolean)
       .join('\n');
 
-    const tools = getTools({ enableUserPrompt });
+    const tools = getTools({ userPrompt });
 
     // Store the agent state
     const agentState: AgentState = {
