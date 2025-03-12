@@ -3,6 +3,7 @@
  */
 
 import { AnthropicProvider } from './providers/anthropic.js';
+import { OllamaProvider } from './providers/ollama.js';
 import { ProviderOptions, GenerateOptions, LLMResponse } from './types.js';
 
 /**
@@ -39,6 +40,7 @@ const providerFactories: Record<
   (model: string, options: ProviderOptions) => LLMProvider
 > = {
   anthropic: (model, options) => new AnthropicProvider(model, options),
+  ollama: (model, options) => new OllamaProvider(model, options),
 };
 
 /**
