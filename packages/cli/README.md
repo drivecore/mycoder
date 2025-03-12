@@ -52,12 +52,22 @@ MyCoder includes a GitHub mode that enables the agent to work with GitHub issues
 - Create PRs when work is complete
 - Create additional GitHub issues for follow-up tasks or ideas
 
-To enable GitHub mode:
+GitHub mode is **enabled by default** but requires the Git and GitHub CLI tools to be installed and configured:
+
+- Git CLI (`git`) must be installed
+- GitHub CLI (`gh`) must be installed and authenticated
+
+MyCoder will automatically check for these requirements when GitHub mode is enabled and will:
+- Warn you if any requirements are missing
+- Automatically disable GitHub mode if the required tools are not available or not authenticated
+
+To manually enable/disable GitHub mode:
 
 1. Via CLI option (overrides config file):
 
 ```bash
-mycoder --githubMode true
+mycoder --githubMode true   # Enable GitHub mode
+mycoder --githubMode false  # Disable GitHub mode
 ```
 
 2. Via configuration file:
@@ -65,33 +75,18 @@ mycoder --githubMode true
 ```js
 // mycoder.config.js
 export default {
-  githubMode: true,
-  // other configuration options...
-};
-```
-
-To disable GitHub mode:
-
-1. Via CLI option:
-
-```bash
-mycoder --githubMode false
-```
-
-2. Via configuration file:
-
-```js
-// mycoder.config.js
-export default {
-  githubMode: false,
+  githubMode: true,  // Enable GitHub mode (default)
   // other configuration options...
 };
 ```
 
 Requirements for GitHub mode:
 
+- Git CLI (`git`) needs to be installed
 - GitHub CLI (`gh`) needs to be installed and authenticated
 - User needs to have appropriate GitHub permissions for the target repository
+
+If GitHub mode is enabled but the requirements are not met, MyCoder will provide instructions on how to install and configure the missing tools.
 
 ## Configuration
 
