@@ -1,3 +1,4 @@
+import { McpConfig } from '../core/mcp/index.js';
 import { Tool } from '../core/types.js';
 
 // Import tools
@@ -8,17 +9,15 @@ import { agentStartTool } from './interaction/agentStart.js';
 import { userPromptTool } from './interaction/userPrompt.js';
 import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
+import { createMcpTool } from './mcp.js';
 import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
 import { respawnTool } from './system/respawn.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
 import { shellStartTool } from './system/shellStart.js';
 import { sleepTool } from './system/sleep.js';
-import { McpTool } from './mcp.js';
 
 // Import these separately to avoid circular dependencies
-
-import { McpConfig } from '../core/mcp/types.js';
 
 interface GetToolsOptions {
   userPrompt?: boolean;
@@ -52,8 +51,8 @@ export function getTools(options?: GetToolsOptions): Tool[] {
 
   // Add MCP tool if we have any servers configured
   if (mcpConfig.servers && mcpConfig.servers.length > 0) {
-    const mcpTool = new McpTool(mcpConfig);
-    tools.push(mcpTool as unknown as Tool);
+    const mcpTool = createMcpTool(mcpConfig);
+    tools.push(mcpTool);
   }
 
   return tools;

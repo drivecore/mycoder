@@ -1,15 +1,11 @@
 /**
  * Model Context Protocol (MCP) Integration
- *
+ * 
  * This module provides integration with the Model Context Protocol (MCP),
  * allowing MyCoder to use context from MCP-compatible servers.
- *
+ * 
  * Uses the official MCP SDK: https://www.npmjs.com/package/@modelcontextprotocol/sdk
  */
-
-import * as MCP from '@modelcontextprotocol/sdk';
-
-export { MCP };
 
 /**
  * Configuration for MCP in mycoder.config.js
