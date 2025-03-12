@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { backgroundToolRegistry, BackgroundToolStatus } from '../../core/backgroundTools.js';
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 
 import { agentStates } from './agentStart.js';
@@ -76,11 +79,15 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       if (terminate) {
         agentState.aborted = true;
         agentState.completed = true;
-        
+
         // Update background tool registry with terminated status
-        backgroundToolRegistry.updateToolStatus(instanceId, BackgroundToolStatus.TERMINATED, {
-          terminatedByUser: true
-        });
+        backgroundToolRegistry.updateToolStatus(
+          instanceId,
+          BackgroundToolStatus.TERMINATED,
+          {
+            terminatedByUser: true,
+          },
+        );
 
         return {
           output: agentState.output || 'Sub-agent terminated before completion',
