@@ -54,6 +54,8 @@ const defaultConfig = {
   customPrompt: '',
   profile: false,
   tokenCache: true,
+  // Ollama configuration
+  ollamaBaseUrl: 'http://localhost:11434',
   // API keys (empty by default)
   ANTHROPIC_API_KEY: '',
 };

@@ -9,18 +9,25 @@ describe('getModel', () => {
     expect(model.provider).toBe('anthropic.messages');
   });
 
-  /*
-
-  it('should return the correct model for openai', () => {
-    const model = getModel('openai', 'gpt-4o-2024-05-13');
-    expect(model).toBeDefined();
-    expect(model.provider).toBe('openai.chat');
-  });
-
   it('should return the correct model for ollama', () => {
     const model = getModel('ollama', 'llama3');
     expect(model).toBeDefined();
     expect(model.provider).toBe('ollama.chat');
+  });
+
+  it('should return the correct model for ollama with custom base URL', () => {
+    const model = getModel('ollama', 'llama3', {
+      ollamaBaseUrl: 'http://custom-ollama:11434',
+    });
+    expect(model).toBeDefined();
+    expect(model.provider).toBe('ollama.chat');
+  });
+
+  /*
+  it('should return the correct model for openai', () => {
+    const model = getModel('openai', 'gpt-4o-2024-05-13');
+    expect(model).toBeDefined();
+    expect(model.provider).toBe('openai.chat');
   });
 
   it('should return the correct model for xai', () => {
@@ -34,7 +41,7 @@ describe('getModel', () => {
     expect(model).toBeDefined();
     expect(model.provider).toBe('mistral.chat');
   });
-*/
+  */
 
   it('should throw an error for unknown provider', () => {
     expect(() => {

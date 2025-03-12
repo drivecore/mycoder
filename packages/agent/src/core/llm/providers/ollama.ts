@@ -29,7 +29,10 @@ export class OllamaProvider implements LLMProvider {
 
   constructor(model: string, options: OllamaOptions = {}) {
     this.model = model;
-    this.baseUrl = options.baseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+    this.baseUrl =
+      options.baseUrl ||
+      process.env.OLLAMA_BASE_URL ||
+      'http://localhost:11434';
 
     // Ensure baseUrl doesn't end with a slash
     if (this.baseUrl.endsWith('/')) {
@@ -41,7 +44,15 @@ export class OllamaProvider implements LLMProvider {
    * Generate text using Ollama API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const { messages, functions, temperature = 0.7, maxTokens, topP, frequencyPenalty, presencePenalty } = options;
+    const {
+      messages,
+      functions,
+      temperature = 0.7,
+      maxTokens,
+      topP,
+      frequencyPenalty,
+      presencePenalty,
+    } = options;
 
     // Format messages for Ollama API
     const formattedMessages = this.formatMessages(messages);
@@ -56,8 +67,12 @@ export class OllamaProvider implements LLMProvider {
           temperature: temperature,
           // Ollama uses top_k instead of top_p, but we'll include top_p if provided
           ...(topP !== undefined && { top_p: topP }),
-          ...(frequencyPenalty !== undefined && { frequency_penalty: frequencyPenalty }),
-          ...(presencePenalty !== undefined && { presence_penalty: presencePenalty }),
+          ...(frequencyPenalty !== undefined && {
+            frequency_penalty: frequencyPenalty,
+          }),
+          ...(presencePenalty !== undefined && {
+            presence_penalty: presencePenalty,
+          }),
         },
       };
 
@@ -93,11 +108,14 @@ export class OllamaProvider implements LLMProvider {
 
       // Extract content and tool calls
       const content = data.message?.content || '';
-      const toolCalls = data.message?.tool_calls?.map((toolCall: any) => ({
-        id: toolCall.id || `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        name: toolCall.name,
-        content: JSON.stringify(toolCall.args || toolCall.arguments || {}),
-      })) || [];
+      const toolCalls =
+        data.message?.tool_calls?.map((toolCall: any) => ({
+          id:
+            toolCall.id ||
+            `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          name: toolCall.name,
+          content: JSON.stringify(toolCall.args || toolCall.arguments || {}),
+        })) || [];
 
       // Create token usage from response data
       const tokenUsage = new TokenUsage();
@@ -110,9 +128,7 @@ export class OllamaProvider implements LLMProvider {
         tokenUsage: tokenUsage,
       };
     } catch (error) {
-      throw new Error(
-        `Error calling Ollama API: ${(error as Error).message}`,
-      );
+      throw new Error(`Error calling Ollama API: ${(error as Error).message}`);
     }
   }
 
@@ -121,7 +137,11 @@ export class OllamaProvider implements LLMProvider {
    */
   private formatMessages(messages: Message[]): any[] {
     return messages.map((msg) => {
-      if (msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system') {
+      if (
+        msg.role === 'user' ||
+        msg.role === 'assistant' ||
+        msg.role === 'system'
+      ) {
         return {
           role: msg.role,
           content: msg.content,
@@ -147,10 +167,10 @@ export class OllamaProvider implements LLMProvider {
           ],
         };
       }
-      // Default fallback
+      // Default fallback for unknown message types
       return {
         role: 'user',
-        content: msg.content,
+        content: (msg as any).content || '',
       };
     });
   }
