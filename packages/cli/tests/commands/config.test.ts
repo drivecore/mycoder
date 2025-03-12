@@ -69,18 +69,18 @@ describe('Config Command', () => {
       warn: vi.fn(),
     };
     vi.mocked(Logger).mockImplementation(() => mockLogger as unknown as Logger);
-    vi.mocked(getConfig).mockReturnValue({ githubMode: false });
+    vi.mocked(getConfig).mockReturnValue({ githubMode: true });
     vi.mocked(getDefaultConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       customPrompt: '',
     });
     vi.mocked(updateConfig).mockImplementation((config) => ({
-      githubMode: false,
+      githubMode: true,
       ...config,
     }));
     vi.mocked(getConfigAtLevel).mockReturnValue({});
-    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: false }));
-    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: false }));
+    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: true }));
+    vi.mocked(clearConfigKey).mockImplementation(() => ({ githubMode: true }));
   });
 
   afterEach(() => {
@@ -107,13 +107,13 @@ describe('Config Command', () => {
   it('should filter out invalid config keys in list command', async () => {
     // Mock getConfig to return config with invalid keys
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       invalidKey: 'some value',
     } as any);
 
     // Mock getDefaultConfig to return only valid keys
     vi.mocked(getDefaultConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
     });
 
     await command.handler!({
@@ -249,13 +249,13 @@ describe('Config Command', () => {
   it('should clear a configuration value', async () => {
     // Mock getConfig to include the key we want to clear
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       customPrompt: 'custom value',
     });
 
     // Mock getDefaultConfig to include the key we want to clear
     vi.mocked(getDefaultConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       customPrompt: '',
     });
 
@@ -333,7 +333,7 @@ describe('Config Command', () => {
 
   it('should handle non-existent key for clear command', async () => {
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
     });
 
     await command.handler!({
@@ -370,13 +370,13 @@ describe('Config Command', () => {
   it('should list all configuration values with default indicators', async () => {
     // Mock getConfig to return a mix of default and custom values
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false, // default value
+      githubMode: true, // default value
       customPrompt: 'custom value', // custom value
     });
 
     // Mock getDefaultConfig to return the default values
     vi.mocked(getDefaultConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       customPrompt: '',
     });
 
