@@ -2,6 +2,8 @@ import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { Page } from 'playwright';
 
+const OUTPUT_LIMIT = 11 * 1024; // 10KB limit
+
 /**
  * Returns the raw HTML content of the page without any processing
  */
@@ -93,13 +95,22 @@ export async function filterPageContent(
   page: Page,
   pageFilter: 'simple' | 'none' | 'readability',
 ): Promise<string> {
+  let result: string = '';
   switch (pageFilter) {
     case 'none':
-      return getNoneProcessedDOM(page);
+      result = await getNoneProcessedDOM(page);
+      break;
     case 'readability':
-      return getReadabilityProcessedDOM(page);
+      result = await getReadabilityProcessedDOM(page);
+      break;
     case 'simple':
     default:
-      return getSimpleProcessedDOM(page);
+      result = await getSimpleProcessedDOM(page);
+      break;
   }
+
+  if (result.length > OUTPUT_LIMIT) {
+    return result.slice(0, OUTPUT_LIMIT) + '...(truncated)';
+  }
+  return result;
 }

@@ -204,6 +204,9 @@ export default {
 
     // Optional: Default context resources to load
     defaultResources: ['company-docs://api/reference'],
+
+    // Optional: Default tools to make available
+    defaultTools: ['company-docs://tools/search'],
   },
 };
 ```
@@ -212,6 +215,25 @@ When MCP is configured, the agent will have access to a new `mcp` tool that allo
 
 - List available resources from configured MCP servers
 - Fetch resources to use as context for its work
+- List available tools from configured MCP servers
+- Execute tools provided by MCP servers
+
+#### Using MCP Tools
+
+MCP tools allow the agent to execute functions provided by external services through the Model Context Protocol. The agent can:
+
+1. Discover available tools using `mcp.listTools()`
+2. Execute a tool using `mcp.executeTool({ uri: 'server-name://path/to/tool', params: { ... } })`
+
+Tools can provide various capabilities like:
+
+- Searching documentation
+- Accessing databases
+- Interacting with APIs
+- Performing specialized calculations
+- Accessing proprietary services
+
+Each tool has a URI that identifies it, along with parameters it accepts and the type of result it returns.
 
 ### CLI-Only Options
 
