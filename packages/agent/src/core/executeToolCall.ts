@@ -110,9 +110,12 @@ export const executeToolCall = async (
     }
   }
 
-  const toolOutput =
-    typeof output === 'string' ? output : JSON.stringify(output, null, 2);
-  return toolOutput.length > OUTPUT_LIMIT
-    ? `${toolOutput.slice(0, OUTPUT_LIMIT)}...(truncated)`
-    : toolOutput;
+  const outputIsString = typeof output === 'string';
+  if (outputIsString) {
+    return output.length > OUTPUT_LIMIT
+      ? `${output.slice(0, OUTPUT_LIMIT)}...(truncated)`
+      : output;
+  } else {
+    return JSON.stringify(output, null, 2);
+  }
 };

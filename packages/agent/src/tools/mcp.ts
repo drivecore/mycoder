@@ -3,10 +3,11 @@
  * 
  * This tool allows the agent to interact with Model Context Protocol (MCP) servers
  * to retrieve resources and use tools provided by those servers.
+ * 
+ * Uses the official MCP SDK: https://www.npmjs.com/package/@modelcontextprotocol/sdk
  */
 
-import { McpClient } from '../core/mcp/client';
-import { McpConfig, McpResource } from '../core/mcp/types';
+import { MCP, McpConfig, McpServerConfig } from '../core/mcp';
 import { Tool } from './tool';
 import { ToolContext } from './types';
 
@@ -30,7 +31,7 @@ interface GetResourceParams {
  * MCP Tool for interacting with MCP servers
  */
 export class McpTool extends Tool {
-  private client: McpClient;
+  private clients: Map<string, MCP.Client> = new Map();
   
   /**
    * Create a new MCP tool
@@ -64,28 +65,72 @@ export class McpTool extends Tool {
       },
     });
     
-    // Initialize the MCP client with configured servers
-    this.client = new McpClient(config.servers || []);
+    // Initialize MCP clients for each configured server
+    this.initializeClients();
+  }
+  
+  /**
+   * Initialize MCP clients for each configured server
+   */
+  private initializeClients(): void {
+    if (!this.config.servers || this.config.servers.length === 0) {
+      return;
+    }
+    
+    for (const server of this.config.servers) {
+      try {
+        const clientOptions: MCP.ClientOptions = {
+          baseURL: server.url,
+        };
+        
+        // Add authentication if configured
+        if (server.auth && server.auth.type === 'bearer') {
+          clientOptions.headers = {
+            Authorization: `Bearer ${server.auth.token}`,
+          };
+        }
+        
+        const client = new MCP.Client(clientOptions);
+        this.clients.set(server.name, client);
+      } catch (error) {
+        console.error(`Failed to initialize MCP client for server ${server.name}:`, error);
+      }
+    }
   }
   
   /**
    * List available resources from MCP servers
    * @param params Optional parameters
-   * @param context Tool context
+   * @param _context Tool context
    * @returns List of available resources
    */
   async listResources(
     params: ListResourcesParams = {},
     _context: ToolContext,
-  ): Promise<McpResource[]> {
-    const resources = await this.client.getAvailableResources();
+  ): Promise<MCP.Resource[]> {
+    const resources: MCP.Resource[] = [];
     
-    // Filter by server if specified
+    // If a specific server is requested, only check that server
     if (params.server) {
-      return resources.filter(resource => {
-        // Simple implementation - in a real implementation, this would be more sophisticated
-        return resource.uri.startsWith(`${params.server}://`);
-      });
+      const client = this.clients.get(params.server);
+      if (client) {
+        try {
+          const serverResources = await client.resources();
+          resources.push(...serverResources);
+        } catch (error) {
+          console.error(`Failed to fetch resources from server ${params.server}:`, error);
+        }
+      }
+    } else {
+      // Otherwise, check all servers
+      for (const [serverName, client] of this.clients.entries()) {
+        try {
+          const serverResources = await client.resources();
+          resources.push(...serverResources);
+        } catch (error) {
+          console.error(`Failed to fetch resources from server ${serverName}:`, error);
+        }
+      }
     }
     
     return resources;
@@ -94,13 +139,38 @@ export class McpTool extends Tool {
   /**
    * Fetch a resource from an MCP server
    * @param params Parameters
-   * @param context Tool context
+   * @param _context Tool context
    * @returns The resource content
    */
   async getResource(
     params: GetResourceParams,
     _context: ToolContext,
   ): Promise<string> {
-    return await this.client.fetchResource(params.uri);
+    // Parse the URI to determine which server to use
+    const serverName = this.getServerNameFromUri(params.uri);
+    if (!serverName) {
+      throw new Error(`Could not determine server from URI: ${params.uri}`);
+    }
+    
+    const client = this.clients.get(serverName);
+    if (!client) {
+      throw new Error(`Server not found: ${serverName}`);
+    }
+    
+    // Use the MCP SDK to fetch the resource
+    const resource = await client.resource(params.uri);
+    return resource.content;
+  }
+  
+  /**
+   * Extract the server name from a resource URI
+   * @param uri Resource URI in the format 'scheme://path'
+   * @returns The server name or undefined if not found
+   * @private
+   */
+  private getServerNameFromUri(uri: string): string | undefined {
+    // For simplicity, we'll use the first part of the URI as the server name
+    const match = uri.match(/^([^:]+):\/\//);
+    return match ? match[1] : undefined;
   }
 }

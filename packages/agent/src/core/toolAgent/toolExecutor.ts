@@ -6,11 +6,18 @@ import { Tool, ToolCall, ToolContext } from '../types.js';
 import { addToolResultToMessages } from './messageUtils.js';
 import { ToolCallResult } from './types.js';
 
-const safeParse = (value: string) => {
+const safeParse = (value: string, context: Record<string, string>) => {
   try {
     return JSON.parse(value);
   } catch (error) {
-    console.error('Error parsing JSON:', error, 'original value:', value);
+    console.error(
+      'Error parsing JSON:',
+      error,
+      'original value:',
+      value,
+      'context',
+      JSON.stringify(context),
+    );
     return { error: value };
   }
 };
@@ -77,7 +84,7 @@ export async function executeTools(
         }
       }
 
-      const parsedResult = safeParse(toolResult);
+      const parsedResult = safeParse(toolResult, { tool: call.name });
 
       // Add the tool result to messages
       addToolResultToMessages(messages, call.id, parsedResult, isError);
