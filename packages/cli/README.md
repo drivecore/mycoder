@@ -4,7 +4,7 @@ Command-line interface for AI-powered coding tasks. Full details available on th
 
 ## Features
 
-- 🤖 **AI-Powered**: Leverages Anthropic's Claude, OpenAI models, xAI/Grok, Mistral AI, and Ollama for intelligent coding assistance
+- 🤖 **AI-Powered**: Leverages Anthropic's Claude, OpenAI models, and Ollama for intelligent coding assistance
 - 🛠️ **Extensible Tool System**: Modular architecture with various tool categories
 - 🔄 **Parallel Execution**: Ability to spawn sub-agents for concurrent task processing
 - 📝 **Self-Modification**: Can modify code, it was built and tested by writing itself
@@ -117,23 +117,20 @@ export default {
   customPrompt: '',
   profile: false,
   tokenCache: true,
-
-  // API keys (better to use environment variables for these)
-  // ANTHROPIC_API_KEY: 'your-api-key',
 };
 ```
 
 MyCoder will search for configuration in the following places (in order of precedence):
 
 1. CLI options (e.g., `--githubMode true`)
-2. Configuration file (`mycoder.config.js`, `.mycoderrc`, etc.)
+2. Configuration file (`mycoder.config.js`)
 3. Default values
 
 ### Model Selection
 
 NOTE: Anthropic Claude 3.7 works the best by far in our testing.
 
-MyCoder supports Anthropic, OpenAI, xAI/Grok, Mistral AI, and Ollama models. You can configure which model provider and model name to use either via CLI options or in your configuration file:
+MyCoder supports Anthropic, OpenAI, and Ollama models. You can configure which model provider and model name to use either via CLI options or in your configuration file:
 
 ```bash
 # Via CLI options (overrides config file)
@@ -202,8 +199,6 @@ mycoder --userSession true "Your prompt here"
 
 - `ANTHROPIC_API_KEY`: Your Anthropic API key (required when using Anthropic models)
 - `OPENAI_API_KEY`: Your OpenAI API key (required when using OpenAI models)
-- `XAI_API_KEY`: Your xAI API key (required when using xAI/Grok models)
-- `MISTRAL_API_KEY`: Your Mistral AI API key (required when using Mistral models)
 
 Note: Ollama models do not require an API key as they run locally or on a specified server.
 
