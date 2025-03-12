@@ -1,3 +1,27 @@
+# [mycoder-agent-v1.1.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.0.0...mycoder-agent-v1.1.0) (2025-03-12)
+
+
+### Bug Fixes
+
+* convert absolute paths to relative paths in textEditor log output ([a5ea845](https://github.com/drivecore/mycoder/commit/a5ea845c32bc569cda4330f59f1bf1553a236aea))
+* implement resource cleanup to prevent CLI hanging issue ([d33e729](https://github.com/drivecore/mycoder/commit/d33e7298686a30661ee8b36f2fdffb16f5f3da71)), closes [#141](https://github.com/drivecore/mycoder/issues/141)
+* llm choice working well for openai, anthropic and ollama ([68d34ab](https://github.com/drivecore/mycoder/commit/68d34abf8a73ed533a072359ce334a9364753425))
+* **openai:** add OpenAI dependency to agent package and enable provider in config ([30b0807](https://github.com/drivecore/mycoder/commit/30b0807d4f3ecdd24f53b7ee4160645a4ed10444))
+* replace @semantic-release/npm with @anolilab/semantic-release-pnpm to properly resolve workspace references ([bacb51f](https://github.com/drivecore/mycoder/commit/bacb51f637f2b2d3b1039bdfdbd33e3d704b6cde))
+* up subagent iterations to 200 from 50 ([b405f1e](https://github.com/drivecore/mycoder/commit/b405f1e6d62eb5304dc1aa6c0ff28dc49dc67dce))
+
+
+### Features
+
+* add agent tracking to background tools ([4a3bcc7](https://github.com/drivecore/mycoder/commit/4a3bcc72f27af5fdbeeb407a748d5ecf3b7faed5))
+* add Ollama configuration options ([d5c3a96](https://github.com/drivecore/mycoder/commit/d5c3a96ce9463c98504c2a346796400df36bf3b0))
+* **agent:** implement agentStart and agentMessage tools ([62f8df3](https://github.com/drivecore/mycoder/commit/62f8df3dd083e2838c97ce89112f390461550ee6)), closes [#111](https://github.com/drivecore/mycoder/issues/111) [#111](https://github.com/drivecore/mycoder/issues/111)
+* allow textEditor to overwrite existing files with create command ([d1cde65](https://github.com/drivecore/mycoder/commit/d1cde65df65bfcca288a47f14eedf5ad5939ed37)), closes [#192](https://github.com/drivecore/mycoder/issues/192)
+* implement background tool tracking (issue [#112](https://github.com/drivecore/mycoder/issues/112)) ([b5bb489](https://github.com/drivecore/mycoder/commit/b5bb48981791acda74ee46b93d2d85e27e93a538))
+* implement Ollama provider for LLM abstraction ([597211b](https://github.com/drivecore/mycoder/commit/597211b90e43c4d52969eb5994d393c15d85ec97))
+* **llm:** add OpenAI support to LLM abstraction ([7bda811](https://github.com/drivecore/mycoder/commit/7bda811658e15b8dd41135cd9b2b90e9ea925e15))
+* **refactor:** agent ([a2f59c2](https://github.com/drivecore/mycoder/commit/a2f59c2f51643a44d6e1ff0c16b319deb1adc3f2))
+
 # mycoder-agent-v1.0.0 (2025-03-11)
 
 ### Bug Fixes
