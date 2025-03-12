@@ -86,6 +86,9 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
           },
         );
 
+        // Clean up resources when agent is terminated
+        await backgroundTools.cleanup();
+
         return {
           output: agentState.output || 'Sub-agent terminated before completion',
           completed: true,

@@ -162,6 +162,9 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
                 (result.result.length > 100 ? '...' : ''),
             },
           );
+
+          // Clean up resources when agent completes successfully
+          await backgroundTools.cleanup();
         }
       } catch (error) {
         // Update agent state with the error
@@ -178,6 +181,9 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
               error: error instanceof Error ? error.message : String(error),
             },
           );
+
+          // Clean up resources when agent encounters an error
+          await backgroundTools.cleanup();
         }
       }
       return true;
