@@ -109,6 +109,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
     // Use command line option if provided, otherwise use config value
     tokenTracker.tokenCache = config.tokenCache;
 
+    const backgroundTools = new BackgroundTools('mainAgent');
+
     try {
       // Early API key check based on model provider
       const providerSettings =
@@ -209,7 +211,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         model: config.model,
         maxTokens: config.maxTokens,
         temperature: config.temperature,
-        backgroundTools: new BackgroundTools('mainAgent'),
+        backgroundTools,
       });
 
       const output =
@@ -225,6 +227,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       );
       // Capture the error with Sentry
       captureException(error);
+    } finally {
+      await backgroundTools.cleanup();
     }
 
     logger.log(

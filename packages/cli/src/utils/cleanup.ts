@@ -1,4 +1,5 @@
 import { BrowserManager, processStates } from 'mycoder-agent';
+import { agentStates } from 'mycoder-agent/dist/tools/interaction/agentStart.js';
 
 /**
  * Handles cleanup of resources before application exit
@@ -7,12 +8,43 @@ import { BrowserManager, processStates } from 'mycoder-agent';
 export async function cleanupResources(): Promise<void> {
   console.log('Cleaning up resources before exit...');
 
+  // First attempt to clean up any still-running agents
+  // This will cascade to their browser sessions and shell processes
+  try {
+    // Find all active agent instances
+    const activeAgents = Array.from(agentStates.entries()).filter(
+      ([_, state]) => !state.completed && !state.aborted,
+    );
+
+    if (activeAgents.length > 0) {
+      console.log(`Cleaning up ${activeAgents.length} active agents...`);
+
+      for (const [id, state] of activeAgents) {
+        try {
+          // Mark the agent as aborted
+          state.aborted = true;
+          state.completed = true;
+
+          // Clean up its resources
+          await state.context.backgroundTools.cleanup();
+        } catch (error) {
+          console.error(`Error cleaning up agent ${id}:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up agents:', error);
+  }
+
+  // As a fallback, still clean up any browser sessions and shell processes
+  // that might not have been caught by the agent cleanup
+
   // 1. Clean up browser sessions
   try {
     // Get the BrowserManager instance - this is a singleton
-    const browserManager = (globalThis as any).__BROWSER_MANAGER__ as
-      | BrowserManager
-      | undefined;
+    const browserManager = (
+      globalThis as unknown as { __BROWSER_MANAGER__?: BrowserManager }
+    ).__BROWSER_MANAGER__;
     if (browserManager) {
       console.log('Closing all browser sessions...');
       await browserManager.closeAllSessions();

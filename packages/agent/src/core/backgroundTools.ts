@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
+// These imports will be used by the cleanup method
+import { BrowserManager } from '../tools/browser/BrowserManager.js';
+import { agentStates } from '../tools/interaction/agentStart.js';
+import { processStates } from '../tools/system/shellStart.js';
+
 // Types of background processes we can track
 export enum BackgroundToolType {
   SHELL = 'shell',
@@ -32,6 +37,7 @@ export interface ShellBackgroundTool extends BackgroundTool {
     command: string;
     exitCode?: number | null;
     signaled?: boolean;
+    error?: string;
   };
 }
 
@@ -40,6 +46,7 @@ export interface BrowserBackgroundTool extends BackgroundTool {
   type: BackgroundToolType.BROWSER;
   metadata: {
     url?: string;
+    error?: string;
   };
 }
 
@@ -48,6 +55,7 @@ export interface AgentBackgroundTool extends BackgroundTool {
   type: BackgroundToolType.AGENT;
   metadata: {
     goal?: string;
+    error?: string;
   };
 }
 
@@ -153,5 +161,127 @@ export class BackgroundTools {
   // Get a specific process by ID
   public getToolById(id: string): AnyBackgroundTool | undefined {
     return this.tools.get(id);
+  }
+
+  /**
+   * Cleans up all resources associated with this agent instance
+   * @returns A promise that resolves when cleanup is complete
+   */
+  public async cleanup(): Promise<void> {
+    const tools = this.getTools();
+
+    // Group tools by type for better cleanup organization
+    const browserTools = tools.filter(
+      (tool): tool is BrowserBackgroundTool =>
+        tool.type === BackgroundToolType.BROWSER &&
+        tool.status === BackgroundToolStatus.RUNNING,
+    );
+
+    const shellTools = tools.filter(
+      (tool): tool is ShellBackgroundTool =>
+        tool.type === BackgroundToolType.SHELL &&
+        tool.status === BackgroundToolStatus.RUNNING,
+    );
+
+    const agentTools = tools.filter(
+      (tool): tool is AgentBackgroundTool =>
+        tool.type === BackgroundToolType.AGENT &&
+        tool.status === BackgroundToolStatus.RUNNING,
+    );
+
+    // Create cleanup promises for each resource type
+    const browserCleanupPromises = browserTools.map((tool) =>
+      this.cleanupBrowserSession(tool),
+    );
+    const shellCleanupPromises = shellTools.map((tool) =>
+      this.cleanupShellProcess(tool),
+    );
+    const agentCleanupPromises = agentTools.map((tool) =>
+      this.cleanupSubAgent(tool),
+    );
+
+    // Wait for all cleanup operations to complete in parallel
+    await Promise.all([
+      ...browserCleanupPromises,
+      ...shellCleanupPromises,
+      ...agentCleanupPromises,
+    ]);
+  }
+
+  /**
+   * Cleans up a browser session
+   * @param tool The browser tool to clean up
+   */
+  private async cleanupBrowserSession(
+    tool: BrowserBackgroundTool,
+  ): Promise<void> {
+    try {
+      const browserManager = (
+        globalThis as unknown as { __BROWSER_MANAGER__?: BrowserManager }
+      ).__BROWSER_MANAGER__;
+      if (browserManager) {
+        await browserManager.closeSession(tool.id);
+      }
+      this.updateToolStatus(tool.id, BackgroundToolStatus.COMPLETED);
+    } catch (error) {
+      this.updateToolStatus(tool.id, BackgroundToolStatus.ERROR, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Cleans up a shell process
+   * @param tool The shell tool to clean up
+   */
+  private async cleanupShellProcess(tool: ShellBackgroundTool): Promise<void> {
+    try {
+      const processState = processStates.get(tool.id);
+      if (processState && !processState.state.completed) {
+        processState.process.kill('SIGTERM');
+
+        // Force kill after a short timeout if still running
+        await new Promise<void>((resolve) => {
+          setTimeout(() => {
+            try {
+              if (!processState.state.completed) {
+                processState.process.kill('SIGKILL');
+              }
+            } catch {
+              // Ignore errors on forced kill
+            }
+            resolve();
+          }, 500);
+        });
+      }
+      this.updateToolStatus(tool.id, BackgroundToolStatus.COMPLETED);
+    } catch (error) {
+      this.updateToolStatus(tool.id, BackgroundToolStatus.ERROR, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Cleans up a sub-agent
+   * @param tool The agent tool to clean up
+   */
+  private async cleanupSubAgent(tool: AgentBackgroundTool): Promise<void> {
+    try {
+      const agentState = agentStates.get(tool.id);
+      if (agentState && !agentState.aborted) {
+        // Set the agent as aborted and completed
+        agentState.aborted = true;
+        agentState.completed = true;
+
+        // Clean up resources owned by this sub-agent
+        await agentState.context.backgroundTools.cleanup();
+      }
+      this.updateToolStatus(tool.id, BackgroundToolStatus.TERMINATED);
+    } catch (error) {
+      this.updateToolStatus(tool.id, BackgroundToolStatus.ERROR, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }
