@@ -302,9 +302,19 @@ export const textEditorTool: Tool<Parameters, ReturnType> = {
         throw new Error(`Unknown command: ${command}`);
     }
   },
-  logParameters: (input, { logger }) => {
+  logParameters: (input, { logger, workingDirectory }) => {
+    // Convert absolute path to relative path if possible
+    let displayPath = input.path;
+    if (workingDirectory && path.isAbsolute(input.path)) {
+      // Check if the path is within the working directory
+      if (input.path.startsWith(workingDirectory)) {
+        // Convert to relative path with ./ prefix
+        displayPath = './' + path.relative(workingDirectory, input.path);
+      }
+    }
+
     logger.info(
-      `${input.command} operation on "${input.path}", ${input.description}`,
+      `${input.command} operation on "${displayPath}", ${input.description}`,
     );
   },
   logReturns: (result, { logger }) => {
