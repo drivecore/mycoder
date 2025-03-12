@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import { backgroundToolRegistry, BackgroundToolStatus, BackgroundToolType } from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
   getModel,
@@ -90,6 +91,8 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
+    const { logger, agentId } = context;
+    
     // Validate parameters
     const {
       description,
@@ -99,6 +102,13 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       relevantFilesDirectories,
       enableUserPrompt = false,
     } = parameterSchema.parse(params);
+    
+    // Create an instance ID
+    const instanceId = uuidv4();
+    
+    // Register this agent with the background tool registry
+    backgroundToolRegistry.registerAgent(agentId || 'unknown', goal);
+    logger.verbose(`Registered agent with ID: ${instanceId}`);
 
     // Construct a well-structured prompt
     const prompt = [
@@ -114,9 +124,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       .join('\n');
 
     const tools = getTools({ enableUserPrompt });
-
-    // Create an instance ID
-    const instanceId = uuidv4();
 
     // Store the agent state
     const agentState: AgentState = {
@@ -147,6 +154,11 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           state.completed = true;
           state.result = result;
           state.output = result.result;
+          
+          // Update background tool registry with completed status
+          backgroundToolRegistry.updateToolStatus(instanceId, BackgroundToolStatus.COMPLETED, {
+            result: result.result.substring(0, 100) + (result.result.length > 100 ? '...' : '')
+          });
         }
       } catch (error) {
         // Update agent state with the error
@@ -154,6 +166,11 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
         if (state && !state.aborted) {
           state.completed = true;
           state.error = error instanceof Error ? error.message : String(error);
+          
+          // Update background tool registry with error status
+          backgroundToolRegistry.updateToolStatus(instanceId, BackgroundToolStatus.ERROR, {
+            error: error instanceof Error ? error.message : String(error)
+          });
         }
       }
       return true;
