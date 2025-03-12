@@ -43,6 +43,9 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Install browsers
         run: cd packages/agent && pnpm exec playwright install --with-deps chromium
 
