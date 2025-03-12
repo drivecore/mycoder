@@ -54,13 +54,11 @@ jobs:
           # Auth GitHub CLI with the token
       - name: Configure GitHub CLI
         run: |
-          # First try with GITHUB_TOKEN
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
           # Verify auth status
           gh auth status
 
       - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           echo "Running MyCoder for issue #${{ github.event.issue.number }} with prompt: ${{ steps.extract-prompt.outputs.prompt }}"
