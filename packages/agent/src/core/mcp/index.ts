@@ -15,6 +15,8 @@ export interface McpConfig {
   servers?: McpServerConfig[];
   /** Default resources to load automatically */
   defaultResources?: string[];
+  /** Default tools to make available */
+  defaultTools?: string[];
 }
 
 /**
