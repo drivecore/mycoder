@@ -85,7 +85,10 @@ describe('XAIProvider', () => {
     );
 
     // Verify the request body
-    const requestBody = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    const fetchCall = vi.mocked(fetch).mock.calls[0];
+    const fetchOptions = fetchCall?.[1];
+    const requestBody = fetchOptions?.body ? JSON.parse(fetchOptions.body as string) : {};
+    
     expect(requestBody).toEqual({
       model: 'grok-2-1212',
       messages: [{ role: 'user', content: 'Hello' }],
@@ -158,8 +161,11 @@ describe('XAIProvider', () => {
     // We're just checking that the structure is correct
     expect(result.text).toBe('');
     expect(result.toolCalls).toHaveLength(1);
-    expect(result.toolCalls[0].id).toBe('call_123');
-    expect(result.toolCalls[0].name).toBe('get_weather');
+    
+    const firstToolCall = result.toolCalls[0];
+    expect(firstToolCall?.id).toBe('call_123');
+    expect(firstToolCall?.name).toBe('get_weather');
+    
     expect(result.tokenUsage).toBeInstanceOf(TokenUsage);
 
     // Verify the fetch call
@@ -171,7 +177,10 @@ describe('XAIProvider', () => {
     );
 
     // Verify the request body
-    const requestBody = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    const fetchCall = vi.mocked(fetch).mock.calls[0];
+    const fetchOptions = fetchCall?.[1];
+    const requestBody = fetchOptions?.body ? JSON.parse(fetchOptions.body as string) : {};
+    
     expect(requestBody.messages).toEqual([
       { role: 'system', content: 'You are a helpful assistant.' },
       { role: 'user', content: 'What is the weather in New York?' },
@@ -252,7 +261,9 @@ describe('XAIProvider', () => {
     });
 
     // Verify the request body
-    const requestBody = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    const fetchCall = vi.mocked(fetch).mock.calls[0];
+    const fetchOptions = fetchCall?.[1];
+    const requestBody = fetchOptions?.body ? JSON.parse(fetchOptions.body as string) : {};
     
     expect(requestBody.messages).toEqual([
       { role: 'system', content: 'You are a helpful assistant.' },
