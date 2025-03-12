@@ -180,6 +180,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
 
       const tools = getTools({
         userPrompt: config.userPrompt,
+        mcpConfig: config.mcp,
       });
 
       // Error handling

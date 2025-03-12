@@ -11,6 +11,7 @@ Command-line interface for AI-powered coding tasks. Full details available on th
 - 🔍 **Smart Logging**: Hierarchical, color-coded logging system for clear output
 - 👤 **Human Compatible**: Uses README.md, project files and shell commands to build its own context
 - 🌐 **GitHub Integration**: GitHub mode for working with issues and PRs as part of workflow
+- 📄 **Model Context Protocol**: Support for MCP to access external context sources
 
 ## Installation
 
@@ -118,6 +119,21 @@ export default {
   customPrompt: '',
   profile: false,
   tokenCache: true,
+
+  // MCP configuration
+  mcp: {
+    servers: [
+      {
+        name: 'example',
+        url: 'https://mcp.example.com',
+        auth: {
+          type: 'bearer',
+          token: 'your-token-here',
+        },
+      },
+    ],
+    defaultResources: ['example://docs/api'],
+  },
 };
 ```
 
@@ -158,6 +174,44 @@ export default {
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
 - `tokenCache`: Enable token caching for LLM API calls (default: `true`)
+- `mcp`: Configuration for Model Context Protocol (MCP) integration (default: `{ servers: [], defaultResources: [] }`)
+
+### Model Context Protocol (MCP) Configuration
+
+MyCoder supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), which allows the agent to access external context sources and tools. MyCoder uses the official [@modelcontextprotocol/sdk](https://www.npmjs.com/package/@modelcontextprotocol/sdk) package for MCP integration.
+
+To configure MCP support, add an `mcp` section to your `mycoder.config.js` file:
+
+```javascript
+// mycoder.config.js
+export default {
+  // Other configuration...
+
+  // MCP configuration
+  mcp: {
+    // MCP Servers to connect to
+    servers: [
+      {
+        name: 'company-docs',
+        url: 'https://mcp.example.com/docs',
+        // Optional authentication
+        auth: {
+          type: 'bearer',
+          token: process.env.MCP_SERVER_TOKEN,
+        },
+      },
+    ],
+
+    // Optional: Default context resources to load
+    defaultResources: ['company-docs://api/reference'],
+  },
+};
+```
+
+When MCP is configured, the agent will have access to a new `mcp` tool that allows it to:
+
+- List available resources from configured MCP servers
+- Fetch resources to use as context for its work
 
 ### CLI-Only Options
 
