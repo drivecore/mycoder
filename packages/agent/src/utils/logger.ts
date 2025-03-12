@@ -37,7 +37,7 @@ export const BasicLoggerStyler = {
       : prefix,
   showPrefix: (_level: LogLevel): boolean => {
     // Show prefix for all log levels
-    return true;
+    return false;
   },
 };
 

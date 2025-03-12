@@ -5,7 +5,7 @@ import { listBackgroundToolsTool } from './listBackgroundTools.js';
 // Mock the entire background tools module
 vi.mock('../../core/backgroundTools.js', () => {
   return {
-    backgroundToolRegistry: {
+    backgroundTools: {
       getToolsByAgent: vi.fn().mockReturnValue([
         {
           id: 'shell-1',

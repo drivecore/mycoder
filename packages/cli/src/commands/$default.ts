@@ -14,6 +14,7 @@ import {
   DEFAULT_CONFIG,
   AgentConfig,
   ModelProvider,
+  BackgroundTools,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 
@@ -208,6 +209,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         model: config.model,
         maxTokens: config.maxTokens,
         temperature: config.temperature,
+        backgroundTools: new BackgroundTools('mainAgent'),
       });
 
       const output =

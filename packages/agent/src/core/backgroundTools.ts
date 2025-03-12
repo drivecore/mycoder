@@ -22,7 +22,6 @@ export interface BackgroundTool {
   status: BackgroundToolStatus;
   startTime: Date;
   endTime?: Date;
-  agentId: string; // To track which agent created this process
   metadata: Record<string, any>; // Additional tool-specific information
 }
 
@@ -61,30 +60,20 @@ export type AnyBackgroundTool =
 /**
  * Registry to keep track of all background processes
  */
-export class BackgroundToolRegistry {
-  private static instance: BackgroundToolRegistry;
-  private tools: Map<string, AnyBackgroundTool> = new Map();
+export class BackgroundTools {
+  tools: Map<string, AnyBackgroundTool> = new Map();
 
   // Private constructor for singleton pattern
-  private constructor() {}
-
-  // Get the singleton instance
-  public static getInstance(): BackgroundToolRegistry {
-    if (!BackgroundToolRegistry.instance) {
-      BackgroundToolRegistry.instance = new BackgroundToolRegistry();
-    }
-    return BackgroundToolRegistry.instance;
-  }
+  constructor(readonly ownerName: string) {}
 
   // Register a new shell process
-  public registerShell(agentId: string, command: string): string {
+  public registerShell(command: string): string {
     const id = uuidv4();
     const tool: ShellBackgroundTool = {
       id,
       type: BackgroundToolType.SHELL,
       status: BackgroundToolStatus.RUNNING,
       startTime: new Date(),
-      agentId,
       metadata: {
         command,
       },
@@ -94,14 +83,13 @@ export class BackgroundToolRegistry {
   }
 
   // Register a new browser process
-  public registerBrowser(agentId: string, url?: string): string {
+  public registerBrowser(url?: string): string {
     const id = uuidv4();
     const tool: BrowserBackgroundTool = {
       id,
       type: BackgroundToolType.BROWSER,
       status: BackgroundToolStatus.RUNNING,
       startTime: new Date(),
-      agentId,
       metadata: {
         url,
       },
@@ -111,14 +99,13 @@ export class BackgroundToolRegistry {
   }
 
   // Register a new agent process (for future use)
-  public registerAgent(agentId: string, goal?: string): string {
+  public registerAgent(goal?: string): string {
     const id = uuidv4();
     const tool: AgentBackgroundTool = {
       id,
       type: BackgroundToolType.AGENT,
       status: BackgroundToolStatus.RUNNING,
       startTime: new Date(),
-      agentId,
       metadata: {
         goal,
       },
@@ -155,13 +142,10 @@ export class BackgroundToolRegistry {
     return true;
   }
 
-  // Get all processes for a specific agent
-  public getToolsByAgent(agentId: string): AnyBackgroundTool[] {
+  public getTools(): AnyBackgroundTool[] {
     const result: AnyBackgroundTool[] = [];
     for (const tool of this.tools.values()) {
-      if (tool.agentId === agentId) {
-        result.push(tool);
-      }
+      result.push(tool);
     }
     return result;
   }
@@ -170,25 +154,4 @@ export class BackgroundToolRegistry {
   public getToolById(id: string): AnyBackgroundTool | undefined {
     return this.tools.get(id);
   }
-
-  // Clean up completed processes (optional, for maintenance)
-  public cleanupOldTools(olderThanHours: number = 24): void {
-    const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
-
-    for (const [id, tool] of this.tools.entries()) {
-      // Remove if it's completed/error/terminated AND older than cutoff
-      if (
-        tool.endTime &&
-        tool.endTime < cutoffTime &&
-        (tool.status === BackgroundToolStatus.COMPLETED ||
-          tool.status === BackgroundToolStatus.ERROR ||
-          tool.status === BackgroundToolStatus.TERMINATED)
-      ) {
-        this.tools.delete(id);
-      }
-    }
-  }
 }
-
-// Export singleton instance
-export const backgroundToolRegistry = BackgroundToolRegistry.getInstance();

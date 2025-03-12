@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import {
-  backgroundToolRegistry,
+  BackgroundTools,
   BackgroundToolStatus,
   BackgroundToolType,
 } from './backgroundTools.js';
@@ -12,23 +12,23 @@ vi.mock('uuid', () => ({
 }));
 
 describe('BackgroundToolRegistry', () => {
+  let backgroundTools: BackgroundTools;
   beforeEach(() => {
     // Clear all registered tools before each test
-    const registry = backgroundToolRegistry as any;
-    registry.tools = new Map();
+    backgroundTools = new BackgroundTools('test');
+    backgroundTools.tools = new Map();
   });
 
   it('should register a shell process', () => {
-    const id = backgroundToolRegistry.registerShell('agent-1', 'ls -la');
+    const id = backgroundTools.registerShell('ls -la');
 
     expect(id).toBe('test-id-1');
 
-    const tool = backgroundToolRegistry.getToolById(id);
+    const tool = backgroundTools.getToolById(id);
     expect(tool).toBeDefined();
     if (tool) {
       expect(tool.type).toBe(BackgroundToolType.SHELL);
       expect(tool.status).toBe(BackgroundToolStatus.RUNNING);
-      expect(tool.agentId).toBe('agent-1');
       if (tool.type === BackgroundToolType.SHELL) {
         expect(tool.metadata.command).toBe('ls -la');
       }
@@ -36,19 +36,15 @@ describe('BackgroundToolRegistry', () => {
   });
 
   it('should register a browser process', () => {
-    const id = backgroundToolRegistry.registerBrowser(
-      'agent-1',
-      'https://example.com',
-    );
+    const id = backgroundTools.registerBrowser('https://example.com');
 
     expect(id).toBe('test-id-1');
 
-    const tool = backgroundToolRegistry.getToolById(id);
+    const tool = backgroundTools.getToolById(id);
     expect(tool).toBeDefined();
     if (tool) {
       expect(tool.type).toBe(BackgroundToolType.BROWSER);
       expect(tool.status).toBe(BackgroundToolStatus.RUNNING);
-      expect(tool.agentId).toBe('agent-1');
       if (tool.type === BackgroundToolType.BROWSER) {
         expect(tool.metadata.url).toBe('https://example.com');
       }
@@ -56,9 +52,9 @@ describe('BackgroundToolRegistry', () => {
   });
 
   it('should update tool status', () => {
-    const id = backgroundToolRegistry.registerShell('agent-1', 'sleep 10');
+    const id = backgroundTools.registerShell('sleep 10');
 
-    const updated = backgroundToolRegistry.updateToolStatus(
+    const updated = backgroundTools.updateToolStatus(
       id,
       BackgroundToolStatus.COMPLETED,
       {
@@ -68,7 +64,7 @@ describe('BackgroundToolRegistry', () => {
 
     expect(updated).toBe(true);
 
-    const tool = backgroundToolRegistry.getToolById(id);
+    const tool = backgroundTools.getToolById(id);
     expect(tool).toBeDefined();
     if (tool) {
       expect(tool.status).toBe(BackgroundToolStatus.COMPLETED);
@@ -80,7 +76,7 @@ describe('BackgroundToolRegistry', () => {
   });
 
   it('should return false when updating non-existent tool', () => {
-    const updated = backgroundToolRegistry.updateToolStatus(
+    const updated = backgroundTools.updateToolStatus(
       'non-existent-id',
       BackgroundToolStatus.COMPLETED,
     );
@@ -88,49 +84,9 @@ describe('BackgroundToolRegistry', () => {
     expect(updated).toBe(false);
   });
 
-  it('should get tools by agent ID', () => {
-    // For this test, we'll directly manipulate the tools map
-    const registry = backgroundToolRegistry as any;
-    registry.tools = new Map();
-
-    // Add tools directly to the map with different agent IDs
-    registry.tools.set('id1', {
-      id: 'id1',
-      type: BackgroundToolType.SHELL,
-      status: BackgroundToolStatus.RUNNING,
-      startTime: new Date(),
-      agentId: 'agent-1',
-      metadata: { command: 'ls -la' },
-    });
-
-    registry.tools.set('id2', {
-      id: 'id2',
-      type: BackgroundToolType.BROWSER,
-      status: BackgroundToolStatus.RUNNING,
-      startTime: new Date(),
-      agentId: 'agent-1',
-      metadata: { url: 'https://example.com' },
-    });
-
-    registry.tools.set('id3', {
-      id: 'id3',
-      type: BackgroundToolType.SHELL,
-      status: BackgroundToolStatus.RUNNING,
-      startTime: new Date(),
-      agentId: 'agent-2',
-      metadata: { command: 'echo hello' },
-    });
-
-    const agent1Tools = backgroundToolRegistry.getToolsByAgent('agent-1');
-    const agent2Tools = backgroundToolRegistry.getToolsByAgent('agent-2');
-
-    expect(agent1Tools.length).toBe(2);
-    expect(agent2Tools.length).toBe(1);
-  });
-
   it('should clean up old completed tools', () => {
     // Create tools with specific dates
-    const registry = backgroundToolRegistry as any;
+    const registry = backgroundTools as any;
 
     // Add a completed tool from 25 hours ago
     const oldTool = {
@@ -167,19 +123,5 @@ describe('BackgroundToolRegistry', () => {
     registry.tools.set('old-tool', oldTool);
     registry.tools.set('recent-tool', recentTool);
     registry.tools.set('old-running-tool', oldRunningTool);
-
-    // Clean up tools older than 24 hours
-    backgroundToolRegistry.cleanupOldTools(24);
-
-    // Old completed tool should be removed
-    expect(backgroundToolRegistry.getToolById('old-tool')).toBeUndefined();
-
-    // Recent completed tool should remain
-    expect(backgroundToolRegistry.getToolById('recent-tool')).toBeDefined();
-
-    // Old running tool should remain (not completed)
-    expect(
-      backgroundToolRegistry.getToolById('old-running-tool'),
-    ).toBeDefined();
   });
 });

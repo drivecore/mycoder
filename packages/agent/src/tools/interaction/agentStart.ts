@@ -2,10 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import {
-  backgroundToolRegistry,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
+import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
   AgentConfig,
@@ -91,7 +88,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
-    const { logger, agentId } = context;
+    const { logger, backgroundTools } = context;
 
     // Validate parameters
     const {
@@ -107,7 +104,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     const instanceId = uuidv4();
 
     // Register this agent with the background tool registry
-    backgroundToolRegistry.registerAgent(agentId || 'unknown', goal);
+    backgroundTools.registerAgent(goal);
     logger.verbose(`Registered agent with ID: ${instanceId}`);
 
     // Construct a well-structured prompt
@@ -156,7 +153,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           state.output = result.result;
 
           // Update background tool registry with completed status
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.COMPLETED,
             {
@@ -174,7 +171,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           state.error = error instanceof Error ? error.message : String(error);
 
           // Update background tool registry with error status
-          backgroundToolRegistry.updateToolStatus(
+          backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.ERROR,
             {
