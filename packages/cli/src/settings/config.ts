@@ -23,7 +23,7 @@ const globalConfigFile = path.join(getSettingsDir(), 'config.json');
 // Export for testing
 export const getProjectConfigFile = (): string => {
   const projectDir = getProjectSettingsDir();
-  
+
   // Ensure the project directory exists
   if (projectDir && !fs.existsSync(projectDir)) {
     try {
@@ -33,7 +33,7 @@ export const getProjectConfigFile = (): string => {
       return '';
     }
   }
-  
+
   return projectDir ? path.join(projectDir, 'config.json') : '';
 };
 
@@ -286,9 +286,17 @@ export const clearConfigKey = (
   }
 
   // Create a new config without the specified key
-  const { [key]: _, ...newConfig } = currentLevelConfig as Record<string, any>;
+  const { [key]: removedValue, ...newConfig } = currentLevelConfig as Record<
+    string,
+    any
+  >;
+  console.log(`Removed value for key ${key}:`, removedValue);
 
   // Write the updated config back to the file
+  console.log(`Clearing key ${key} from ${targetFile}`);
+  console.log(`Original config:`, JSON.stringify(currentLevelConfig, null, 2));
+  console.log(`New config without key:`, JSON.stringify(newConfig, null, 2));
+
   fs.writeFileSync(targetFile, JSON.stringify(newConfig, null, 2));
 
   // Return the new merged configuration

@@ -15,6 +15,15 @@ export class BrowserManager {
     defaultTimeout: 30000,
   };
 
+  constructor() {
+    // Store a reference to the instance globally for cleanup
+    // This allows the CLI to access the instance for cleanup
+    (globalThis as any).__BROWSER_MANAGER__ = this;
+
+    // Set up cleanup handlers for graceful shutdown
+    this.setupGlobalCleanup();
+  }
+
   async createSession(config?: BrowserConfig): Promise<BrowserSession> {
     try {
       const sessionConfig = { ...this.defaultConfig, ...config };
@@ -80,14 +89,46 @@ export class BrowserManager {
       this.sessions.delete(session.id);
     });
 
-    // Handle process exit
-    process.on('exit', () => {
-      this.closeSession(session.id).catch(() => {});
+    // No need to add individual process handlers for each session
+    // We'll handle all sessions in the global cleanup
+  }
+
+  /**
+   * Sets up global cleanup handlers for all browser sessions
+   */
+  private setupGlobalCleanup(): void {
+    // Use beforeExit for async cleanup
+    process.on('beforeExit', () => {
+      this.closeAllSessions().catch((err) => {
+        console.error('Error closing browser sessions:', err);
+      });
     });
 
-    // Handle unexpected errors
-    process.on('uncaughtException', () => {
-      this.closeSession(session.id).catch(() => {});
+    // Use exit for synchronous cleanup (as a fallback)
+    process.on('exit', () => {
+      // Can only do synchronous operations here
+      for (const session of this.sessions.values()) {
+        try {
+          // Attempt synchronous close - may not fully work
+          session.browser.close();
+          // eslint-disable-next-line unused-imports/no-unused-vars
+        } catch (e) {
+          // Ignore errors during exit
+        }
+      }
+    });
+
+    // Handle SIGINT (Ctrl+C)
+    process.on('SIGINT', () => {
+      // eslint-disable-next-line promise/catch-or-return
+      this.closeAllSessions()
+        .catch(() => {
+          return false;
+        })
+        .finally(() => {
+          // Give a moment for cleanup to complete
+          setTimeout(() => process.exit(0), 500);
+        });
     });
   }
 

@@ -34,7 +34,7 @@ export const getProjectSettingsDir = (): string => {
 
   // If we're creating a new project config, use the current directory
   const projectDir = path.join(process.cwd(), '.mycoder');
-  
+
   // Ensure directory exists when it's requested
   if (!fs.existsSync(projectDir)) {
     try {
@@ -45,7 +45,7 @@ export const getProjectSettingsDir = (): string => {
       // as other code will handle the error when trying to use it
     }
   }
-  
+
   return projectDir;
 };
 

@@ -25,6 +25,7 @@ type ProcessState = {
 };
 
 // Global map to store process state
+// This is exported so it can be accessed for cleanup
 export const processStates: Map<string, ProcessState> = new Map();
 
 const parameterSchema = z.object({
