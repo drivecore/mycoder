@@ -1,16 +1,12 @@
-feat(agent): implement incremental resource cleanup for agent lifecycle
+refactor(agent): implement parallel resource cleanup
 
-This commit adds a new cleanup method to the BackgroundTools class that handles
-cleaning up browser sessions, shell processes, and sub-agents associated with an
-agent when it completes its task, encounters an error, or is terminated.
+This change improves the resource cleanup process by handling browser sessions,
+shell processes, and sub-agents in parallel rather than sequentially.
 
-The changes include:
+The implementation:
+1. Refactors the cleanup method into smaller helper methods for each resource type
+2. Uses Promise.all to execute cleanup operations concurrently
+3. Filters tools by status during the initial grouping to simplify the code
 
-- Adding a cleanup method to BackgroundTools that cleans up resources
-- Calling cleanup when agents complete successfully
-- Calling cleanup when agents encounter errors
-- Calling cleanup when agents are terminated
-- Enhancing global cleanup to first attempt to clean up any still-running agents
-- Adding tests for the new cleanup functionality
-
-Fixes #236
+This approach significantly speeds up the cleanup process, especially when
+dealing with multiple resources of different types.
