@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest';
 
+import { TokenTracker } from '../core/tokens.js';
+import { ToolContext } from '../core/types.js';
+import { MockLogger } from '../utils/mockLogger.js';
+
 import { getTools } from './getTools.js';
+
+// Mock context
+export const getMockToolContext = (): ToolContext => ({
+  logger: new MockLogger(),
+  tokenTracker: new TokenTracker(),
+  workingDirectory: '.',
+  headless: true,
+  userSession: false,
+  pageFilter: 'none',
+  githubMode: true,
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
+});
 
 describe('getTools', () => {
   it('should return a successful result with tools', () => {

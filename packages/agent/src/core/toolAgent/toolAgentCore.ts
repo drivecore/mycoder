@@ -1,12 +1,14 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { generateText } from '../llm/core.js';
+import { createProvider } from '../llm/provider.js';
 import { Message, ToolUseMessage } from '../llm/types.js';
+import { Tool, ToolContext } from '../types.js';
 
-import { DEFAULT_CONFIG } from './config.js';
+import { AgentConfig } from './config.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
-import { Tool, ToolAgentResult, ToolContext } from './types.js';
+import { ToolAgentResult } from './types.js';
 
 // Import from our new LLM abstraction instead of Vercel AI SDK
 
@@ -17,7 +19,7 @@ import { Tool, ToolAgentResult, ToolContext } from './types.js';
 export const toolAgent = async (
   initialPrompt: string,
   tools: Tool[],
-  config = DEFAULT_CONFIG,
+  config: AgentConfig,
   context: ToolContext,
 ): Promise<ToolAgentResult> => {
   const { logger, tokenTracker } = context;
@@ -41,7 +43,7 @@ export const toolAgent = async (
   const systemPrompt = config.getSystemPrompt(context);
 
   // Create the LLM provider
-  const provider = config.model;
+  const provider = createProvider(config.provider, config.model);
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.verbose(

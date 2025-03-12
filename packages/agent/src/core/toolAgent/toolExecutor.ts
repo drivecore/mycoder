@@ -1,10 +1,10 @@
 import { executeToolCall } from '../executeToolCall.js';
 import { Message } from '../llm/types.js';
 import { TokenTracker } from '../tokens.js';
-import { ToolCall } from '../types.js';
+import { Tool, ToolCall, ToolContext } from '../types.js';
 
 import { addToolResultToMessages } from './messageUtils.js';
-import { Tool, ToolCallResult, ToolContext } from './types.js';
+import { ToolCallResult } from './types.js';
 
 const safeParse = (value: string) => {
   try {

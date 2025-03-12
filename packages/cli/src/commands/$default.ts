@@ -12,8 +12,9 @@ import {
   LogLevel,
   subAgentTool,
   errorToString,
-  getModel,
   DEFAULT_CONFIG,
+  AgentConfig,
+  ModelProvider,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 
@@ -190,19 +191,15 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const config = await getConfig();
 
       // Create a config with the selected model
-      const agentConfig = {
+      const agentConfig: AgentConfig = {
         ...DEFAULT_CONFIG,
-        model: getModel(
-          userModelProvider as 'anthropic' /*
-            | 'openai'
-            | 'ollama'
-            | 'xai'
-            | 'mistral'*/,
-          userModelName,
-        ),
+        provider: userModelProvider as ModelProvider,
+        model: userModelName,
         maxTokens: userMaxTokens,
         temperature: userTemperature,
       };
+
+      console.log('agentConfig', agentConfig);
 
       const result = await toolAgent(prompt, tools, agentConfig, {
         logger,
@@ -221,6 +218,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
             : argv.enableUserPrompt !== undefined
               ? argv.enableUserPrompt
               : true,
+        provider: userModelProvider as ModelProvider,
+        model: userModelName,
       });
 
       const output =

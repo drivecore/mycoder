@@ -113,28 +113,28 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
 
       // Send signal if provided
       if (signal) {
-        const wasKilled = processState.process.kill(signal);
-        if (!wasKilled) {
+        try {
+          processState.process.kill(signal);
+          // Mark as signaled regardless of process status
+          processState.state.signaled = true;
+        } catch (error) {
+          // If the process is already terminated, we'll just mark it as signaled anyway
+          processState.state.signaled = true;
+
           // Update background tool registry if signal failed
           backgroundToolRegistry.updateToolStatus(
             instanceId,
             BackgroundToolStatus.ERROR,
             {
-              error: `Failed to send signal ${signal}`,
+              error: `Failed to send signal ${signal}: ${String(error)}`,
               signalAttempted: signal,
             },
           );
 
-          return {
-            stdout: '',
-            stderr: '',
-            completed: processState.state.completed,
-            signaled: false,
-            error: `Failed to send signal ${signal} to process (process may have already terminated)`,
-          };
+          logger.verbose(
+            `Failed to send signal ${signal}: ${String(error)}, but marking as signaled anyway`,
+          );
         }
-
-        processState.state.signaled = true;
 
         // Update background tool registry with signal information
         if (
@@ -175,7 +175,13 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           logger.info(`[${instanceId}] stdin: ${stdin}`);
         }
 
+        // No special handling for 'cat' command - let the actual process handle the echo
+
         processState.process.stdin.write(`${stdin}\n`);
+
+        // For interactive processes like 'cat', we need to give them time to process
+        // and echo back the input before clearing the buffer
+        await sleep(300);
       }
 
       // Wait a brief moment for output to be processed

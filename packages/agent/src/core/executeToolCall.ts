@@ -23,10 +23,7 @@ export const executeToolCall = async (
     customPrefix: tool.logPrefix,
   });
 
-  const toolContext: ToolContext = {
-    ...context,
-    logger,
-  };
+  const toolContext: ToolContext = { ...context, logger };
 
   let parsedJson: any;
   try {

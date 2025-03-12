@@ -1,21 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
-import { MockLogger } from '../../utils/mockLogger.js';
 import { sleep } from '../../utils/sleep.js';
+import { getMockToolContext } from '../getTools.test.js';
 
 import { processStates, shellStartTool } from './shellStart.js';
 
-const toolContext: ToolContext = {
-  logger: new MockLogger(),
-  headless: true,
-  workingDirectory: '.',
-  userSession: false,
-  pageFilter: 'simple',
-  tokenTracker: new TokenTracker(),
-  githubMode: true,
-};
+const toolContext: ToolContext = getMockToolContext();
+
 describe('shellStartTool', () => {
   beforeEach(() => {
     processStates.clear();

@@ -8,7 +8,7 @@ import {
 } from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
-  getModel,
+  AgentConfig,
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { ToolAgentResult } from '../../core/toolAgent/types.js';
@@ -67,11 +67,12 @@ type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
 // Sub-agent specific configuration
-const subAgentConfig = {
+const subAgentConfig: AgentConfig = {
   maxIterations: 200,
-  model: getModel('anthropic', 'claude-3-7-sonnet-20250219'),
   maxTokens: 4096,
   temperature: 0.7,
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
   getSystemPrompt: (context: ToolContext) => {
     return [
       getDefaultSystemPrompt(context),

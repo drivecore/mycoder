@@ -1,20 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { TokenTracker } from '../../core/tokens';
 import { ToolContext } from '../../core/types';
-import { MockLogger } from '../../utils/mockLogger';
+import { getMockToolContext } from '../getTools.test';
 
 import { sleepTool } from './sleep';
 
-const toolContext: ToolContext = {
-  logger: new MockLogger(),
-  headless: true,
-  workingDirectory: '.',
-  userSession: false,
-  pageFilter: 'simple',
-  tokenTracker: new TokenTracker(),
-  githubMode: true,
-};
+const toolContext: ToolContext = getMockToolContext();
 
 describe('sleep tool', () => {
   beforeEach(() => {

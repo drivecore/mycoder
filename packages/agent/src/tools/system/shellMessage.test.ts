@@ -1,22 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
-import { MockLogger } from '../../utils/mockLogger.js';
 import { sleep } from '../../utils/sleep.js';
+import { getMockToolContext } from '../getTools.test.js';
 
 import { shellMessageTool, NodeSignals } from './shellMessage.js';
 import { processStates, shellStartTool } from './shellStart.js';
 
-const toolContext: ToolContext = {
-  logger: new MockLogger(),
-  headless: true,
-  workingDirectory: '.',
-  userSession: false,
-  pageFilter: 'simple',
-  tokenTracker: new TokenTracker(),
-  githubMode: true,
-};
+const toolContext: ToolContext = getMockToolContext();
 
 // Helper function to get instanceId from shellStart result
 const getInstanceId = (
@@ -65,9 +56,13 @@ describe('shellMessageTool', () => {
       toolContext,
     );
 
+    // With 'cat', the input should be echoed back exactly
     expect(result.stdout).toBe('hello world');
     expect(result.stderr).toBe('');
     expect(result.completed).toBe(false);
+
+    // Verify the instance ID is valid
+    expect(processStates.has(testInstanceId)).toBe(true);
   });
 
   it('should handle nonexistent process', async () => {

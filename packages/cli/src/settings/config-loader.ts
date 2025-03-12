@@ -28,6 +28,7 @@ const defaultConfig: Config = {
 
   // API keys (empty by default)
   ANTHROPIC_API_KEY: '',
+  OPENAI_API_KEY: '',
 };
 
 /**
@@ -37,19 +38,7 @@ const defaultConfig: Config = {
 export function loadConfig(cliOptions: Partial<Config> = {}): Config {
   // Initialize cosmiconfig
   const explorer = cosmiconfigSync('mycoder', {
-    searchPlaces: [
-      'mycoder.config.js',
-      'mycoder.config.cjs',
-      'mycoder.config.mjs',
-      '.mycoderrc',
-      '.mycoderrc.json',
-      '.mycoderrc.yaml',
-      '.mycoderrc.yml',
-      '.mycoderrc.js',
-      '.mycoderrc.cjs',
-      '.mycoderrc.mjs',
-      'package.json',
-    ],
+    searchPlaces: ['mycoder.config.js', 'package.json'],
   });
 
   // Search for configuration file

@@ -1,8 +1,4 @@
 // Import types from the core types file
-import { Tool, ToolContext } from '../types.js';
-
-// Export the imported types explicitly
-export { Tool, ToolContext };
 
 // Define types specific to toolAgent here
 export interface ToolAgentResult {

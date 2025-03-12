@@ -3,6 +3,7 @@
  */
 
 import { AnthropicProvider } from './providers/anthropic.js';
+import { OpenAIProvider } from './providers/openai.js';
 import { ProviderOptions, GenerateOptions, LLMResponse } from './types.js';
 
 /**
@@ -39,6 +40,7 @@ const providerFactories: Record<
   (model: string, options: ProviderOptions) => LLMProvider
 > = {
   anthropic: (model, options) => new AnthropicProvider(model, options),
+  openai: (model, options) => new OpenAIProvider(model, options),
 };
 
 /**
@@ -49,6 +51,7 @@ export function createProvider(
   model: string,
   options: ProviderOptions = {},
 ): LLMProvider {
+  console.log({ providerType, model, options });
   const factory = providerFactories[providerType.toLowerCase()];
 
   if (!factory) {

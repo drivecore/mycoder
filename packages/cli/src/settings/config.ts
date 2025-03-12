@@ -23,6 +23,7 @@ export type Config = {
 
   // API keys
   ANTHROPIC_API_KEY: string;
+  OPENAI_API_KEY: string;
 
   // Additional properties can be added by users
   [key: string]: any;

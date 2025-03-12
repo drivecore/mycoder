@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
-import { MockLogger } from '../../utils/mockLogger.js';
+import { getMockToolContext } from '../getTools.test.js';
 
 import { userPromptTool } from './userPrompt.js';
 
@@ -12,23 +11,14 @@ vi.mock('../../utils/userPrompt.js', () => ({
 }));
 
 // Mock context
-const mockContext: ToolContext = {
-  logger: new MockLogger(),
-  tokenTracker: new TokenTracker(),
-  workingDirectory: '/test',
-  headless: true,
-  userSession: false,
-  pageFilter: 'none',
-  githubMode: true,
-};
-
+const toolContext: ToolContext = getMockToolContext();
 describe('userPromptTool', () => {
   it('should prompt the user and return their response', async () => {
     const result = await userPromptTool.execute(
       {
         prompt: 'Test prompt',
       },
-      mockContext,
+      toolContext,
     );
 
     expect(result).toHaveProperty('userText');
@@ -46,7 +36,7 @@ describe('userPromptTool', () => {
       {
         prompt: 'Another test prompt',
       },
-      mockContext,
+      toolContext,
     );
 
     expect(result.userText).toBe('Custom response');

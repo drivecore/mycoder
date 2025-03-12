@@ -30,7 +30,7 @@ vi.mock('mycoder-agent', () => ({
   },
   subAgentTool: { logPrefix: '' },
   errorToString: vi.fn(),
-  getModel: vi.fn(),
+  createProvider: vi.fn(),
   DEFAULT_CONFIG: {},
   TokenTracker: vi.fn().mockImplementation(() => ({
     logLevel: 2,

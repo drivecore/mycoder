@@ -4,6 +4,7 @@ import { JsonSchema7Type } from 'zod-to-json-schema';
 import { Logger } from '../utils/logger.js';
 
 import { TokenTracker } from './tokens.js';
+import { ModelProvider } from './toolAgent/config.js';
 
 export type TokenLevel = 'debug' | 'verbose' | 'info' | 'warn' | 'error';
 
@@ -21,6 +22,8 @@ export type ToolContext = {
   tokenCache?: boolean;
   enableUserPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
+  provider: ModelProvider;
+  model: string;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

@@ -1,22 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 
-import { MockLogger } from '../utils/mockLogger.js';
+import { getMockToolContext } from '../tools/getTools.test.js';
 
 import { executeToolCall } from './executeToolCall.js';
-import { TokenTracker } from './tokens.js';
 import { Tool, ToolContext } from './types.js';
 
-const toolContext: ToolContext = {
-  logger: new MockLogger(),
-  headless: true,
-  workingDirectory: '.',
-  userSession: false,
-  pageFilter: 'simple',
-  tokenTracker: new TokenTracker(),
-  githubMode: true,
-};
-
+const toolContext: ToolContext = getMockToolContext();
 // Mock tool for testing
 const mockTool: Tool = {
   name: 'mockTool',

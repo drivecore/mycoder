@@ -23,6 +23,7 @@ describe('config', () => {
       profile: false,
       tokenCache: true,
       ANTHROPIC_API_KEY: '',
+      OPENAI_API_KEY: '',
     };
     vi.mocked(configLoader.loadConfig).mockReturnValue(mockConfig);
 
@@ -47,6 +48,7 @@ describe('config', () => {
       profile: false,
       tokenCache: true,
       ANTHROPIC_API_KEY: '',
+      OPENAI_API_KEY: '',
     };
     vi.mocked(configLoader.loadConfig).mockReturnValue(mockConfig);
 
