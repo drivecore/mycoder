@@ -8,11 +8,10 @@ import { ToolContext } from '../types';
 /**
  * Available model providers
  */
-export type ModelProvider = 'anthropic';
+export type ModelProvider = 'anthropic' | 'xai';
 /*
   | 'openai'
   | 'ollama'
-  | 'xai'
   | 'mistral'*/
 
 /**
@@ -22,6 +21,8 @@ export function getModel(provider: ModelProvider, model: string): LLMProvider {
   switch (provider) {
     case 'anthropic':
       return createProvider('anthropic', model);
+    case 'xai':
+      return createProvider('xai', model);
     /*case 'openai':
       return createProvider('openai', model);
     case 'ollama':
@@ -31,8 +32,6 @@ export function getModel(provider: ModelProvider, model: string): LLMProvider {
         });
       }
       return createProvider('ollama', model);
-    case 'xai':
-      return createProvider('xai', model);
     case 'mistral':
       return createProvider('mistral', model);*/
     default:

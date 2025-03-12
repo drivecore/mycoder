@@ -56,6 +56,7 @@ const defaultConfig = {
   tokenCache: true,
   // API keys (empty by default)
   ANTHROPIC_API_KEY: '',
+  XAI_API_KEY: '',
 };
 
 export type Config = typeof defaultConfig;

@@ -77,6 +77,18 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
         'Store your Anthropic API key in configuration',
       )
       .example(
+        '$0 config set XAI_API_KEY <your-key>',
+        'Store your XAI/Grok API key in configuration',
+      )
+      .example(
+        '$0 config set provider xai',
+        'Use XAI/Grok as the provider',
+      )
+      .example(
+        '$0 config set model grok-2-1212',
+        'Use Grok 2 model',
+      )
+      .example(
         '$0 config clear --all',
         'Clear all configuration settings',
       ) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
