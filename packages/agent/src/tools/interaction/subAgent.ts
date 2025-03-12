@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import { backgroundToolRegistry, BackgroundToolStatus, BackgroundToolType } from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
   getModel,
@@ -68,6 +69,8 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
+    const { logger, agentId } = context;
+    
     // Validate parameters
     const {
       description,
@@ -76,6 +79,10 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       workingDirectory,
       relevantFilesDirectories,
     } = parameterSchema.parse(params);
+    
+    // Register this sub-agent with the background tool registry
+    const subAgentId = backgroundToolRegistry.registerAgent(agentId || 'unknown', goal);
+    logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
 
     // Construct a well-structured prompt
     const prompt = [
@@ -97,11 +104,26 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       ...subAgentConfig,
     };
 
-    const result = await toolAgent(prompt, tools, config, {
-      ...context,
-      workingDirectory: workingDirectory ?? context.workingDirectory,
-    });
-    return { response: result.result };
+    try {
+      const result = await toolAgent(prompt, tools, config, {
+        ...context,
+        workingDirectory: workingDirectory ?? context.workingDirectory,
+      });
+      
+      // Update background tool registry with completed status
+      backgroundToolRegistry.updateToolStatus(subAgentId, BackgroundToolStatus.COMPLETED, {
+        result: result.result.substring(0, 100) + (result.result.length > 100 ? '...' : '')
+      });
+      
+      return { response: result.result };
+    } catch (error) {
+      // Update background tool registry with error status
+      backgroundToolRegistry.updateToolStatus(subAgentId, BackgroundToolStatus.ERROR, {
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      throw error;
+    }
   },
   logParameters: (input, { logger }) => {
     logger.info(`Delegating task "${input.description}"`);

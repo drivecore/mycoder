@@ -20,6 +20,7 @@ export type ToolContext = {
   customPrompt?: string;
   tokenCache?: boolean;
   enableUserPrompt?: boolean;
+  agentId?: string; // Unique identifier for the agent, used for background tool tracking
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

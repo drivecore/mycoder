@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 
@@ -111,6 +115,16 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
       if (signal) {
         const wasKilled = processState.process.kill(signal);
         if (!wasKilled) {
+          // Update background tool registry if signal failed
+          backgroundToolRegistry.updateToolStatus(
+            instanceId,
+            BackgroundToolStatus.ERROR,
+            {
+              error: `Failed to send signal ${signal}`,
+              signalAttempted: signal,
+            },
+          );
+
           return {
             stdout: '',
             stderr: '',
@@ -119,7 +133,33 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
             error: `Failed to send signal ${signal} to process (process may have already terminated)`,
           };
         }
+
         processState.state.signaled = true;
+
+        // Update background tool registry with signal information
+        if (
+          signal === 'SIGTERM' ||
+          signal === 'SIGKILL' ||
+          signal === 'SIGINT'
+        ) {
+          backgroundToolRegistry.updateToolStatus(
+            instanceId,
+            BackgroundToolStatus.TERMINATED,
+            {
+              signal,
+              terminatedByUser: true,
+            },
+          );
+        } else {
+          backgroundToolRegistry.updateToolStatus(
+            instanceId,
+            BackgroundToolStatus.RUNNING,
+            {
+              signal,
+              signaled: true,
+            },
+          );
+        }
       }
 
       // Send input if provided
