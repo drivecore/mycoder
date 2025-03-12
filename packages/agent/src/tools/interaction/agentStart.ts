@@ -69,10 +69,6 @@ type ReturnType = z.infer<typeof returnSchema>;
 // Sub-agent specific configuration
 const subAgentConfig: AgentConfig = {
   maxIterations: 200,
-  maxTokens: 4096,
-  temperature: 0.7,
-  provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',
   getSystemPrompt: (context: ToolContext) => {
     return [
       getDefaultSystemPrompt(context),
