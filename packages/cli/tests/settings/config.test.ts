@@ -61,7 +61,7 @@ describe('Config', () => {
 
   describe('updateConfig', () => {
     it('should update config and write to file', () => {
-      const currentConfig = { githubMode: false };
+      const currentConfig = { githubMode: true };
       const newConfig = { githubMode: true };
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(currentConfig));
@@ -77,7 +77,7 @@ describe('Config', () => {
     });
 
     it('should merge partial config with existing config', () => {
-      const currentConfig = { githubMode: false, existingSetting: 'value' };
+      const currentConfig = { githubMode: true, existingSetting: 'value' };
       const partialConfig = { githubMode: true };
       vi.mocked(fs.existsSync).mockReturnValue(true);
       vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(currentConfig));

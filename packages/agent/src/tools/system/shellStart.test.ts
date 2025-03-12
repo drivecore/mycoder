@@ -14,7 +14,7 @@ const toolContext: ToolContext = {
   userSession: false,
   pageFilter: 'simple',
   tokenTracker: new TokenTracker(),
-  githubMode: false,
+  githubMode: true,
 };
 describe('shellStartTool', () => {
   beforeEach(() => {

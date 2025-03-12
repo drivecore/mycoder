@@ -54,7 +54,7 @@ describe('Config Defaults for CLI Options', () => {
   it('should use config values for headless, userSession, and pageFilter when not provided in args', async () => {
     // Setup mock config with default values
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       headless: true,
       userSession: false,
       pageFilter: 'none',
@@ -96,7 +96,7 @@ describe('Config Defaults for CLI Options', () => {
   it('should use command line args for headless, userSession, and pageFilter when provided', async () => {
     // Setup mock config with default values
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       headless: true, // Default is true
       userSession: false, // Default is false
       pageFilter: 'none', // Default is none
@@ -132,7 +132,7 @@ describe('Config Defaults for CLI Options', () => {
   it('should test the actual toolAgent call with config defaults', async () => {
     // Setup mock config with default values
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       headless: true,
       userSession: false,
       pageFilter: 'none',
@@ -180,7 +180,7 @@ describe('Config Defaults for CLI Options', () => {
   it('should test the actual toolAgent call with command line args', async () => {
     // Setup mock config with default values
     vi.mocked(getConfig).mockReturnValue({
-      githubMode: false,
+      githubMode: true,
       headless: true, // Default is true
       userSession: false, // Default is false
       pageFilter: 'none', // Default is none

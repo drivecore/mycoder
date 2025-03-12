@@ -43,7 +43,7 @@ const projectConfigFile = (): string => getProjectConfigFile();
 // Default configuration
 const defaultConfig = {
   // Add default configuration values here
-  githubMode: false,
+  githubMode: true,
   headless: true,
   userSession: false,
   pageFilter: 'none' as 'simple' | 'none' | 'readability',
