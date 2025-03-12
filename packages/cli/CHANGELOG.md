@@ -1,3 +1,10 @@
+# [mycoder-v1.3.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.2.0...mycoder-v1.3.0) (2025-03-12)
+
+
+### Features
+
+* implement MCP tools support ([2d99ac8](https://github.com/drivecore/mycoder/commit/2d99ac8cefaa770e368d469355a509739aafe6a3))
+
 # [mycoder-v1.2.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.1.1...mycoder-v1.2.0) (2025-03-12)
 
 
