@@ -64,7 +64,7 @@ type ReturnType = z.infer<typeof returnSchema>;
 
 // Sub-agent specific configuration
 const subAgentConfig = {
-  maxIterations: 50,
+  maxIterations: 200,
   model: getModel('anthropic', 'claude-3-7-sonnet-20250219'),
   maxTokens: 4096,
   temperature: 0.7,
