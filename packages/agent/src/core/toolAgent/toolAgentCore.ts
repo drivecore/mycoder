@@ -43,7 +43,7 @@ export const toolAgent = async (
   const systemPrompt = config.getSystemPrompt(context);
 
   // Create the LLM provider
-  const provider = createProvider(config.provider, config.model);
+  const provider = createProvider(context.provider, context.model);
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.verbose(
@@ -74,8 +74,8 @@ export const toolAgent = async (
     const generateOptions = {
       messages: messagesWithSystem,
       functions: functionDefinitions,
-      temperature: config.temperature,
-      maxTokens: config.maxTokens,
+      temperature: context.temperature,
+      maxTokens: context.maxTokens,
     };
 
     const { text, toolCalls, tokenUsage } = await generateText(

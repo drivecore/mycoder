@@ -47,10 +47,6 @@ type ReturnType = z.infer<typeof returnSchema>;
 // Sub-agent specific configuration
 const subAgentConfig: AgentConfig = {
   maxIterations: 200,
-  provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',
-  maxTokens: 4096,
-  temperature: 0.7,
   getSystemPrompt: (context: ToolContext) => {
     return [
       getDefaultSystemPrompt(context),
@@ -106,11 +102,9 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
 
     const tools = getTools({ userPrompt: false });
 
-    // Update config if timeout is specified
+    // Use the subAgentConfig
     const config: AgentConfig = {
       ...subAgentConfig,
-      provider: context.provider,
-      model: context.model,
     };
 
     try {
