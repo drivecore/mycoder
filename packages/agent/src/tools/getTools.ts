@@ -5,10 +5,10 @@ import { browseMessageTool } from './browser/browseMessage.js';
 import { browseStartTool } from './browser/browseStart.js';
 import { agentMessageTool } from './interaction/agentMessage.js';
 import { agentStartTool } from './interaction/agentStart.js';
-import { subAgentTool } from './interaction/subAgent.js';
 import { userPromptTool } from './interaction/userPrompt.js';
 import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
+import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
 import { respawnTool } from './system/respawn.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
@@ -27,7 +27,6 @@ export function getTools(options?: GetToolsOptions): Tool[] {
   // Force cast to Tool type to avoid TypeScript issues
   const tools: Tool[] = [
     textEditorTool as unknown as Tool,
-    subAgentTool as unknown as Tool,
     agentStartTool as unknown as Tool,
     agentMessageTool as unknown as Tool,
     sequenceCompleteTool as unknown as Tool,
@@ -38,6 +37,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     browseMessageTool as unknown as Tool,
     respawnTool as unknown as Tool,
     sleepTool as unknown as Tool,
+    listBackgroundToolsTool as unknown as Tool,
   ];
 
   // Only include userPrompt tool if enabled

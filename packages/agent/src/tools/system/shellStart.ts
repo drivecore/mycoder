@@ -4,6 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 
@@ -98,7 +102,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       showStdIn = false,
       showStdout = false,
     },
-    { logger, workingDirectory },
+    { logger, workingDirectory, agentId },
   ): Promise<ReturnType> => {
     if (showStdIn) {
       logger.info(`Command input: ${command}`);
@@ -107,7 +111,12 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
     return new Promise((resolve) => {
       try {
+        // Generate a unique ID for this process
         const instanceId = uuidv4();
+
+        // Register this shell process with the background tool registry
+        backgroundToolRegistry.registerShell(agentId || 'unknown', command);
+
         let hasResolved = false;
 
         // Split command into command and args
@@ -154,6 +163,16 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         process.on('error', (error) => {
           logger.error(`[${instanceId}] Process error: ${error.message}`);
           processState.state.completed = true;
+
+          // Update background tool registry with error status
+          backgroundToolRegistry.updateToolStatus(
+            instanceId,
+            BackgroundToolStatus.ERROR,
+            {
+              error: error.message,
+            },
+          );
+
           if (!hasResolved) {
             hasResolved = true;
             resolve({
@@ -174,6 +193,16 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           processState.state.completed = true;
           processState.state.signaled = signal !== null;
           processState.state.exitCode = code;
+
+          // Update background tool registry with completed status
+          const status =
+            code === 0
+              ? BackgroundToolStatus.COMPLETED
+              : BackgroundToolStatus.ERROR;
+          backgroundToolRegistry.updateToolStatus(instanceId, status, {
+            exitCode: code,
+            signaled: signal !== null,
+          });
 
           if (!hasResolved) {
             hasResolved = true;

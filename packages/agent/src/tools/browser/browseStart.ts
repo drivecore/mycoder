@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
@@ -42,7 +46,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { url, timeout = 30000 },
-    { logger, headless, userSession, pageFilter },
+    { logger, headless, userSession, pageFilter, agentId },
   ): Promise<ReturnType> => {
     logger.verbose(`Starting browser session${url ? ` at ${url}` : ''}`);
     logger.verbose(
@@ -52,6 +56,9 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
 
     try {
       const instanceId = uuidv4();
+
+      // Register this browser session with the background tool registry
+      backgroundToolRegistry.registerBrowser(agentId || 'unknown', url);
 
       // Launch browser
       const launchOptions = {
@@ -91,6 +98,11 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       // Setup cleanup handlers
       browser.on('disconnected', () => {
         browserSessions.delete(instanceId);
+        // Update background tool registry when browser disconnects
+        backgroundToolRegistry.updateToolStatus(
+          instanceId,
+          BackgroundToolStatus.TERMINATED,
+        );
       });
 
       // Navigate to URL if provided
@@ -133,6 +145,16 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       logger.verbose('Browser session started successfully');
       logger.verbose(`Content length: ${content.length} characters`);
 
+      // Update background tool registry with running status
+      backgroundToolRegistry.updateToolStatus(
+        instanceId,
+        BackgroundToolStatus.RUNNING,
+        {
+          url: url || 'about:blank',
+          contentLength: content.length,
+        },
+      );
+
       return {
         instanceId,
         status: 'initialized',
@@ -140,6 +162,10 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       };
     } catch (error) {
       logger.error(`Failed to start browser: ${errorToString(error)}`);
+
+      // No need to update background tool registry here as we don't have a valid instanceId
+      // when an error occurs before the browser is properly initialized
+
       return {
         instanceId: '',
         status: 'error',

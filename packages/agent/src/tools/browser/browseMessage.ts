@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import {
+  backgroundToolRegistry,
+  BackgroundToolStatus,
+} from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
@@ -184,6 +188,16 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
           await session.page.context().close();
           await session.browser.close();
           browserSessions.delete(instanceId);
+
+          // Update background tool registry when browser is explicitly closed
+          backgroundToolRegistry.updateToolStatus(
+            instanceId,
+            BackgroundToolStatus.COMPLETED,
+            {
+              closedExplicitly: true,
+            },
+          );
+
           logger.verbose('Browser session closed successfully');
           return { status: 'closed' };
         }
@@ -194,6 +208,17 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
       }
     } catch (error) {
       logger.error('Browser action failed:', { error });
+
+      // Update background tool registry with error status if action fails
+      backgroundToolRegistry.updateToolStatus(
+        instanceId,
+        BackgroundToolStatus.ERROR,
+        {
+          error: errorToString(error),
+          actionType,
+        },
+      );
+
       return {
         status: 'error',
         error: errorToString(error),

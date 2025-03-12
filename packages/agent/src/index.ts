@@ -9,6 +9,7 @@ export * from './tools/system/respawn.js';
 export * from './tools/system/sequenceComplete.js';
 export * from './tools/system/shellMessage.js';
 export * from './tools/system/shellExecute.js';
+export * from './tools/system/listBackgroundTools.js';
 
 // Tools - Browser
 export * from './tools/browser/BrowserManager.js';
@@ -25,6 +26,7 @@ export * from './tools/interaction/userPrompt.js';
 // Core
 export * from './core/executeToolCall.js';
 export * from './core/types.js';
+export * from './core/backgroundTools.js';
 // Tool Agent Core
 export { toolAgent } from './core/toolAgent/toolAgentCore.js';
 export * from './core/toolAgent/config.js';
