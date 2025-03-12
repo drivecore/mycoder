@@ -21,7 +21,7 @@ export type Config = {
   tokenUsage: boolean;
 
   ollamaBaseUrl: string;
-  
+
   // MCP configuration
   mcp?: {
     servers?: Array<{
@@ -64,7 +64,7 @@ const defaultConfig: Config = {
 
   // Ollama configuration
   ollamaBaseUrl: 'http://localhost:11434',
-  
+
   // MCP configuration
   mcp: {
     servers: [],
