@@ -1,3 +1,10 @@
+# [mycoder-agent-v1.3.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.2.0...mycoder-agent-v1.3.0) (2025-03-12)
+
+
+### Features
+
+* implement MCP tools support ([2d99ac8](https://github.com/drivecore/mycoder/commit/2d99ac8cefaa770e368d469355a509739aafe6a3))
+
 # [mycoder-agent-v1.2.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.1.0...mycoder-agent-v1.2.0) (2025-03-12)
 
 
