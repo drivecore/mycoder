@@ -15,10 +15,6 @@ export type ModelProvider = 'anthropic' | 'openai' | 'ollama';
 
 export type AgentConfig = {
   maxIterations: number;
-  provider: ModelProvider;
-  model: string;
-  maxTokens: number;
-  temperature: number;
   getSystemPrompt: (toolContext: ToolContext) => string;
 };
 
@@ -55,10 +51,6 @@ export function getModel(
  */
 export const DEFAULT_CONFIG: AgentConfig = {
   maxIterations: 200,
-  provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',
-  maxTokens: 4096,
-  temperature: 0.7,
   getSystemPrompt: getDefaultSystemPrompt,
 };
 

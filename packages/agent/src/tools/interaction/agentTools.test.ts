@@ -26,6 +26,8 @@ const mockContext: ToolContext = {
   githubMode: true,
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
+  maxTokens: 4096,
+  temperature: 0.7,
 };
 
 describe('Agent Tools', () => {

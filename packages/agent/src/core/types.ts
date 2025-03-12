@@ -24,6 +24,8 @@ export type ToolContext = {
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
   provider: ModelProvider;
   model: string;
+  maxTokens: number;
+  temperature: number;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

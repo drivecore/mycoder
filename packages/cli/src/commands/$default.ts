@@ -146,13 +146,9 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         process.exit(0);
       });
 
-      // Create a config with the selected model
+      // Create a config for the agent
       const agentConfig: AgentConfig = {
         ...DEFAULT_CONFIG,
-        provider: config.provider as ModelProvider,
-        model: config.model,
-        maxTokens: config.maxTokens,
-        temperature: config.temperature,
       };
 
       const result = await toolAgent(prompt, tools, agentConfig, {
@@ -168,6 +164,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         userPrompt: config.userPrompt,
         provider: config.provider as ModelProvider,
         model: config.model,
+        maxTokens: config.maxTokens,
+        temperature: config.temperature,
       });
 
       const output =
