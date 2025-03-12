@@ -53,7 +53,6 @@ export function createProvider(
   model: string,
   options: ProviderOptions = {},
 ): LLMProvider {
-  console.log({ providerType, model, options });
   const factory = providerFactories[providerType.toLowerCase()];
 
   if (!factory) {

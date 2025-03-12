@@ -93,18 +93,11 @@ export async function loadConfig(
     searchStrategy: 'global',
   });
 
-  console.log({ cwd: process.cwd() });
-
   // Search for configuration file
   const result = await explorer.search();
-  console.log({ explorerResult: result });
 
   // Merge configurations with precedence: default < file < cli
   const fileConfig = result?.config || {};
-
-  console.log({ defaultConfig });
-  console.log({ fileConfig });
-  console.log({ cliOptions });
 
   // Return merged configuration
   const mergedConfig = {
@@ -112,7 +105,6 @@ export async function loadConfig(
     ...removeUndefined(fileConfig),
     ...removeUndefined(cliOptions),
   };
-  console.log({ mergedConfig });
   return mergedConfig;
 }
 

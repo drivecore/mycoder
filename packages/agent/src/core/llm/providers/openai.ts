@@ -50,12 +50,6 @@ export class OpenAIProvider implements LLMProvider {
       throw new Error('OpenAI API key is required');
     }
 
-    console.log({
-      provider: this.provider,
-      model,
-      apiKey: this.apiKey,
-    });
-
     // Initialize OpenAI client
     this.client = new OpenAI({
       apiKey: this.apiKey,

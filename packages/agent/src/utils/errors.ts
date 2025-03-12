@@ -7,12 +7,11 @@ export const providerConfig: Record<
     keyName: 'ANTHROPIC_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/anthropic',
   },
-  /*
   openai: {
     keyName: 'OPENAI_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/openai',
   },
-  xai: {
+  /*xai: {
     keyName: 'XAI_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/getting-started/xai',
   },

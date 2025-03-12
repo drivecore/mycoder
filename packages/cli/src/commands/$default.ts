@@ -155,8 +155,6 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
         temperature: config.temperature,
       };
 
-      console.log('agentConfig', agentConfig);
-
       const result = await toolAgent(prompt, tools, agentConfig, {
         logger,
         headless: config.headless,

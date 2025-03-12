@@ -59,23 +59,23 @@ Create a `mycoder.config.js` file in your project root:
 export default {
   // GitHub integration
   githubMode: true,
-  
+
   // Browser settings
   headless: true,
   userSession: false,
   pageFilter: 'none', // 'simple', 'none', or 'readability'
-  
+
   // Model settings
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,
   temperature: 0.7,
-  
+
   // Custom settings
   customPrompt: '',
   profile: false,
   tokenCache: true,
-  
+
   // Ollama configuration (if using local models)
   ollamaBaseUrl: 'http://localhost:11434',
 };

@@ -110,12 +110,6 @@ export class AnthropicProvider implements LLMProvider {
       throw new Error('Anthropic API key is required');
     }
 
-    console.log({
-      provider: this.provider,
-      model,
-      apiKey: this.apiKey,
-    });
-
     // Initialize Anthropic client
     this.client = new Anthropic({
       apiKey: this.apiKey,

@@ -55,11 +55,13 @@ MyCoder includes a GitHub mode that enables the agent to work with GitHub issues
 To enable GitHub mode:
 
 1. Via CLI option (overrides config file):
+
 ```bash
 mycoder --githubMode true
 ```
 
 2. Via configuration file:
+
 ```js
 // mycoder.config.js
 export default {
@@ -71,11 +73,13 @@ export default {
 To disable GitHub mode:
 
 1. Via CLI option:
+
 ```bash
 mycoder --githubMode false
 ```
 
 2. Via configuration file:
+
 ```js
 // mycoder.config.js
 export default {
@@ -158,7 +162,7 @@ Or in your configuration file:
 export default {
   // Model settings
   provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',  // or any other Anthropic model
+  model: 'claude-3-7-sonnet-20250219', // or any other Anthropic model
   // other configuration options...
 };
 ```
@@ -186,14 +190,15 @@ Example configuration in `mycoder.config.js`:
 // mycoder.config.js
 export default {
   // Browser settings
-  headless: false,  // Show browser UI
-  userSession: true,  // Use existing browser session
-  pageFilter: 'readability',  // Use readability for webpage processing
-  
+  headless: false, // Show browser UI
+  userSession: true, // Use existing browser session
+  pageFilter: 'readability', // Use readability for webpage processing
+
   // Custom settings
-  customPrompt: "Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.",
-  tokenCache: false,  // Disable token caching for LLM API calls
-  
+  customPrompt:
+    'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
+  tokenCache: false, // Disable token caching for LLM API calls
+
   // Other configuration options...
 };
 ```
