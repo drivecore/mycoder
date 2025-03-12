@@ -114,7 +114,18 @@ export const command: CommandModule<SharedOptions, ConfigOptions> = {
 
     // Handle 'list' command
     if (argv.command === 'list') {
+      // Import directly to avoid circular dependency
+      const { getSettingsDir } = await import('../settings/settings.js');
+      const { getProjectConfigFile } = await import('../settings/config.js');
+      
+      const globalConfigFile = path.join(getSettingsDir(), 'config.json');
+      const projectConfigFile = getProjectConfigFile();
+      
       logger.info('Current configuration:');
+      logger.info(`Global config file: ${globalConfigFile}`);
+      logger.info(`Project config file: ${projectConfigFile}`);
+      logger.info('');
+      
       const defaultConfig = getDefaultConfig();
 
       // Get all valid config keys

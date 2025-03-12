@@ -33,7 +33,20 @@ export const getProjectSettingsDir = (): string => {
   }
 
   // If we're creating a new project config, use the current directory
-  return path.join(process.cwd(), '.mycoder');
+  const projectDir = path.join(process.cwd(), '.mycoder');
+  
+  // Ensure directory exists when it's requested
+  if (!fs.existsSync(projectDir)) {
+    try {
+      fs.mkdirSync(projectDir, { recursive: true });
+    } catch (error) {
+      console.error(`Error creating project settings directory: ${error}`);
+      // Still return the path even if we couldn't create it,
+      // as other code will handle the error when trying to use it
+    }
+  }
+  
+  return projectDir;
 };
 
 /**

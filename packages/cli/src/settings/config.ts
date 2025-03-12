@@ -23,6 +23,17 @@ const globalConfigFile = path.join(getSettingsDir(), 'config.json');
 // Export for testing
 export const getProjectConfigFile = (): string => {
   const projectDir = getProjectSettingsDir();
+  
+  // Ensure the project directory exists
+  if (projectDir && !fs.existsSync(projectDir)) {
+    try {
+      fs.mkdirSync(projectDir, { recursive: true });
+    } catch (error) {
+      console.error(`Error creating project settings directory: ${error}`);
+      return '';
+    }
+  }
+  
   return projectDir ? path.join(projectDir, 'config.json') : '';
 };
 
