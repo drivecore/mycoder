@@ -35,13 +35,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
       - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
+      - name: Install browsers
+        run: cd packages/agent && pnpm exec playwright install --with-deps chromium
 
       - name: Configure Git
         run: |
