@@ -18,6 +18,7 @@ export type SharedOptions = {
   readonly githubMode?: boolean;
   readonly userWarning?: boolean;
   readonly upgradeCheck?: boolean;
+  readonly ollamaBaseUrl?: string;
 };
 
 export const sharedOptions = {
@@ -36,7 +37,7 @@ export const sharedOptions = {
   provider: {
     type: 'string',
     description: 'AI model provider to use',
-    choices: ['anthropic' /*, 'openai', 'ollama', 'xai', 'mistral'*/],
+    choices: ['anthropic', 'ollama' /*, 'openai', 'xai', 'mistral'*/],
   } as const,
   model: {
     type: 'string',
@@ -119,5 +120,9 @@ export const sharedOptions = {
     type: 'boolean',
     description: 'Disable version upgrade check (for automated/remote usage)',
     default: false,
+  } as const,
+  ollamaBaseUrl: {
+    type: 'string',
+    description: 'Base URL for Ollama API (default: http://localhost:11434)',
   } as const,
 };

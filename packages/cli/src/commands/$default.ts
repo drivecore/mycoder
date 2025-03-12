@@ -137,8 +137,15 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
           process.env[keyName] = configApiKey;
           logger.debug(`Using ${keyName} from configuration`);
         }
+      } else if (userModelProvider === 'ollama') {
+        // For Ollama, we check if the base URL is set
+        const ollamaBaseUrl = argv.ollamaBaseUrl || userConfig.ollamaBaseUrl;
+        logger.debug(`Using Ollama with base URL: ${ollamaBaseUrl}`);
+      } else {
+        // Unknown provider
+        logger.error(`Unknown provider: ${userModelProvider}`);
+        throw new Error(`Unknown provider: ${userModelProvider}`);
       }
-      // No API key check needed for Ollama as it uses a local server
 
       let prompt: string | undefined;
 

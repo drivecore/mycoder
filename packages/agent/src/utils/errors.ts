@@ -21,7 +21,7 @@ export const providerConfig: Record<
     docsUrl: 'https://mycoder.ai/docs/getting-started/mistral',
   },*/
   // No API key needed for ollama as it uses a local server
-  //ollama: undefined,
+  ollama: undefined,
 };
 
 /**

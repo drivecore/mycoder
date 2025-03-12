@@ -26,6 +26,9 @@ const defaultConfig: Config = {
   profile: false,
   tokenCache: true,
 
+  // Ollama configuration
+  ollamaBaseUrl: 'http://localhost:11434',
+
   // API keys (empty by default)
   ANTHROPIC_API_KEY: '',
   OPENAI_API_KEY: '',
@@ -90,6 +93,9 @@ export default {
   customPrompt: '',
   profile: false,
   tokenCache: true,
+  
+  // Ollama configuration
+  ollamaBaseUrl: 'http://localhost:11434',
   
   // API keys (better to use environment variables for these)
   // ANTHROPIC_API_KEY: 'your-api-key',
