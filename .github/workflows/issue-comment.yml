@@ -1,5 +1,9 @@
 name: MyCoder Issue Comment Action
 
+# This workflow is triggered on all issue comments, but only runs the job
+# if the comment contains '/mycoder' and is from the authorized user.
+# Note: The workflow will appear in GitHub Actions logs for all comments,
+# but it will exit early (skip the job) if the conditions aren't met.
 on:
   issue_comment:
     types: [created]
