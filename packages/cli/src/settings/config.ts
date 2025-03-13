@@ -34,6 +34,21 @@ export type Config = {
     }>;
     defaultResources?: string[];
   };
+
+  // Custom commands configuration
+  commands?: Record<
+    string,
+    {
+      description?: string;
+      args?: Array<{
+        name: string;
+        description?: string;
+        required?: boolean;
+        default?: string;
+      }>;
+      execute: (args: Record<string, string>) => string | Promise<string>;
+    }
+  >;
 };
 
 // Default configuration
@@ -97,6 +112,31 @@ function removeUndefined(obj: any) {
     Object.entries(obj).filter(([_, value]) => value !== undefined),
   );
 }
+
+/**
+ * Validates custom commands configuration
+ * @param config The configuration object
+ * @throws Error if any command configuration is invalid
+ */
+function validateCustomCommands(config: Config): void {
+  if (!config.commands) return;
+
+  Object.entries(config.commands).forEach(([name, command]) => {
+    // Validate name (should be valid command name)
+    if (!/^[a-z][\w-]*$/.test(name)) {
+      throw new Error(
+        `Invalid command name: ${name}. Command names should start with a letter and contain only letters, numbers, hyphens, and underscores.`,
+      );
+    }
+
+    // Validate execute property
+    if (typeof command.execute !== 'function') {
+      throw new Error(
+        `Invalid execute property for command ${name}. Should be a function.`,
+      );
+    }
+  });
+}
 /**
  * Load configuration using cosmiconfig
  * @returns Merged configuration with default values
@@ -121,5 +161,9 @@ export async function loadConfig(
     ...removeUndefined(fileConfig),
     ...removeUndefined(cliOptions),
   };
+
+  // Validate custom commands if present
+  validateCustomCommands(mergedConfig);
+
   return mergedConfig;
 }

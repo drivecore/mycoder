@@ -6,6 +6,7 @@ import yargs, { ArgumentsCamelCase, CommandModule } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { command as defaultCommand } from './commands/$default.js';
+import { getCustomCommands } from './commands/custom.js';
 import { command as testProfileCommand } from './commands/test-profile.js';
 import { command as testSentryCommand } from './commands/test-sentry.js';
 import { command as toolsCommand } from './commands/tools.js';
@@ -47,6 +48,10 @@ const main = async () => {
 
   // Set up yargs with the new CLI interface
   mark('Before yargs setup');
+
+  // Load custom commands from config
+  const customCommands = await getCustomCommands();
+
   const argv = await yargs(hideBin(process.argv))
     .scriptName(packageInfo.name!)
     .version(packageInfo.version!)
@@ -58,6 +63,7 @@ const main = async () => {
       testSentryCommand,
       testProfileCommand,
       toolsCommand,
+      ...customCommands, // Add custom commands
     ] as CommandModule[])
     .strict()
     .showHelpOnFail(true)
