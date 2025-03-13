@@ -1,3 +1,10 @@
+# [mycoder-v1.3.1](https://github.com/drivecore/mycoder/compare/mycoder-v1.3.0...mycoder-v1.3.1) (2025-03-13)
+
+
+### Bug Fixes
+
+* redo ollama llm provider using ollama sdk ([586fe82](https://github.com/drivecore/mycoder/commit/586fe827d048aa6c13675ba838bd50309b3980e2))
+
 # [mycoder-v1.3.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.2.0...mycoder-v1.3.0) (2025-03-12)
 
 ### Features

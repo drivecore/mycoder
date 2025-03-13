@@ -1,3 +1,11 @@
+# [mycoder-agent-v1.3.1](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.3.0...mycoder-agent-v1.3.1) (2025-03-13)
+
+
+### Bug Fixes
+
+* redo ollama llm provider using ollama sdk ([586fe82](https://github.com/drivecore/mycoder/commit/586fe827d048aa6c13675ba838bd50309b3980e2))
+* update Ollama provider to use official npm package API correctly ([738a84a](https://github.com/drivecore/mycoder/commit/738a84aff560076e4ad24129f5dc9bf09d304ffa))
+
 # [mycoder-agent-v1.3.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.2.0...mycoder-agent-v1.3.0) (2025-03-12)
 
 ### Features
