@@ -199,6 +199,13 @@ export function getDefaultSystemPrompt(toolContext: ToolContext): string {
     'When you run into issues or unexpected results, take a step back and read the project documentation and configuration files and look at other source files in the project for examples of what works.',
     '',
     'Use sub-agents for parallel tasks, providing them with specific context they need rather than having them rediscover it.',
-    toolContext.customPrompt ? `\n\n${toolContext.customPrompt}` : '',
+    (() => {
+      if (!toolContext.customPrompt) return '';
+      if (typeof toolContext.customPrompt === 'string') {
+        return `\n\n${toolContext.customPrompt}`;
+      }
+      // It's an array of strings
+      return `\n\n${toolContext.customPrompt.join('\n')}`;
+    })(),
   ].join('\n');
 }
