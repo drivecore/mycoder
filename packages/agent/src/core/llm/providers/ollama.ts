@@ -1,14 +1,25 @@
 /**
- * Ollama provider implementation
+ * Ollama provider implementation using the official Ollama npm package
  */
 
+import {
+  ChatRequest as OllamaChatRequest,
+  ChatResponse as OllamaChatResponse,
+  Ollama,
+  ToolCall as OllamaTooCall,
+  Tool as OllamaTool,
+  Message as OllamaMessage,
+} from 'ollama';
+
 import { TokenUsage } from '../../tokens.js';
+import { ToolCall } from '../../types.js';
 import { LLMProvider } from '../provider.js';
 import {
   GenerateOptions,
   LLMResponse,
   Message,
   ProviderOptions,
+  FunctionDefinition,
 } from '../types.js';
 
 /**
@@ -19,29 +30,26 @@ export interface OllamaOptions extends ProviderOptions {
 }
 
 /**
- * Ollama provider implementation
+ * Ollama provider implementation using the official Ollama npm package
  */
 export class OllamaProvider implements LLMProvider {
   name: string = 'ollama';
   provider: string = 'ollama.chat';
   model: string;
-  private baseUrl: string;
+  private client: Ollama;
 
   constructor(model: string, options: OllamaOptions = {}) {
     this.model = model;
-    this.baseUrl =
+    const baseUrl =
       options.baseUrl ||
       process.env.OLLAMA_BASE_URL ||
       'http://localhost:11434';
 
-    // Ensure baseUrl doesn't end with a slash
-    if (this.baseUrl.endsWith('/')) {
-      this.baseUrl = this.baseUrl.slice(0, -1);
-    }
+    this.client = new Ollama({ host: baseUrl });
   }
 
   /**
-   * Generate text using Ollama API
+   * Generate text using Ollama API via the official npm package
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
     const {
@@ -52,126 +60,171 @@ export class OllamaProvider implements LLMProvider {
       topP,
       frequencyPenalty,
       presencePenalty,
+      stopSequences,
     } = options;
 
     // Format messages for Ollama API
     const formattedMessages = this.formatMessages(messages);
 
-    try {
-      // Prepare request options
-      const requestOptions: any = {
-        model: this.model,
-        messages: formattedMessages,
-        stream: false,
-        options: {
-          temperature: temperature,
-          // Ollama uses top_k instead of top_p, but we'll include top_p if provided
-          ...(topP !== undefined && { top_p: topP }),
-          ...(frequencyPenalty !== undefined && {
-            frequency_penalty: frequencyPenalty,
-          }),
-          ...(presencePenalty !== undefined && {
-            presence_penalty: presencePenalty,
-          }),
-        },
+    // Prepare request options
+    const requestOptions: OllamaChatRequest = {
+      model: this.model,
+      messages: formattedMessages,
+      stream: false,
+      options: {
+        temperature: temperature,
+        ...(topP !== undefined && { top_p: topP }),
+        ...(frequencyPenalty !== undefined && {
+          frequency_penalty: frequencyPenalty,
+        }),
+        ...(presencePenalty !== undefined && {
+          presence_penalty: presencePenalty,
+        }),
+        ...(stopSequences &&
+          stopSequences.length > 0 && { stop: stopSequences }),
+      },
+    };
+
+    // Add max_tokens if provided
+    if (maxTokens !== undefined) {
+      requestOptions.options = {
+        ...requestOptions.options,
+        num_predict: maxTokens,
       };
-
-      // Add max_tokens if provided
-      if (maxTokens !== undefined) {
-        requestOptions.options.num_predict = maxTokens;
-      }
-
-      // Add functions/tools if provided
-      if (functions && functions.length > 0) {
-        requestOptions.tools = functions.map((fn) => ({
-          name: fn.name,
-          description: fn.description,
-          parameters: fn.parameters,
-        }));
-      }
-
-      // Make the API request
-      const response = await fetch(`${this.baseUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestOptions),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ollama API error: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
-
-      // Extract content and tool calls
-      const content = data.message?.content || '';
-      const toolCalls =
-        data.message?.tool_calls?.map((toolCall: any) => ({
-          id:
-            toolCall.id ||
-            `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          name: toolCall.name,
-          content: JSON.stringify(toolCall.args || toolCall.arguments || {}),
-        })) || [];
-
-      // Create token usage from response data
-      const tokenUsage = new TokenUsage();
-      tokenUsage.input = data.prompt_eval_count || 0;
-      tokenUsage.output = data.eval_count || 0;
-
-      return {
-        text: content,
-        toolCalls: toolCalls,
-        tokenUsage: tokenUsage,
-      };
-    } catch (error) {
-      throw new Error(`Error calling Ollama API: ${(error as Error).message}`);
     }
+
+    // Add functions/tools if provided
+    if (functions && functions.length > 0) {
+      requestOptions.tools = this.convertFunctionsToTools(functions);
+    }
+
+    // Make the API request using the Ollama client
+    const response: OllamaChatResponse = await this.client.chat({
+      ...requestOptions,
+      stream: false,
+    });
+
+    // Extract content and tool calls
+    const content = response.message?.content || '';
+
+    // Handle tool calls if present
+    const toolCalls = this.extractToolCalls(response);
+
+    // Create token usage from response data
+    const tokenUsage = new TokenUsage();
+    tokenUsage.output = response.eval_count || 0;
+    tokenUsage.input = response.prompt_eval_count || 0;
+
+    return {
+      text: content,
+      toolCalls: toolCalls,
+      tokenUsage: tokenUsage,
+    };
+  }
+
+  /*
+  interface Tool {
+    type: string;
+    function: {
+        name: string;
+        description: string;
+        parameters: {
+            type: string;
+            required: string[];
+            properties: {
+                [key: string]: {
+                    type: string;
+                    description: string;
+                    enum?: string[];
+                };
+            };
+        };
+    };
+}*/
+
+  /**
+   * Convert our function definitions to Ollama tool format
+   */
+  private convertFunctionsToTools(
+    functions: FunctionDefinition[],
+  ): OllamaTool[] {
+    return functions.map(
+      (fn) =>
+        ({
+          type: 'function',
+          function: {
+            name: fn.name,
+            description: fn.description,
+            parameters: fn.parameters,
+          },
+        }) as OllamaTool,
+    );
+  }
+
+  /**
+   * Extract tool calls from Ollama response
+   */
+  private extractToolCalls(response: OllamaChatResponse): ToolCall[] {
+    if (!response.message?.tool_calls) {
+      return [];
+    }
+
+    return response.message.tool_calls.map((toolCall: OllamaTooCall) => {
+      //console.log('ollama tool call', toolCall);
+      return {
+        id: `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        name: toolCall.function?.name,
+        content:
+          typeof toolCall.function?.arguments === 'string'
+            ? toolCall.function.arguments
+            : JSON.stringify(toolCall.function?.arguments || {}),
+      };
+    });
   }
 
   /**
    * Format messages for Ollama API
    */
-  private formatMessages(messages: Message[]): any[] {
-    return messages.map((msg) => {
-      if (
-        msg.role === 'user' ||
-        msg.role === 'assistant' ||
-        msg.role === 'system'
-      ) {
-        return {
-          role: msg.role,
-          content: msg.content,
-        };
-      } else if (msg.role === 'tool_result') {
-        // Ollama expects tool results as a 'tool' role
-        return {
-          role: 'tool',
-          content: msg.content,
-          tool_call_id: msg.tool_use_id,
-        };
-      } else if (msg.role === 'tool_use') {
-        // We'll convert tool_use to assistant messages with tool_calls
-        return {
-          role: 'assistant',
-          content: '',
-          tool_calls: [
+  private formatMessages(messages: Message[]): OllamaMessage[] {
+    const output: OllamaMessage[] = [];
+
+    messages.forEach((msg) => {
+      switch (msg.role) {
+        case 'user':
+        case 'assistant':
+        case 'system':
+          output.push({
+            role: msg.role,
+            content: msg.content,
+          } satisfies OllamaMessage);
+          break;
+        case 'tool_result':
+          // Ollama expects tool results as a 'tool' role
+          output.push({
+            role: 'tool',
+            content:
+              typeof msg.content === 'string'
+                ? msg.content
+                : JSON.stringify(msg.content),
+          } as OllamaMessage);
+          break;
+        case 'tool_use': {
+          // So there is an issue here is that ollama expects tool calls to be part of the assistant message
+          // get last message and add tool call to it
+          const lastMessage: OllamaMessage = output[output.length - 1]!;
+          lastMessage.tool_calls = [
             {
-              id: msg.id,
-              name: msg.name,
-              arguments: msg.content,
+              function: {
+                name: msg.name,
+                arguments: JSON.parse(msg.content),
+              },
             },
-          ],
-        };
+          ];
+          break;
+        }
       }
-      // Default fallback for unknown message types
-      return {
-        role: 'user',
-        content: (msg as any).content || '',
-      };
     });
+
+    return output;
   }
 }

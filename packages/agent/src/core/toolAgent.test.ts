@@ -75,17 +75,21 @@ describe('toolAgent', () => {
   });
 
   it('should handle unknown tools', async () => {
-    await expect(
-      executeToolCall(
-        {
-          id: '1',
-          name: 'nonexistentTool',
-          content: JSON.stringify({}),
-        },
-        [mockTool],
-        toolContext,
-      ),
-    ).rejects.toThrow("No tool with the name 'nonexistentTool' exists.");
+    const result = await executeToolCall(
+      {
+        id: '1',
+        name: 'nonexistentTool',
+        content: JSON.stringify({}),
+      },
+      [mockTool],
+      toolContext,
+    );
+
+    // Parse the result as JSON
+    const parsedResult = JSON.parse(result);
+
+    // Check that it contains the expected error properties
+    expect(parsedResult.error).toBe(true);
   });
 
   it('should handle tool execution errors', async () => {

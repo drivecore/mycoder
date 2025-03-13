@@ -1,3 +1,21 @@
+# [mycoder-agent-v1.3.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.2.0...mycoder-agent-v1.3.0) (2025-03-12)
+
+### Features
+
+- implement MCP tools support ([2d99ac8](https://github.com/drivecore/mycoder/commit/2d99ac8cefaa770e368d469355a509739aafe6a3))
+
+# [mycoder-agent-v1.2.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.1.0...mycoder-agent-v1.2.0) (2025-03-12)
+
+### Bug Fixes
+
+- Fix TypeScript errors in MCP implementation ([f5837d3](https://github.com/drivecore/mycoder/commit/f5837d3a5dd219efc8e1d811e467f4bb695a1d94))
+
+### Features
+
+- Add basic Model Context Protocol (MCP) support ([8ec9619](https://github.com/drivecore/mycoder/commit/8ec9619c3cc63df8f14222762f5da0bcabe273a5))
+- **agent:** implement incremental resource cleanup for agent lifecycle ([576436e](https://github.com/drivecore/mycoder/commit/576436ef2c7c5f234f088b7dba2e7fd65590738f)), closes [#236](https://github.com/drivecore/mycoder/issues/236)
+- background tools is now scope to agents ([e55817f](https://github.com/drivecore/mycoder/commit/e55817f32b373fdbff8bb1ac90105b272044d33f))
+
 # [mycoder-agent-v1.1.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.0.0...mycoder-agent-v1.1.0) (2025-03-12)
 
 ### Bug Fixes

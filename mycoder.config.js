@@ -9,12 +9,13 @@ export default {
   pageFilter: 'none', // 'simple', 'none', or 'readability'
 
   // Model settings
-  provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',
+  //provider: 'anthropic',
+  //model: 'claude-3-7-sonnet-20250219',
   //provider: 'openai',
   //model: 'gpt-4o',
   //provider: 'ollama',
   //model: 'medragondot/Sky-T1-32B-Preview:latest',
+  //model: 'llama3.2:3b',
   maxTokens: 4096,
   temperature: 0.7,
 

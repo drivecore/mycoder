@@ -14,7 +14,10 @@ export const executeToolCall = async (
 ): Promise<string> => {
   const tool = tools.find((t) => t.name === toolCall.name);
   if (!tool) {
-    throw new Error(`No tool with the name '${toolCall.name}' exists.`);
+    return JSON.stringify({
+      error: true,
+      message: `No tool with the name '${toolCall.name}' exists.`,
+    });
   }
 
   const logger = new Logger({
