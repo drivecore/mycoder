@@ -13,7 +13,7 @@ export type Config = {
   model: string;
   maxTokens: number;
   temperature: number;
-  customPrompt: string;
+  customPrompt: string | string[];
   profile: boolean;
   tokenCache: boolean;
   userPrompt: boolean;

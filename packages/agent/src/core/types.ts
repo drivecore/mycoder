@@ -19,7 +19,7 @@ export type ToolContext = {
   pageFilter: pageFilter;
   tokenTracker: TokenTracker;
   githubMode: boolean;
-  customPrompt?: string;
+  customPrompt?: string | string[];
   tokenCache?: boolean;
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking

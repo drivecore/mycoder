@@ -20,7 +20,14 @@ export default {
   temperature: 0.7,
 
   // Custom settings
+  // customPrompt can be a string or an array of strings for multiple lines
   customPrompt: '',
+  // Example of multiple line custom prompts:
+  // customPrompt: [
+  //   'Custom instruction line 1',
+  //   'Custom instruction line 2',
+  //   'Custom instruction line 3',
+  // ],
   profile: false,
   tokenCache: true,
 };
