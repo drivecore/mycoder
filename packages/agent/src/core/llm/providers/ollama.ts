@@ -1,10 +1,12 @@
 /**
- * Ollama provider implementation
+ * Ollama provider implementation using the official Ollama npm package
  */
 
+import ollama, { Ollama, ChatResponse, Tool } from 'ollama';
 import { TokenUsage } from '../../tokens.js';
 import { LLMProvider } from '../provider.js';
 import {
+  FunctionDefinition,
   GenerateOptions,
   LLMResponse,
   Message,
@@ -19,29 +21,26 @@ export interface OllamaOptions extends ProviderOptions {
 }
 
 /**
- * Ollama provider implementation
+ * Ollama provider implementation using the official Ollama npm package
  */
 export class OllamaProvider implements LLMProvider {
   name: string = 'ollama';
   provider: string = 'ollama.chat';
   model: string;
-  private baseUrl: string;
+  private client: Ollama;
 
   constructor(model: string, options: OllamaOptions = {}) {
     this.model = model;
-    this.baseUrl =
-      options.baseUrl ||
-      process.env.OLLAMA_BASE_URL ||
+    const baseUrl = 
+      options.baseUrl || 
+      process.env.OLLAMA_BASE_URL || 
       'http://localhost:11434';
 
-    // Ensure baseUrl doesn't end with a slash
-    if (this.baseUrl.endsWith('/')) {
-      this.baseUrl = this.baseUrl.slice(0, -1);
-    }
+    this.client = new Ollama({ host: baseUrl });
   }
 
   /**
-   * Generate text using Ollama API
+   * Generate text using Ollama API via the official npm package
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
     const {
@@ -52,75 +51,55 @@ export class OllamaProvider implements LLMProvider {
       topP,
       frequencyPenalty,
       presencePenalty,
+      stopSequences,
     } = options;
 
     // Format messages for Ollama API
     const formattedMessages = this.formatMessages(messages);
 
     try {
-      // Prepare request options
-      const requestOptions: any = {
+      // Prepare chat options
+      const ollamaOptions: Record<string, any> = {
+        temperature,
+      };
+      
+      // Add optional parameters if provided
+      if (topP !== undefined) ollamaOptions.top_p = topP;
+      if (frequencyPenalty !== undefined) ollamaOptions.frequency_penalty = frequencyPenalty;
+      if (presencePenalty !== undefined) ollamaOptions.presence_penalty = presencePenalty;
+      if (maxTokens !== undefined) ollamaOptions.num_predict = maxTokens;
+      if (stopSequences && stopSequences.length > 0) ollamaOptions.stop = stopSequences;
+
+      // Prepare request parameters
+      const requestParams: any = {
         model: this.model,
         messages: formattedMessages,
         stream: false,
-        options: {
-          temperature: temperature,
-          // Ollama uses top_k instead of top_p, but we'll include top_p if provided
-          ...(topP !== undefined && { top_p: topP }),
-          ...(frequencyPenalty !== undefined && {
-            frequency_penalty: frequencyPenalty,
-          }),
-          ...(presencePenalty !== undefined && {
-            presence_penalty: presencePenalty,
-          }),
-        },
+        options: ollamaOptions,
       };
-
-      // Add max_tokens if provided
-      if (maxTokens !== undefined) {
-        requestOptions.options.num_predict = maxTokens;
-      }
 
       // Add functions/tools if provided
       if (functions && functions.length > 0) {
-        requestOptions.tools = functions.map((fn) => ({
-          name: fn.name,
-          description: fn.description,
-          parameters: fn.parameters,
-        }));
+        requestParams.tools = this.convertFunctionsToTools(functions);
       }
 
-      // Make the API request
-      const response = await fetch(`${this.baseUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestOptions),
-      });
+      // Make the API request using the Ollama client
+      const response = await this.client.chat(requestParams);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ollama API error: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
-
-      // Extract content and tool calls
-      const content = data.message?.content || '';
-      const toolCalls =
-        data.message?.tool_calls?.map((toolCall: any) => ({
-          id:
-            toolCall.id ||
-            `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          name: toolCall.name,
-          content: JSON.stringify(toolCall.args || toolCall.arguments || {}),
-        })) || [];
+      // Extract content from response
+      const content = response.message?.content || '';
+      
+      // Process tool calls if present
+      const toolCalls = this.processToolCalls(response);
 
       // Create token usage from response data
       const tokenUsage = new TokenUsage();
-      tokenUsage.input = data.prompt_eval_count || 0;
-      tokenUsage.output = data.eval_count || 0;
+      if (response.prompt_eval_count) {
+        tokenUsage.input = response.prompt_eval_count;
+      }
+      if (response.eval_count) {
+        tokenUsage.output = response.eval_count;
+      }
 
       return {
         text: content,
@@ -130,6 +109,37 @@ export class OllamaProvider implements LLMProvider {
     } catch (error) {
       throw new Error(`Error calling Ollama API: ${(error as Error).message}`);
     }
+  }
+
+  /**
+   * Convert our FunctionDefinition format to Ollama's Tool format
+   */
+  private convertFunctionsToTools(functions: FunctionDefinition[]): Tool[] {
+    return functions.map((fn) => ({
+      type: 'function',
+      function: {
+        name: fn.name,
+        description: fn.description,
+        parameters: fn.parameters,
+      }
+    }));
+  }
+
+  /**
+   * Process tool calls from the Ollama response
+   */
+  private processToolCalls(response: ChatResponse): any[] {
+    if (!response.message?.tool_calls || response.message.tool_calls.length === 0) {
+      return [];
+    }
+
+    return response.message.tool_calls.map((toolCall) => ({
+      id: toolCall.function?.name 
+        ? `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+        : toolCall.id,
+      name: toolCall.function?.name,
+      content: JSON.stringify(toolCall.function?.arguments || {}),
+    }));
   }
 
   /**
@@ -161,8 +171,10 @@ export class OllamaProvider implements LLMProvider {
           tool_calls: [
             {
               id: msg.id,
-              name: msg.name,
-              arguments: msg.content,
+              function: {
+                name: msg.name,
+                arguments: msg.content,
+              }
             },
           ],
         };
