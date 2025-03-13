@@ -103,6 +103,7 @@ Examples:
 
 - [mycoder](packages/cli) - Command-line interface for MyCoder
 - [mycoder-agent](packages/agent) - Agent module for MyCoder
+- [mycoder-docs](packages/docs) - Documentation website for MyCoder
 
 ## Development
 

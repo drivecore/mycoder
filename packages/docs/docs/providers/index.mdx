@@ -1,0 +1,54 @@
+---
+sidebar_position: 1
+---
+
+# LLM Providers
+
+MyCoder supports multiple Language Model (LLM) providers, giving you flexibility to choose the best solution for your needs. This section documents how to configure and use the various supported providers.
+
+## Supported Providers
+
+MyCoder currently supports the following LLM providers:
+
+- [**Anthropic**](./anthropic.md) - Claude models from Anthropic
+- [**OpenAI**](./openai.md) - GPT models from OpenAI
+- [**Ollama**](./ollama.md) - Self-hosted open-source models via Ollama
+
+## Configuring Providers
+
+Each provider has its own specific configuration requirements, typically involving:
+
+1. Setting API keys or connection details
+2. Selecting a specific model
+3. Configuring provider-specific parameters
+
+You can configure the provider in your `mycoder.config.js` file. Here's a basic example:
+
+```javascript
+export default {
+  // Provider selection
+  provider: 'anthropic',
+  model: 'claude-3-7-sonnet-20250219',
+  
+  // Other MyCoder settings
+  // ...
+};
+```
+
+## Provider Selection Considerations
+
+When choosing which provider to use, consider:
+
+- **Performance**: Different providers have different capabilities and performance characteristics
+- **Cost**: Pricing varies significantly between providers
+- **Features**: Some models have better support for specific features like tool calling
+- **Availability**: Self-hosted options like Ollama provide more control but require setup
+- **Privacy**: Self-hosted options may offer better privacy for sensitive work
+
+## Provider-Specific Documentation
+
+For detailed instructions on setting up each provider, see the provider-specific pages:
+
+- [Anthropic Configuration](./anthropic.md)
+- [OpenAI Configuration](./openai.md)
+- [Ollama Configuration](./ollama.md)

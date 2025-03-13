@@ -1,0 +1,19 @@
+ben:
+  name: Ben Houston
+  title: Founder of DriveCore
+  url: https://github.com/bhouston
+  image_url: https://github.com/bhouston.png
+  socials:
+    github: bhouston
+    x: BenHouston3D  # Updated from twitter
+    bluesky: benhouston3d.com
+    mastodon: 'BenHouston3D@mastodon.gamedev.place'
+
+mycoder_team:
+  name: MyCoder Team
+  title: MyCoder Development Team
+  url: https://github.com/drivecore
+  image_url: https://github.com/drivecore.png
+  socials:
+    github: drivecore
+    x: BenHouston3D

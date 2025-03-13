@@ -1,0 +1,64 @@
+facebook:
+  label: Facebook
+  permalink: /facebook
+  description: Facebook tag description
+
+hello:
+  label: Hello
+  permalink: /hello
+  description: Hello tag description
+
+docusaurus:
+  label: Docusaurus
+  permalink: /docusaurus
+  description: Docusaurus tag description
+
+hola:
+  label: Hola
+  permalink: /hola
+  description: Hola tag description
+
+ai:
+  label: AI
+  permalink: /ai
+  description: Artificial Intelligence related content
+
+coding:
+  label: Coding
+  permalink: /coding
+  description: Content related to coding practices and techniques
+
+programming:
+  label: Programming
+  permalink: /programming
+  description: Programming concepts, languages, and methodologies
+
+development:
+  label: Development
+  permalink: /development
+  description: Software development processes and tools
+
+tools:
+  label: Tools
+  permalink: /tools
+  description: Software tools and utilities for developers
+
+case-study:
+  label: Case Study
+  permalink: /case-study
+  description: Real-world examples and case studies
+
+github:
+  label: GitHub
+  permalink: /github
+  description: Content related to GitHub features and workflows
+
+productivity:
+  label: Productivity
+  permalink: /productivity
+  description: Tips and techniques for improving productivity
+
+workflow:
+  label: Workflow
+  permalink: /workflow
+  description: Development workflows and process improvements

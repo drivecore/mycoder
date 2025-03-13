@@ -1,0 +1,10 @@
+.sidebarItemLink {
+  display: block;
+  margin-bottom: 0.8rem;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.sidebarItemLink:hover {
+  text-decoration: underline;
+}
