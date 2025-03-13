@@ -1,4 +1,4 @@
-import { cosmiconfig } from 'cosmiconfig';
+import { loadConfig as loadC12Config, watchConfig } from 'c12';
 import { ArgumentsCamelCase } from 'yargs';
 
 import { SharedOptions } from '../options';
@@ -107,12 +107,6 @@ export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {
   };
 };
 
-function removeUndefined(obj: any) {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, value]) => value !== undefined),
-  );
-}
-
 /**
  * Validates custom commands configuration
  * @param config The configuration object
@@ -138,32 +132,53 @@ function validateCustomCommands(config: Config): void {
   });
 }
 /**
- * Load configuration using cosmiconfig
+ * Load configuration using c12
  * @returns Merged configuration with default values
  */
 export async function loadConfig(
   cliOptions: Partial<Config> = {},
 ): Promise<Config> {
-  // Initialize cosmiconfig
-  const explorer = cosmiconfig('mycoder', {
-    searchStrategy: 'global',
+  // Load configuration using c12
+  const { config } = await loadC12Config({
+    name: 'mycoder',
+    defaults: defaultConfig,
+    overrides: cliOptions,
+    // Optionally enable .env support
+    // dotenv: true,
   });
 
-  // Search for configuration file
-  const result = await explorer.search();
+  // Convert to Config type and validate custom commands
+  const typedConfig = config as unknown as Config;
+  validateCustomCommands(typedConfig);
 
-  // Merge configurations with precedence: default < file < cli
-  const fileConfig = result?.config || {};
+  return typedConfig;
+}
 
-  // Return merged configuration
-  const mergedConfig = {
-    ...defaultConfig,
-    ...removeUndefined(fileConfig),
-    ...removeUndefined(cliOptions),
+/**
+ * Watch configuration for changes
+ * @param cliOptions CLI options to override configuration
+ * @param onUpdate Callback when configuration is updated
+ */
+export async function watchConfigForChanges(
+  cliOptions: Partial<Config> = {},
+  onUpdate?: (config: Config) => void,
+) {
+  const { config, watchingFiles, unwatch } = await watchConfig({
+    name: 'mycoder',
+    defaults: defaultConfig,
+    overrides: cliOptions,
+    onUpdate: ({ newConfig }) => {
+      const typedConfig = newConfig as unknown as Config;
+      validateCustomCommands(typedConfig);
+      if (onUpdate) {
+        onUpdate(typedConfig);
+      }
+    },
+  });
+
+  return {
+    config: config as unknown as Config,
+    watchingFiles,
+    unwatch,
   };
-
-  // Validate custom commands if present
-  validateCustomCommands(mergedConfig);
-
-  return mergedConfig;
 }

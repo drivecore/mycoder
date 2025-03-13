@@ -46,8 +46,8 @@
   "license": "MIT",
   "dependencies": {
     "@sentry/node": "^9.3.0",
+    "c12": "^3.0.2",
     "chalk": "^5",
-    "cosmiconfig": "^9.0.0",
     "deepmerge": "^4.3.1",
     "dotenv": "^16",
     "mycoder-agent": "workspace:*",
