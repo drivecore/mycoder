@@ -6,7 +6,6 @@ sidebar_position: 3
 
 Learn how to use MyCoder effectively for your development tasks.
 
-
 ## Basic Usage
 
 ### Running with a Prompt
@@ -73,24 +72,25 @@ export default {
   model: 'claude-3-7-sonnet-20250219',
 
   // Custom settings
-  customPrompt: 'Always use TypeScript when writing code. Prefer functional programming patterns when possible.',
+  customPrompt:
+    'Always use TypeScript when writing code. Prefer functional programming patterns when possible.',
 };
 ```
 
 ### Available Configuration Options
 
-| Option          | Description                                        | Example in mycoder.config.js                           |
-| --------------- | -------------------------------------------------- | ------------------------------------------------------ |
-| `logLevel`      | Default logging level                              | `logLevel: 'verbose'`                                  |
-| `tokenUsage`    | Show token usage by default                        | `tokenUsage: true`                                     |
-| `headless`      | Use browser in headless mode                       | `headless: false`                                      |
-| `userSession`   | Use existing browser session                       | `userSession: true`                                    |
-| `pageFilter`    | Default webpage content processing method          | `pageFilter: 'readability'`                            |
-| `provider`      | Default AI model provider                          | `provider: 'openai'`                                   |
-| `model`         | Default model name                                 | `model: 'gpt-4o'`                                      |
-| `customPrompt`  | Custom instructions to append to the system prompt | `customPrompt: "Always use TypeScript"`                |
-| `githubMode`    | Enable GitHub integration mode                     | `githubMode: true`                                     |
-| `profile`       | Enable performance profiling                       | `profile: true`                                        |
+| Option         | Description                                        | Example in mycoder.config.js            |
+| -------------- | -------------------------------------------------- | --------------------------------------- |
+| `logLevel`     | Default logging level                              | `logLevel: 'verbose'`                   |
+| `tokenUsage`   | Show token usage by default                        | `tokenUsage: true`                      |
+| `headless`     | Use browser in headless mode                       | `headless: false`                       |
+| `userSession`  | Use existing browser session                       | `userSession: true`                     |
+| `pageFilter`   | Default webpage content processing method          | `pageFilter: 'readability'`             |
+| `provider`     | Default AI model provider                          | `provider: 'openai'`                    |
+| `model`        | Default model name                                 | `model: 'gpt-4o'`                       |
+| `customPrompt` | Custom instructions to append to the system prompt | `customPrompt: "Always use TypeScript"` |
+| `githubMode`   | Enable GitHub integration mode                     | `githubMode: true`                      |
+| `profile`      | Enable performance profiling                       | `profile: true`                         |
 
 ## Custom Prompt
 
@@ -100,7 +100,8 @@ The `customPrompt` configuration option allows you to append custom instructions
 // mycoder.config.js
 export default {
   // Example: Set a custom prompt to prefer TypeScript
-  customPrompt: "Always use TypeScript when writing code. Prefer functional programming patterns when possible.",
+  customPrompt:
+    'Always use TypeScript when writing code. Prefer functional programming patterns when possible.',
 };
 ```
 
@@ -136,16 +137,16 @@ This requires the GitHub CLI (`gh`) to be installed and authenticated. For more 
 
 MyCoder has access to a variety of tools that enable it to perform complex tasks:
 
-| Tool                 | Description                                      | Use Case                                                         |
-| -------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
-| **textEditor**       | Views, creates, and edits files with persistence | Reading and modifying project files with advanced capabilities   |
-| **shellStart**       | Executes shell commands                          | Running builds, tests, installations, git operations             |
-| **shellMessage**     | Interacts with running shell processes           | Working with interactive CLIs, monitoring long-running processes |
-| **fetch**            | Makes HTTP requests                              | Accessing APIs, downloading resources                            |
-| **browseStart**      | Starts a browser session                         | Researching documentation, exploring solutions                   |
-| **browseMessage**    | Performs actions in an active browser            | Navigating websites, extracting information                      |
-| **agentStart**       | Starts a sub-agent and returns immediately       | Creating asynchronous specialized agents for parallel tasks      |
-| **agentMessage**     | Interacts with a running sub-agent               | Checking status, providing guidance, or terminating sub-agents   |
+| Tool              | Description                                      | Use Case                                                         |
+| ----------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| **textEditor**    | Views, creates, and edits files with persistence | Reading and modifying project files with advanced capabilities   |
+| **shellStart**    | Executes shell commands                          | Running builds, tests, installations, git operations             |
+| **shellMessage**  | Interacts with running shell processes           | Working with interactive CLIs, monitoring long-running processes |
+| **fetch**         | Makes HTTP requests                              | Accessing APIs, downloading resources                            |
+| **browseStart**   | Starts a browser session                         | Researching documentation, exploring solutions                   |
+| **browseMessage** | Performs actions in an active browser            | Navigating websites, extracting information                      |
+| **agentStart**    | Starts a sub-agent and returns immediately       | Creating asynchronous specialized agents for parallel tasks      |
+| **agentMessage**  | Interacts with a running sub-agent               | Checking status, providing guidance, or terminating sub-agents   |
 
 For more detailed information about specific features, check the following pages:
 

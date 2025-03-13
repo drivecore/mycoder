@@ -62,25 +62,25 @@ export default {
 
 The MCP configuration accepts the following options:
 
-| Option | Description | Type | Default |
-|--------|-------------|------|---------|
-| `servers` | Array of MCP server configurations | Array | `[]` |
-| `defaultResources` | Resources to load automatically | Array of strings | `[]` |
+| Option             | Description                        | Type             | Default |
+| ------------------ | ---------------------------------- | ---------------- | ------- |
+| `servers`          | Array of MCP server configurations | Array            | `[]`    |
+| `defaultResources` | Resources to load automatically    | Array of strings | `[]`    |
 
 Each server configuration requires:
 
-| Option | Description | Type | Required |
-|--------|-------------|------|----------|
-| `name` | Unique name for this MCP server | String | Yes |
-| `url` | URL of the MCP server | String | Yes |
-| `auth` | Authentication configuration | Object | No |
+| Option | Description                     | Type   | Required |
+| ------ | ------------------------------- | ------ | -------- |
+| `name` | Unique name for this MCP server | String | Yes      |
+| `url`  | URL of the MCP server           | String | Yes      |
+| `auth` | Authentication configuration    | Object | No       |
 
 Authentication options:
 
-| Option | Description | Type | Required |
-|--------|-------------|------|----------|
-| `type` | Authentication type (currently only 'bearer') | String | Yes |
-| `token` | Authentication token | String | Yes |
+| Option  | Description                                   | Type   | Required |
+| ------- | --------------------------------------------- | ------ | -------- |
+| `type`  | Authentication type (currently only 'bearer') | String | Yes      |
+| `token` | Authentication token                          | String | Yes      |
 
 ## Using MCP in MyCoder
 
@@ -99,3 +99,4 @@ I'll check what resources are available from the MCP servers.
 <function_calls>
 <invoke name="mcp">
 <parameter name="method">listResources
+```

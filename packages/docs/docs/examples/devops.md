@@ -20,6 +20,7 @@ the build and runs lint, etc for this repo.
 ```
 
 **Why this works well:**
+
 - References specific recommendations from an existing issue
 - Points to an example implementation in another repository
 - Clearly defines the expected outcome (CI action for build validation and linting)
@@ -42,6 +43,7 @@ then once the task is complete please submit a PR.
 ```
 
 **Why this works well:**
+
 - Identifies a specific configuration issue (npm vs. pnpm)
 - Points to a reference implementation with the desired approach
 - Clearly defines the expected deliverables (GitHub issue and PR)
@@ -64,11 +66,12 @@ that are depended upon.
 I must have some part of the configuration of the
 current project incorrect right? Can you create an
 issue for this and then investigate. You can use
-the command \"pnpm clean:dist\" to reset the package 
+the command \"pnpm clean:dist\" to reset the package
 to its non-built state.
 ```
 
 **Why this works well:**
+
 - Describes the specific command that's failing
 - Explains the expected behavior and the actual outcome
 - Shares the developer's hypothesis about the cause
@@ -89,6 +92,7 @@ success.
 ```
 
 **Why this works well:**
+
 - Identifies a specific problem (GitHub action failure)
 - Requests a complete workflow: investigation, issue creation, and fix implementation
 - Sets clear expectations for verification

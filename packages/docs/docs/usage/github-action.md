@@ -88,8 +88,7 @@ jobs:
           git config --global user.name "Your Name (via MyCoder)"
           git config --global user.email "your-email@example.com"
 
-      - run:
-          pnpm install -g mycoder
+      - run: pnpm install -g mycoder
 
       # Auth GitHub CLI with the token
       - name: Configure GitHub CLI

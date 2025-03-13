@@ -44,12 +44,13 @@ MyCoder will search for configuration in the following places (in order of prece
 
 ### AI Model Selection
 
-| Option     | Description             | Possible Values                                   | Default     |
-| ---------- | ----------------------- | ------------------------------------------------- | ----------- |
-| `provider` | The AI provider to use  | `anthropic`, `openai`, `mistral`, `xai`, `ollama` | `anthropic` |
-| `model`    | The specific model to use | Depends on provider                             | `claude-3-7-sonnet-20250219` |
+| Option     | Description               | Possible Values                                   | Default                      |
+| ---------- | ------------------------- | ------------------------------------------------- | ---------------------------- |
+| `provider` | The AI provider to use    | `anthropic`, `openai`, `mistral`, `xai`, `ollama` | `anthropic`                  |
+| `model`    | The specific model to use | Depends on provider                               | `claude-3-7-sonnet-20250219` |
 
 Example:
+
 ```javascript
 // mycoder.config.js
 export default {
@@ -61,13 +62,14 @@ export default {
 
 ### Logging and Debugging
 
-| Option       | Description                     | Possible Values                           | Default |
-| ------------ | ------------------------------- | ----------------------------------------- | ------- |
-| `logLevel`   | Minimum level of logs to show   | `debug`, `verbose`, `info`, `warn`, `error` | `info`  |
-| `tokenUsage` | Show token usage in logs        | `true`, `false`                            | `false` |
-| `profile`    | Enable performance profiling    | `true`, `false`                            | `false` |
+| Option       | Description                   | Possible Values                             | Default |
+| ------------ | ----------------------------- | ------------------------------------------- | ------- |
+| `logLevel`   | Minimum level of logs to show | `debug`, `verbose`, `info`, `warn`, `error` | `info`  |
+| `tokenUsage` | Show token usage in logs      | `true`, `false`                             | `false` |
+| `profile`    | Enable performance profiling  | `true`, `false`                             | `false` |
 
 Example:
+
 ```javascript
 // mycoder.config.js
 export default {
@@ -79,13 +81,14 @@ export default {
 
 ### Browser Integration
 
-| Option        | Description                       | Possible Values                    | Default |
-| ------------- | --------------------------------- | ---------------------------------- | ------- |
-| `headless`    | Run browser in headless mode      | `true`, `false`                    | `true`  |
-| `userSession` | Use existing browser session      | `true`, `false`                    | `false` |
-| `pageFilter`  | Method to process webpage content | `simple`, `none`, `readability`    | `simple` |
+| Option        | Description                       | Possible Values                 | Default  |
+| ------------- | --------------------------------- | ------------------------------- | -------- |
+| `headless`    | Run browser in headless mode      | `true`, `false`                 | `true`   |
+| `userSession` | Use existing browser session      | `true`, `false`                 | `false`  |
+| `pageFilter`  | Method to process webpage content | `simple`, `none`, `readability` | `simple` |
 
 Example:
+
 ```javascript
 // mycoder.config.js
 export default {
@@ -97,18 +100,20 @@ export default {
 
 ### Behavior Customization
 
-| Option         | Description                                        | Possible Values     | Default |
-| -------------- | -------------------------------------------------- | ------------------- | ------- |
-| `customPrompt` | Custom instructions for the AI                     | Any string          | `""`    |
-| `githubMode`   | Enable GitHub integration                          | `true`, `false`     | `false` |
+| Option         | Description                    | Possible Values | Default |
+| -------------- | ------------------------------ | --------------- | ------- |
+| `customPrompt` | Custom instructions for the AI | Any string      | `""`    |
+| `githubMode`   | Enable GitHub integration      | `true`, `false` | `false` |
 
 Example:
+
 ```javascript
 // mycoder.config.js
 export default {
   // Set a custom prompt to guide the AI's behavior
-  customPrompt: "Always write TypeScript code with proper type annotations. Prefer functional programming patterns where appropriate.",
-  
+  customPrompt:
+    'Always write TypeScript code with proper type annotations. Prefer functional programming patterns where appropriate.',
+
   // Enable GitHub integration
   githubMode: true,
 };
@@ -152,17 +157,18 @@ export default {
   model: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,
   temperature: 0.7,
-  
+
   // Browser settings
   headless: false,
   userSession: true,
   pageFilter: 'readability',
-  
+
   // GitHub integration
   githubMode: true,
-  
+
   // Custom settings
-  customPrompt: 'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
+  customPrompt:
+    'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
   profile: true,
   tokenUsage: true,
   tokenCache: true,

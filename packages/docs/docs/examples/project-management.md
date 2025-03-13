@@ -32,6 +32,7 @@ what each package does and the main ways developers
 ```
 
 **Why this works well:**
+
 - Clearly defines multiple distinct tasks
 - Provides rationale for each requested change
 - Specifies the exact deliverables (GitHub issues)
@@ -49,6 +50,7 @@ do a combined PR back to Github?
 ```
 
 **Why this works well:**
+
 - Concise and direct
 - References specific issue numbers
 - Clearly states the expected outcome (a combined PR)
@@ -64,6 +66,7 @@ to github?
 ```
 
 **Why this works well:**
+
 - Simple, direct instruction
 - References a specific issue by number
 - Clearly states the expected outcome (a PR)
@@ -92,6 +95,7 @@ the problem and make a separate PR to fix it.
 ```
 
 **Why this works well:**
+
 - Provides clear context about the current situation
 - Specifies a diagnostic approach (check GitHub Actions)
 - Offers a hypothesis about potential causes
@@ -109,6 +113,7 @@ Can you confirm the project builds? I am not sure it does.
 ```
 
 **Why this works well:**
+
 - Simple, direct question
 - Focuses on a specific verification task
 - Implicitly asks MyCoder to attempt building the project and report results

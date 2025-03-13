@@ -11,14 +11,15 @@ MyCoder's GitHub mode integrates AI-powered coding assistance directly with your
 Before using GitHub mode, you need:
 
 1. The GitHub CLI (`gh`) installed and authenticated
+
    ```bash
    # Install GitHub CLI
    # macOS
    brew install gh
-   
+
    # Windows
    winget install --id GitHub.cli
-   
+
    # Ubuntu/Debian
    sudo apt install gh
    ```
@@ -88,6 +89,7 @@ Fix memory leak in cache system (#42)
 ### 4. Create Pull Requests
 
 When work is complete, MyCoder can create pull requests with:
+
 - Descriptive title
 - Detailed description of changes
 - Reference to the original issue
@@ -98,11 +100,13 @@ When work is complete, MyCoder can create pull requests with:
 Here's an example of how GitHub mode works in practice:
 
 1. Start with an issue (existing or new)
+
    ```bash
    mycoder "Create an issue for implementing dark mode"
    ```
 
 2. Work on the issue
+
    ```bash
    mycoder "Implement the dark mode feature described in issue #53"
    ```

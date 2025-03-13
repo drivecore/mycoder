@@ -12,3 +12,4 @@ eslint.config.js
 pnpm-lock.yaml
 tsconfig.json
 vitest.config.js
+build

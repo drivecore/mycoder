@@ -20,6 +20,7 @@ lint, etc for this repo.
 ```
 
 **Why this works well:**
+
 - References specific recommendations from an existing issue
 - Points to an example implementation in another repository as a reference
 - Clearly defines the scope (recommendations 2 and 3)
@@ -86,6 +87,7 @@ Vercel AI SDK.
 ```
 
 **Why this works well:**
+
 - Provides detailed background on the current implementation
 - References specific PRs for context
 - Clearly outlines the desired architecture with specific components
@@ -117,6 +119,7 @@ package to its non-built state.
 ```
 
 **Why this works well:**
+
 - Describes the specific command that's failing
 - Explains the expected behavior and the actual outcome
 - Shares the developer's hypothesis about the cause
@@ -136,9 +139,9 @@ action to complete before declaring success.
 ```
 
 **Why this works well:**
+
 - Identifies a specific problem (GitHub action failure)
 - Requests a complete workflow: investigation, issue creation, and fix implementation
 - Sets clear expectations for verification (waiting for the GitHub action to complete)
 
 **Technique:** Asking MyCoder to handle the full cycle from investigation to fix helps ensure that the problem is properly understood and addressed.
-

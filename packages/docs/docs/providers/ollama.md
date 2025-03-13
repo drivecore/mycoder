@@ -20,11 +20,13 @@ To use Ollama with MyCoder:
 Follow the installation instructions on the [Ollama website](https://ollama.ai/) for your operating system.
 
 For macOS:
+
 ```bash
 curl -fsSL https://ollama.ai/install.sh | sh
 ```
 
 For Linux:
+
 ```bash
 curl -fsSL https://ollama.ai/install.sh | sh
 ```
@@ -58,10 +60,10 @@ export default {
   // Provider selection
   provider: 'ollama',
   model: 'medragondot/Sky-T1-32B-Preview:latest',
-  
+
   // Optional: Custom base URL (defaults to http://localhost:11434)
   // ollamaBaseUrl: 'http://localhost:11434',
-  
+
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,

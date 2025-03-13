@@ -60,6 +60,7 @@ slow down development? If so, we should optimize it.
 ```
 
 **Why this works well:**
+
 - Asks MyCoder to analyze its own previous work
 - Focuses on optimization and developer experience
 - Treats MyCoder as a teammate who can explain their decisions
@@ -73,6 +74,7 @@ simultaneously. Once done, submit the PR and link both issues.
 ```
 
 **Why this works well:**
+
 - Groups related tasks for efficient implementation
 - Provides clear instructions on the desired outcome
 - Leverages GitHub references to maintain context
@@ -89,6 +91,7 @@ independent PR to address it.
 ```
 
 **Why this works well:**
+
 - Asks MyCoder to independently investigate a problem
 - Provides context about potential causes
 - Gives clear guidance on how to proceed based on findings

@@ -31,10 +31,10 @@ export default {
   // Provider selection
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
-  
+
   // Optional: Set API key directly (environment variable is preferred)
   // anthropicApiKey: 'your_api_key_here',
-  
+
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,

@@ -37,11 +37,11 @@ export default {
   // Provider selection
   provider: 'openai',
   model: 'gpt-4o',
-  
+
   // Optional: Set API key directly (environment variable is preferred)
   // openaiApiKey: 'your_api_key_here',
   // openaiOrganization: 'your_organization_id',
-  
+
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,
