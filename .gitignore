@@ -5,3 +5,12 @@ runs
 data
 internal_docs
 .DS_Store
+
+# Docusaurus specific
+.docusaurus
+.cache-loader
+packages/docs/build
+packages/docs/.env.local
+packages/docs/.env.development.local
+packages/docs/.env.test.local
+packages/docs/.env.production.local
