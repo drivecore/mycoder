@@ -69,19 +69,6 @@ describe('OpenAIProvider', () => {
     expect(provider.model).toBe('gpt-4');
   });
 
-  it('should throw error if API key is missing', () => {
-    // Clear environment variable
-    const originalKey = process.env.OPENAI_API_KEY;
-    delete process.env.OPENAI_API_KEY;
-
-    expect(() => new OpenAIProvider('gpt-4')).toThrow(
-      'OpenAI API key is required',
-    );
-
-    // Restore environment variable
-    process.env.OPENAI_API_KEY = originalKey;
-  });
-
   it('should generate text and handle tool calls', async () => {
     const response = await provider.generateText({
       messages: [

@@ -108,35 +108,29 @@ export async function executePrompt(
     const providerSettings =
       providerConfig[config.provider as keyof typeof providerConfig];
 
-    if (providerSettings) {
-      const { keyName } = providerSettings;
-
-      // First check if the API key is in the config
-      const configApiKey = config[keyName as keyof typeof config] as string;
-      // Then fall back to environment variable
-      const envApiKey = process.env[keyName];
-      // Use config key if available, otherwise use env key
-      const apiKey = configApiKey || envApiKey;
-
-      if (!apiKey) {
-        logger.error(getProviderApiKeyError(config.provider));
-        throw new Error(`${config.provider} API key not found`);
-      }
-
-      // If we're using a key from config, set it as an environment variable
-      // This ensures it's available to the provider libraries
-      if (configApiKey && !envApiKey) {
-        process.env[keyName] = configApiKey;
-        logger.info(`Using ${keyName} from configuration`);
-      }
-    } else if (config.provider === 'ollama') {
-      // For Ollama, we check if the base URL is set
-      logger.info(`Using Ollama with base URL: ${config.ollamaBaseUrl}`);
-    } else {
+    if (!providerSettings) {
       // Unknown provider
       logger.info(`Unknown provider: ${config.provider}`);
       throw new Error(`Unknown provider: ${config.provider}`);
     }
+
+    const { keyName } = providerSettings;
+    let apiKey: string | undefined = undefined;
+    if (keyName) {
+      // Then fall back to environment variable
+      apiKey = process.env[keyName];
+      if (!apiKey) {
+        logger.error(getProviderApiKeyError(config.provider));
+        throw new Error(`${config.provider} API key not found`);
+      }
+    }
+
+    logger.info(`LLM: ${config.provider}/${config.model}`);
+    if (config.baseUrl) {
+      // For Ollama, we check if the base URL is set
+      logger.info(`Using base url: ${config.baseUrl}`);
+    }
+    console.log();
 
     // Add the standard suffix to all prompts
     prompt += [
@@ -176,10 +170,12 @@ export async function executePrompt(
       tokenCache: config.tokenCache,
       userPrompt: config.userPrompt,
       provider: config.provider as ModelProvider,
+      baseUrl: config.baseUrl,
       model: config.model,
       maxTokens: config.maxTokens,
       temperature: config.temperature,
       backgroundTools,
+      apiKey,
     });
 
     const output =
@@ -216,8 +212,8 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
   },
   handler: async (argv) => {
     // Get configuration for model provider and name
-    const config = await loadConfig(getConfigFromArgv(argv));
-
+    const argvConfig = getConfigFromArgv(argv);
+    const config = await loadConfig(argvConfig);
     let prompt: string | undefined;
 
     // If promptFile is specified, read from file

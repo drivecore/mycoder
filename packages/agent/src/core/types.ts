@@ -24,7 +24,9 @@ export type ToolContext = {
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
   provider: ModelProvider;
-  model: string;
+  model?: string;
+  baseUrl?: string;
+  apiKey?: string;
   maxTokens: number;
   temperature: number;
   backgroundTools: BackgroundTools;

@@ -103,7 +103,7 @@ export class AnthropicProvider implements LLMProvider {
 
   constructor(model: string, options: AnthropicOptions = {}) {
     this.model = model;
-    this.apiKey = options.apiKey || process.env.ANTHROPIC_API_KEY || '';
+    this.apiKey = options.apiKey ?? '';
     this.baseUrl = options.baseUrl;
 
     if (!this.apiKey) {

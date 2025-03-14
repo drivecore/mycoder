@@ -47,7 +47,10 @@ export const toolAgent = async (
   const systemPrompt = config.getSystemPrompt(localContext);
 
   // Create the LLM provider
-  const provider = createProvider(localContext.provider, localContext.model);
+  const provider = createProvider(localContext.provider, localContext.model, {
+    baseUrl: context.baseUrl,
+    apiKey: context.apiKey,
+  });
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.verbose(

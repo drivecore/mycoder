@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { createProvider, LLMProvider } from '../llm/provider.js';
 import { ToolContext } from '../types';
 
 /**
@@ -18,34 +17,6 @@ export type AgentConfig = {
   getSystemPrompt: (toolContext: ToolContext) => string;
 };
 
-/**
- * Get the model instance based on provider and model name
- */
-export function getModel(
-  provider: ModelProvider,
-  model: string,
-  options?: { ollamaBaseUrl?: string },
-): LLMProvider {
-  switch (provider) {
-    case 'anthropic':
-      return createProvider('anthropic', model);
-    case 'openai':
-      return createProvider('openai', model);
-    case 'ollama':
-      if (options?.ollamaBaseUrl) {
-        return createProvider('ollama', model, {
-          baseUrl: options.ollamaBaseUrl,
-        });
-      }
-      return createProvider('ollama', model);
-    /*case 'xai':
-      return createProvider('xai', model);
-    case 'mistral':
-      return createProvider('mistral', model);*/
-    default:
-      throw new Error(`Unknown model provider: ${provider}`);
-  }
-}
 /**
  * Default configuration for the tool agent
  */
