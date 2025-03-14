@@ -1,3 +1,10 @@
+# [mycoder-agent-v1.4.1](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.0...mycoder-agent-v1.4.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* typescript compile error, unsure how it got past CI. ([ed9960a](https://github.com/drivecore/mycoder/commit/ed9960a35905ef41790e33ae28fb47c00b561603))
+
 # [mycoder-agent-v1.4.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.3.1...mycoder-agent-v1.4.0) (2025-03-14)
 
 
