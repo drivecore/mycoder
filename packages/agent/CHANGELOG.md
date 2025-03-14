@@ -1,3 +1,16 @@
+# [mycoder-agent-v1.4.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.3.1...mycoder-agent-v1.4.0) (2025-03-14)
+
+
+### Bug Fixes
+
+* disable respawn as it can confuse some LLMs ([c04ee43](https://github.com/drivecore/mycoder/commit/c04ee436b02a37d94688803b406cfb0b1e52c281))
+* perfect gpustack compatibility, fix openai edge case ([9359f62](https://github.com/drivecore/mycoder/commit/9359f62e5b2f66c0db76bf9bb00161eb6964a888))
+
+
+### Features
+
+* support multiple line custom prompts in mycoder.config.js ([fa7f45e](https://github.com/drivecore/mycoder/commit/fa7f45ea9e81fa73fba0afa099e127fbdeaf5281)), closes [#249](https://github.com/drivecore/mycoder/issues/249)
+
 # [mycoder-agent-v1.3.1](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.3.0...mycoder-agent-v1.3.1) (2025-03-13)
 
 ### Bug Fixes
