@@ -170,7 +170,6 @@ export class OllamaProvider implements LLMProvider {
     }
 
     return response.message.tool_calls.map((toolCall: OllamaTooCall) => {
-      //console.log('ollama tool call', toolCall);
       return {
         id: `tool-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         name: toolCall.function?.name,

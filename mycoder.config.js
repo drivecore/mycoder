@@ -16,6 +16,8 @@ export default {
   //provider: 'ollama',
   //model: 'medragondot/Sky-T1-32B-Preview:latest',
   //model: 'llama3.2:3b',
+  //provider: 'xai',
+  //model: 'grok-2-latest',
   maxTokens: 4096,
   temperature: 0.7,
 

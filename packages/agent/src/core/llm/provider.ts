@@ -35,41 +35,67 @@ export interface LLMProvider {
   generateText(options: GenerateOptions): Promise<LLMResponse>;
 }
 
+export type ProviderConfig = {
+  keyName?: string;
+  docsUrl?: string;
+  baseUrl?: string;
+  model: string;
+  factory: (model: string, options: ProviderOptions) => LLMProvider;
+};
+
 // Provider factory registry
-const providerFactories: Record<
-  string,
-  (model: string, options: ProviderOptions) => LLMProvider
-> = {
-  anthropic: (model, options) => new AnthropicProvider(model, options),
-  openai: (model, options) => new OpenAIProvider(model, options),
-  ollama: (model, options) => new OllamaProvider(model, options),
+export const providerConfig: Record<string, ProviderConfig> = {
+  anthropic: {
+    keyName: 'ANTHROPIC_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/provider/anthropic',
+    model: 'claude-3-7-sonnet-20250219',
+    factory: (model, options) => new AnthropicProvider(model, options),
+  },
+  openai: {
+    keyName: 'OPENAI_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/provider/openai',
+    model: 'gpt-4o-2024-05-13',
+    factory: (model, options) => new OpenAIProvider(model, options),
+  },
+  gpustack: {
+    docsUrl: 'https://mycoder.ai/docs/provider/local-openai',
+    model: 'llama3.2',
+    baseUrl: 'http://localhost:80',
+    factory: (model, options) => new OpenAIProvider(model, options),
+  },
+  ollama: {
+    docsUrl: 'https://mycoder.ai/docs/provider/ollama',
+    model: 'llama3.2',
+    baseUrl: 'http://localhost:11434',
+    factory: (model, options) => new OllamaProvider(model, options),
+  },
+  xai: {
+    keyName: 'XAI_API_KEY',
+    docsUrl: 'https://mycoder.ai/docs/provider/xai',
+    baseUrl: 'https://api.x.ai/v1',
+    model: 'grok-2-latest',
+    factory: (model, options) => new OpenAIProvider(model, options),
+  },
 };
 
 /**
  * Create a provider instance
  */
 export function createProvider(
-  providerType: string,
-  model: string,
+  provider: string,
+  model?: string,
   options: ProviderOptions = {},
 ): LLMProvider {
-  const factory = providerFactories[providerType.toLowerCase()];
+  const config = providerConfig[provider];
 
-  if (!factory) {
+  if (!config) {
     throw new Error(
-      `Provider '${providerType}' not found. Available providers: ${Object.keys(providerFactories).join(', ')}`,
+      `Provider '${provider}' not found. Available providers: ${Object.keys(providerConfig).join(', ')}`,
     );
   }
 
-  return factory(model, options);
-}
-
-/**
- * Register a new provider implementation
- */
-export function registerProvider(
-  providerType: string,
-  factory: (model: string, options: ProviderOptions) => LLMProvider,
-): void {
-  providerFactories[providerType.toLowerCase()] = factory;
+  return config.factory(model ?? config.model, {
+    ...options,
+    baseUrl: options.baseUrl ?? config.baseUrl,
+  });
 }

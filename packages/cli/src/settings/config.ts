@@ -10,7 +10,7 @@ export type Config = {
   userSession: boolean;
   pageFilter: 'simple' | 'none' | 'readability';
   provider: string;
-  model: string;
+  model?: string;
   maxTokens: number;
   temperature: number;
   customPrompt: string | string[];
@@ -20,7 +20,7 @@ export type Config = {
   upgradeCheck: boolean;
   tokenUsage: boolean;
 
-  ollamaBaseUrl: string;
+  baseUrl?: string;
 
   // MCP configuration
   mcp?: {
@@ -65,7 +65,6 @@ const defaultConfig: Config = {
 
   // Model settings
   provider: 'anthropic',
-  model: 'claude-3-7-sonnet-20250219',
   maxTokens: 4096,
   temperature: 0.7,
 
@@ -76,9 +75,6 @@ const defaultConfig: Config = {
   userPrompt: true,
   upgradeCheck: true,
   tokenUsage: false,
-
-  // Ollama configuration
-  ollamaBaseUrl: 'http://localhost:11434',
 
   // MCP configuration
   mcp: {
@@ -138,13 +134,11 @@ function validateCustomCommands(config: Config): void {
 export async function loadConfig(
   cliOptions: Partial<Config> = {},
 ): Promise<Config> {
-  // Load configuration using c12
   const { config } = await loadC12Config({
     name: 'mycoder',
     defaults: defaultConfig,
     overrides: cliOptions,
-    // Optionally enable .env support
-    // dotenv: true,
+    globalRc: true,
   });
 
   // Convert to Config type and validate custom commands

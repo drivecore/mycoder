@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { createProvider } from '../llm/provider.js';
 
-import { getModel } from './config.js';
-
 describe('createProvider', () => {
   it('should return the correct model for anthropic', () => {
     const model = createProvider('anthropic', 'claude-3-7-sonnet-20250219', {
@@ -27,7 +25,7 @@ describe('createProvider', () => {
   });
 
   it('should return the correct model for ollama with custom base URL', () => {
-    const model = getModel('ollama', 'llama3', {
+    const model = createProvider('ollama', 'llama3', {
       ollamaBaseUrl: 'http://custom-ollama:11434',
     });
     expect(model).toBeDefined();
