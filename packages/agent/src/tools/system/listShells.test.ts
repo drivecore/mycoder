@@ -81,8 +81,9 @@ describe('listShellsTool', () => {
 
     expect(result.shells.length).toBe(1);
     expect(result.count).toBe(1);
-    expect(result.shells[0].id).toBe('shell-1');
-    expect(result.shells[0].status).toBe(ShellStatus.RUNNING);
+    expect(result.shells.length).toBe(1);
+    expect(result.shells[0]!.id).toBe('shell-1');
+    expect(result.shells[0]!.status).toBe(ShellStatus.RUNNING);
   });
 
   it('should include metadata when verbose is true', async () => {
@@ -105,9 +106,10 @@ describe('listShellsTool', () => {
     );
 
     expect(result.shells.length).toBe(1);
-    expect(result.shells[0].id).toBe('shell-3');
-    expect(result.shells[0].status).toBe(ShellStatus.ERROR);
-    expect(result.shells[0].metadata).toBeDefined();
-    expect(result.shells[0].metadata?.error).toBe('Command not found');
+    expect(result.shells.length).toBe(1);
+    expect(result.shells[0]!.id).toBe('shell-3');
+    expect(result.shells[0]!.status).toBe(ShellStatus.ERROR);
+    expect(result.shells[0]!.metadata).toBeDefined();
+    expect(result.shells[0]!.metadata?.error).toBe('Command not found');
   });
 });

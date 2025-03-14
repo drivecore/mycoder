@@ -104,16 +104,19 @@ describe('ShellTracker', () => {
     // Get running shells
     const runningShells = shellTracker.getShells(ShellStatus.RUNNING);
     expect(runningShells.length).toBe(1);
-    expect(runningShells[0].id).toBe('shell-1');
+    expect(runningShells.length).toBe(1);
+    expect(runningShells[0]!.id).toBe('shell-1');
 
     // Get completed shells
     const completedShells = shellTracker.getShells(ShellStatus.COMPLETED);
     expect(completedShells.length).toBe(1);
-    expect(completedShells[0].id).toBe('shell-2');
+    expect(completedShells.length).toBe(1);
+    expect(completedShells[0]!.id).toBe('shell-2');
 
     // Get error shells
     const errorShells = shellTracker.getShells(ShellStatus.ERROR);
     expect(errorShells.length).toBe(1);
-    expect(errorShells[0].id).toBe('shell-3');
+    expect(errorShells.length).toBe(1);
+    expect(errorShells[0]!.id).toBe('shell-3');
   });
 });
