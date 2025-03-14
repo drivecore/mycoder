@@ -1,5 +1,5 @@
 {
-  "name": "@mycoder/docs",
+  "name": "mycoder-docs",
   "version": "0.10.1",
   "private": true,
   "packageManager": "pnpm@10.2.1",
