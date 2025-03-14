@@ -35,21 +35,7 @@ describe('BackgroundToolRegistry', () => {
     }
   });
 
-  it('should register a browser process', () => {
-    const id = backgroundTools.registerBrowser('https://example.com');
-
-    expect(id).toBe('test-id-1');
-
-    const tool = backgroundTools.getToolById(id);
-    expect(tool).toBeDefined();
-    if (tool) {
-      expect(tool.type).toBe(BackgroundToolType.BROWSER);
-      expect(tool.status).toBe(BackgroundToolStatus.RUNNING);
-      if (tool.type === BackgroundToolType.BROWSER) {
-        expect(tool.metadata.url).toBe('https://example.com');
-      }
-    }
-  });
+  // Browser registration test removed since browser tracking is now decoupled
 
   it('should update tool status', () => {
     const id = backgroundTools.registerShell('sleep 10');
