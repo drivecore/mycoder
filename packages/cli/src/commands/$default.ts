@@ -129,7 +129,9 @@ export async function executePrompt(
       }
     }
 
-    logger.info(`LLM: ${config.provider}/${config.model}`);
+    logger.info(
+      `LLM: ${config.provider}/${config.model ?? providerSettings.model}`,
+    );
     if (apiKey) {
       logger.info(`Using API key: ${apiKey.slice(0, 4)}...`);
     }
