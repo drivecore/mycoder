@@ -15,9 +15,9 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "clean": "rimraf .docusaurus build",
-    "clean:all": "pnpm clean && rimraf node_modules"
+    "clean:all": "pnpm clean && rimraf node_modules",
+    "semantic-release": "pnpm exec semantic-release -e semantic-release-monorepo"
   },
   "dependencies": {
     "@docusaurus/core": "3.7.0",
