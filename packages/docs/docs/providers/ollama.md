@@ -62,7 +62,7 @@ export default {
   model: 'medragondot/Sky-T1-32B-Preview:latest',
 
   // Optional: Custom base URL (defaults to http://localhost:11434)
-  // ollamaBaseUrl: 'http://localhost:11434',
+  // baseUrl: 'http://localhost:11434',
 
   // Other MyCoder settings
   maxTokens: 4096,
