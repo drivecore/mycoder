@@ -4,20 +4,21 @@ import { ToolContext } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 import { getMockToolContext } from '../getTools.test.js';
 
-import { processStates, shellStartTool } from './shellStart.js';
+import { shellStartTool } from './shellStart.js';
+import { shellTracker } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
 describe('shellStartTool', () => {
   beforeEach(() => {
-    processStates.clear();
+    shellTracker.processStates.clear();
   });
 
   afterEach(() => {
-    for (const processState of processStates.values()) {
+    for (const processState of shellTracker.processStates.values()) {
       processState.process.kill();
     }
-    processStates.clear();
+    shellTracker.processStates.clear();
   });
 
   it('should handle fast commands in sync mode', async () => {
@@ -83,7 +84,7 @@ describe('shellStartTool', () => {
     );
 
     // Even sync results should be in processStates
-    expect(processStates.size).toBeGreaterThan(0);
+    expect(shellTracker.processStates.size).toBeGreaterThan(0);
     expect(syncResult.mode).toBe('sync');
     expect(syncResult.error).toBeUndefined();
     if (syncResult.mode === 'sync') {
@@ -101,7 +102,7 @@ describe('shellStartTool', () => {
     );
 
     if (asyncResult.mode === 'async') {
-      expect(processStates.has(asyncResult.instanceId)).toBe(true);
+      expect(shellTracker.processStates.has(asyncResult.instanceId)).toBe(true);
     }
   });
 
@@ -120,7 +121,7 @@ describe('shellStartTool', () => {
       expect(result.instanceId).toBeDefined();
       expect(result.error).toBeUndefined();
 
-      const processState = processStates.get(result.instanceId);
+      const processState = shellTracker.processStates.get(result.instanceId);
       expect(processState).toBeDefined();
 
       if (processState?.process.stdin) {
@@ -177,7 +178,9 @@ describe('shellStartTool', () => {
     );
 
     if (asyncResult.mode === 'async') {
-      const processState = processStates.get(asyncResult.instanceId);
+      const processState = shellTracker.processStates.get(
+        asyncResult.instanceId,
+      );
       expect(processState).toBeDefined();
       expect(processState?.showStdIn).toBe(true);
       expect(processState?.showStdout).toBe(true);

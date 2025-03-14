@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 // Import mocked modules
 import { BrowserManager } from '../tools/browser/BrowserManager.js';
 import { agentStates } from '../tools/interaction/agentStart.js';
-import { processStates } from '../tools/system/shellStart.js';
+import { shellTracker } from '../tools/system/ShellTracker.js';
 
 import { BackgroundTools, BackgroundToolStatus } from './backgroundTools';
 import { Tool } from './types';
@@ -43,9 +43,12 @@ vi.mock('../tools/browser/BrowserManager.js', () => {
   };
 });
 
-vi.mock('../tools/system/shellStart.js', () => {
+vi.mock('../tools/system/ShellTracker.js', () => {
   return {
-    processStates: new Map<string, MockProcessState>(),
+    shellTracker: {
+      processStates: new Map<string, MockProcessState>(),
+      cleanupAllShells: vi.fn().mockResolvedValue(undefined),
+    },
   };
 });
 
@@ -87,8 +90,8 @@ describe('BackgroundTools cleanup', () => {
       showStdout: false,
     };
 
-    processStates.clear();
-    processStates.set('shell-1', mockProcessState as any);
+    shellTracker.processStates.clear();
+    shellTracker.processStates.set('shell-1', mockProcessState as any);
 
     // Setup mock agent states
     const mockAgentState: MockAgentState = {
@@ -119,7 +122,7 @@ describe('BackgroundTools cleanup', () => {
     ).__BROWSER_MANAGER__ = undefined;
 
     // Clear mock states
-    processStates.clear();
+    shellTracker.processStates.clear();
     agentStates.clear();
   });
 
@@ -142,24 +145,11 @@ describe('BackgroundTools cleanup', () => {
   });
 
   it('should clean up shell processes', async () => {
-    // Register a shell tool
-    const shellId = backgroundTools.registerShell('echo "test"');
-
-    // Get mock process state
-    const mockProcessState = processStates.get('shell-1');
-
-    // Set the shell ID to match
-    processStates.set(shellId, processStates.get('shell-1') as any);
-
     // Run cleanup
     await backgroundTools.cleanup();
 
-    // Check that kill was called
-    expect(mockProcessState?.process.kill).toHaveBeenCalledWith('SIGTERM');
-
-    // Check that tool status was updated
-    const tool = backgroundTools.getToolById(shellId);
-    expect(tool?.status).toBe(BackgroundToolStatus.COMPLETED);
+    // Check that shellTracker.cleanupAllShells was called
+    expect(shellTracker.cleanupAllShells).toHaveBeenCalled();
   });
 
   it('should clean up sub-agents', async () => {

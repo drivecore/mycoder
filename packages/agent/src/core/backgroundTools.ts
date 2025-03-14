@@ -3,11 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 // These imports will be used by the cleanup method
 import { BrowserManager } from '../tools/browser/BrowserManager.js';
 import { agentStates } from '../tools/interaction/agentStart.js';
-import { processStates } from '../tools/system/shellStart.js';
+import { shellTracker } from '../tools/system/ShellTracker.js';
 
 // Types of background processes we can track
 export enum BackgroundToolType {
-  SHELL = 'shell',
   BROWSER = 'browser',
   AGENT = 'agent',
 }
@@ -30,17 +29,6 @@ export interface BackgroundTool {
   metadata: Record<string, any>; // Additional tool-specific information
 }
 
-// Shell process specific data
-export interface ShellBackgroundTool extends BackgroundTool {
-  type: BackgroundToolType.SHELL;
-  metadata: {
-    command: string;
-    exitCode?: number | null;
-    signaled?: boolean;
-    error?: string;
-  };
-}
-
 // Browser process specific data
 export interface BrowserBackgroundTool extends BackgroundTool {
   type: BackgroundToolType.BROWSER;
@@ -60,10 +48,7 @@ export interface AgentBackgroundTool extends BackgroundTool {
 }
 
 // Utility type for all background tool types
-export type AnyBackgroundTool =
-  | ShellBackgroundTool
-  | BrowserBackgroundTool
-  | AgentBackgroundTool;
+export type AnyBackgroundTool = BrowserBackgroundTool | AgentBackgroundTool;
 
 /**
  * Registry to keep track of all background processes
@@ -73,22 +58,6 @@ export class BackgroundTools {
 
   // Private constructor for singleton pattern
   constructor(readonly ownerName: string) {}
-
-  // Register a new shell process
-  public registerShell(command: string): string {
-    const id = uuidv4();
-    const tool: ShellBackgroundTool = {
-      id,
-      type: BackgroundToolType.SHELL,
-      status: BackgroundToolStatus.RUNNING,
-      startTime: new Date(),
-      metadata: {
-        command,
-      },
-    };
-    this.tools.set(id, tool);
-    return id;
-  }
 
   // Register a new browser process
   public registerBrowser(url?: string): string {
@@ -177,12 +146,6 @@ export class BackgroundTools {
         tool.status === BackgroundToolStatus.RUNNING,
     );
 
-    const shellTools = tools.filter(
-      (tool): tool is ShellBackgroundTool =>
-        tool.type === BackgroundToolType.SHELL &&
-        tool.status === BackgroundToolStatus.RUNNING,
-    );
-
     const agentTools = tools.filter(
       (tool): tool is AgentBackgroundTool =>
         tool.type === BackgroundToolType.AGENT &&
@@ -193,19 +156,15 @@ export class BackgroundTools {
     const browserCleanupPromises = browserTools.map((tool) =>
       this.cleanupBrowserSession(tool),
     );
-    const shellCleanupPromises = shellTools.map((tool) =>
-      this.cleanupShellProcess(tool),
-    );
     const agentCleanupPromises = agentTools.map((tool) =>
       this.cleanupSubAgent(tool),
     );
 
+    // Clean up shell processes using ShellTracker
+    await shellTracker.cleanupAllShells();
+
     // Wait for all cleanup operations to complete in parallel
-    await Promise.all([
-      ...browserCleanupPromises,
-      ...shellCleanupPromises,
-      ...agentCleanupPromises,
-    ]);
+    await Promise.all([...browserCleanupPromises, ...agentCleanupPromises]);
   }
 
   /**
@@ -221,38 +180,6 @@ export class BackgroundTools {
       ).__BROWSER_MANAGER__;
       if (browserManager) {
         await browserManager.closeSession(tool.id);
-      }
-      this.updateToolStatus(tool.id, BackgroundToolStatus.COMPLETED);
-    } catch (error) {
-      this.updateToolStatus(tool.id, BackgroundToolStatus.ERROR, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  /**
-   * Cleans up a shell process
-   * @param tool The shell tool to clean up
-   */
-  private async cleanupShellProcess(tool: ShellBackgroundTool): Promise<void> {
-    try {
-      const processState = processStates.get(tool.id);
-      if (processState && !processState.state.completed) {
-        processState.process.kill('SIGTERM');
-
-        // Force kill after a short timeout if still running
-        await new Promise<void>((resolve) => {
-          setTimeout(() => {
-            try {
-              if (!processState.state.completed) {
-                processState.process.kill('SIGKILL');
-              }
-            } catch {
-              // Ignore errors on forced kill
-            }
-            resolve();
-          }, 500);
-        });
       }
       this.updateToolStatus(tool.id, BackgroundToolStatus.COMPLETED);
     } catch (error) {

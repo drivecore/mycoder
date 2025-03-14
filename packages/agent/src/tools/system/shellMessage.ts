@@ -1,11 +1,10 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { processStates } from './shellStart.js';
+import { ShellStatus, shellTracker } from './ShellTracker.js';
 
 // Define NodeJS signals as an enum
 export enum NodeSignals {
@@ -96,14 +95,14 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, stdin, signal, showStdIn, showStdout },
-    { logger, backgroundTools },
+    { logger },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Interacting with shell process ${instanceId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
     );
 
     try {
-      const processState = processStates.get(instanceId);
+      const processState = shellTracker.processStates.get(instanceId);
       if (!processState) {
         throw new Error(`No process found with ID ${instanceId}`);
       }
@@ -118,44 +117,32 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           // If the process is already terminated, we'll just mark it as signaled anyway
           processState.state.signaled = true;
 
-          // Update background tool registry if signal failed
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.ERROR,
-            {
-              error: `Failed to send signal ${signal}: ${String(error)}`,
-              signalAttempted: signal,
-            },
-          );
+          // Update shell tracker if signal failed
+          shellTracker.updateShellStatus(instanceId, ShellStatus.ERROR, {
+            error: `Failed to send signal ${signal}: ${String(error)}`,
+            signalAttempted: signal,
+          });
 
           logger.verbose(
             `Failed to send signal ${signal}: ${String(error)}, but marking as signaled anyway`,
           );
         }
 
-        // Update background tool registry with signal information
+        // Update shell tracker with signal information
         if (
           signal === 'SIGTERM' ||
           signal === 'SIGKILL' ||
           signal === 'SIGINT'
         ) {
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.TERMINATED,
-            {
-              signal,
-              terminatedByUser: true,
-            },
-          );
+          shellTracker.updateShellStatus(instanceId, ShellStatus.TERMINATED, {
+            signal,
+            terminatedByUser: true,
+          });
         } else {
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.RUNNING,
-            {
-              signal,
-              signaled: true,
-            },
-          );
+          shellTracker.updateShellStatus(instanceId, ShellStatus.RUNNING, {
+            signal,
+            signaled: true,
+          });
         }
       }
 
@@ -241,7 +228,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (input, { logger }) => {
-    const processState = processStates.get(input.instanceId);
+    const processState = shellTracker.processStates.get(input.instanceId);
     const showStdIn =
       input.showStdIn !== undefined
         ? input.showStdIn
