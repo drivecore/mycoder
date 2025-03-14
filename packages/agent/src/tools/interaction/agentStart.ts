@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
@@ -8,26 +7,13 @@ import {
   AgentConfig,
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
-import { ToolAgentResult } from '../../core/toolAgent/types.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
 
-// Define AgentState type
-type AgentState = {
-  goal: string;
-  prompt: string;
-  output: string;
-  completed: boolean;
-  error?: string;
-  result?: ToolAgentResult;
-  context: ToolContext;
-  workingDirectory: string;
-  tools: Tool[];
-  aborted: boolean;
-};
+import { AgentStatus, agentTracker, AgentState } from './agentTracker.js';
 
-// Global map to store agent state
-export const agentStates: Map<string, AgentState> = new Map();
+// For backward compatibility
+export const agentStates = new Map<string, AgentState>();
 
 const parameterSchema = z.object({
   description: z
@@ -100,11 +86,12 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       userPrompt = false,
     } = parameterSchema.parse(params);
 
-    // Create an instance ID
-    const instanceId = uuidv4();
+    // Register this agent with the agent tracker
+    const instanceId = agentTracker.registerAgent(goal);
 
-    // Register this agent with the background tool registry
+    // For backward compatibility, also register with background tools
     backgroundTools.registerAgent(goal);
+
     logger.verbose(`Registered agent with ID: ${instanceId}`);
 
     // Construct a well-structured prompt
@@ -124,6 +111,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     // Store the agent state
     const agentState: AgentState = {
+      id: instanceId,
       goal,
       prompt,
       output: '',
@@ -134,6 +122,10 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       aborted: false,
     };
 
+    // Register agent state with the tracker
+    agentTracker.registerAgentState(instanceId, agentState);
+
+    // For backward compatibility
     agentStates.set(instanceId, agentState);
 
     // Start the agent in a separate promise that we don't await
@@ -146,13 +138,20 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
         });
 
         // Update agent state with the result
-        const state = agentStates.get(instanceId);
+        const state = agentTracker.getAgentState(instanceId);
         if (state && !state.aborted) {
           state.completed = true;
           state.result = result;
           state.output = result.result;
 
-          // Update background tool registry with completed status
+          // Update agent tracker with completed status
+          agentTracker.updateAgentStatus(instanceId, AgentStatus.COMPLETED, {
+            result:
+              result.result.substring(0, 100) +
+              (result.result.length > 100 ? '...' : ''),
+          });
+
+          // For backward compatibility
           backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.COMPLETED,
@@ -168,12 +167,17 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
         }
       } catch (error) {
         // Update agent state with the error
-        const state = agentStates.get(instanceId);
+        const state = agentTracker.getAgentState(instanceId);
         if (state && !state.aborted) {
           state.completed = true;
           state.error = error instanceof Error ? error.message : String(error);
 
-          // Update background tool registry with error status
+          // Update agent tracker with error status
+          agentTracker.updateAgentStatus(instanceId, AgentStatus.ERROR, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+
+          // For backward compatibility
           backgroundTools.updateToolStatus(
             instanceId,
             BackgroundToolStatus.ERROR,
