@@ -1,6 +1,6 @@
 // Provider configuration map
 
-import { providerConfig } from '../core/llm/provider';
+import { providerConfig } from '../core/llm/provider.js';
 
 /**
  * Generates a provider-specific API key error message
