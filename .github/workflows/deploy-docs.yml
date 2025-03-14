@@ -43,7 +43,6 @@ jobs:
 
       - name: Build and push Docker container
         run: |
-          cd packages/docs
           docker build -t ${{ env.IMAGE_PATH }} -f ./packages/docs/Dockerfile .
           docker push ${{ env.IMAGE_PATH }}
 
