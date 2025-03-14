@@ -57,12 +57,6 @@ export const providerConfig: Record<string, ProviderConfig> = {
     model: 'gpt-4o-2024-05-13',
     factory: (model, options) => new OpenAIProvider(model, options),
   },
-  gpustack: {
-    docsUrl: 'https://mycoder.ai/docs/provider/local-openai',
-    model: 'llama3.2',
-    baseUrl: 'http://localhost:80',
-    factory: (model, options) => new OpenAIProvider(model, options),
-  },
   ollama: {
     docsUrl: 'https://mycoder.ai/docs/provider/ollama',
     model: 'llama3.2',

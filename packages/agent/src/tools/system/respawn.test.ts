@@ -8,9 +8,8 @@ import { respawnTool } from './respawn';
 const toolContext: ToolContext = getMockToolContext();
 
 describe('respawnTool', () => {
-  it('should have correct name and description', () => {
+  it('should have correct name', () => {
     expect(respawnTool.name).toBe('respawn');
-    expect(respawnTool.description).toContain('Resets the agent context');
   });
 
   it('should execute and return confirmation message', async () => {

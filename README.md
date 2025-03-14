@@ -83,8 +83,8 @@ export default {
   profile: false,
   tokenCache: true,
 
-  // Ollama configuration (if using local models)
-  ollamaBaseUrl: 'http://localhost:11434',
+  // Base URL configuration (for providers that need it)
+  baseUrl: 'http://localhost:11434', // Example for Ollama
 };
 ```
 

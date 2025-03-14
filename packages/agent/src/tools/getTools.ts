@@ -10,7 +10,6 @@ import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
 import { createMcpTool } from './mcp.js';
 import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
-import { respawnTool } from './system/respawn.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
 import { shellStartTool } from './system/shellStart.js';
@@ -39,7 +38,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     shellMessageTool as unknown as Tool,
     browseStartTool as unknown as Tool,
     browseMessageTool as unknown as Tool,
-    respawnTool as unknown as Tool,
+    //respawnTool as unknown as Tool,  this is a confusing tool for now.
     sleepTool as unknown as Tool,
     listBackgroundToolsTool as unknown as Tool,
   ];
