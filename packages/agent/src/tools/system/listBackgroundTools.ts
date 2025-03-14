@@ -10,7 +10,7 @@ const parameterSchema = z.object({
     .optional()
     .describe('Filter tools by status (default: "all")'),
   type: z
-    .enum(['all', 'shell', 'browser', 'agent'])
+    .enum(['all', 'shell', 'agent'])
     .optional()
     .describe('Filter tools by type (default: "all")'),
   verbose: z
@@ -39,8 +39,7 @@ type ReturnType = z.infer<typeof returnSchema>;
 
 export const listBackgroundToolsTool: Tool<Parameters, ReturnType> = {
   name: 'listBackgroundTools',
-  description:
-    'Lists all background tools (shells, browsers, agents) and their status',
+  description: 'Lists all background tools (shells, agents) and their status',
   logPrefix: '🔍',
   parameters: parameterSchema,
   returns: returnSchema,

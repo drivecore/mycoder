@@ -1,14 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // These imports will be used by the cleanup method
-import { BrowserManager } from '../tools/browser/BrowserManager.js';
 import { agentStates } from '../tools/interaction/agentStart.js';
 import { processStates } from '../tools/system/shellStart.js';
 
 // Types of background processes we can track
 export enum BackgroundToolType {
   SHELL = 'shell',
-  BROWSER = 'browser',
   AGENT = 'agent',
 }
 
@@ -41,15 +39,6 @@ export interface ShellBackgroundTool extends BackgroundTool {
   };
 }
 
-// Browser process specific data
-export interface BrowserBackgroundTool extends BackgroundTool {
-  type: BackgroundToolType.BROWSER;
-  metadata: {
-    url?: string;
-    error?: string;
-  };
-}
-
 // Agent process specific data (for future use)
 export interface AgentBackgroundTool extends BackgroundTool {
   type: BackgroundToolType.AGENT;
@@ -60,10 +49,7 @@ export interface AgentBackgroundTool extends BackgroundTool {
 }
 
 // Utility type for all background tool types
-export type AnyBackgroundTool =
-  | ShellBackgroundTool
-  | BrowserBackgroundTool
-  | AgentBackgroundTool;
+export type AnyBackgroundTool = ShellBackgroundTool | AgentBackgroundTool;
 
 /**
  * Registry to keep track of all background processes
@@ -84,22 +70,6 @@ export class BackgroundTools {
       startTime: new Date(),
       metadata: {
         command,
-      },
-    };
-    this.tools.set(id, tool);
-    return id;
-  }
-
-  // Register a new browser process
-  public registerBrowser(url?: string): string {
-    const id = uuidv4();
-    const tool: BrowserBackgroundTool = {
-      id,
-      type: BackgroundToolType.BROWSER,
-      status: BackgroundToolStatus.RUNNING,
-      startTime: new Date(),
-      metadata: {
-        url,
       },
     };
     this.tools.set(id, tool);
@@ -171,12 +141,6 @@ export class BackgroundTools {
     const tools = this.getTools();
 
     // Group tools by type for better cleanup organization
-    const browserTools = tools.filter(
-      (tool): tool is BrowserBackgroundTool =>
-        tool.type === BackgroundToolType.BROWSER &&
-        tool.status === BackgroundToolStatus.RUNNING,
-    );
-
     const shellTools = tools.filter(
       (tool): tool is ShellBackgroundTool =>
         tool.type === BackgroundToolType.SHELL &&
@@ -190,9 +154,6 @@ export class BackgroundTools {
     );
 
     // Create cleanup promises for each resource type
-    const browserCleanupPromises = browserTools.map((tool) =>
-      this.cleanupBrowserSession(tool),
-    );
     const shellCleanupPromises = shellTools.map((tool) =>
       this.cleanupShellProcess(tool),
     );
@@ -201,33 +162,7 @@ export class BackgroundTools {
     );
 
     // Wait for all cleanup operations to complete in parallel
-    await Promise.all([
-      ...browserCleanupPromises,
-      ...shellCleanupPromises,
-      ...agentCleanupPromises,
-    ]);
-  }
-
-  /**
-   * Cleans up a browser session
-   * @param tool The browser tool to clean up
-   */
-  private async cleanupBrowserSession(
-    tool: BrowserBackgroundTool,
-  ): Promise<void> {
-    try {
-      const browserManager = (
-        globalThis as unknown as { __BROWSER_MANAGER__?: BrowserManager }
-      ).__BROWSER_MANAGER__;
-      if (browserManager) {
-        await browserManager.closeSession(tool.id);
-      }
-      this.updateToolStatus(tool.id, BackgroundToolStatus.COMPLETED);
-    } catch (error) {
-      this.updateToolStatus(tool.id, BackgroundToolStatus.ERROR, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+    await Promise.all([...shellCleanupPromises, ...agentCleanupPromises]);
   }
 
   /**

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 // Import mocked modules
-import { BrowserManager } from '../tools/browser/BrowserManager.js';
 import { agentStates } from '../tools/interaction/agentStart.js';
 import { processStates } from '../tools/system/shellStart.js';
 
@@ -35,14 +34,6 @@ type MockAgentState = {
 };
 
 // Mock dependencies
-vi.mock('../tools/browser/BrowserManager.js', () => {
-  return {
-    BrowserManager: class MockBrowserManager {
-      closeSession = vi.fn().mockResolvedValue(undefined);
-    },
-  };
-});
-
 vi.mock('../tools/system/shellStart.js', () => {
   return {
     processStates: new Map<string, MockProcessState>(),
@@ -58,19 +49,12 @@ vi.mock('../tools/interaction/agentStart.js', () => {
 describe('BackgroundTools cleanup', () => {
   let backgroundTools: BackgroundTools;
 
-  // Setup mocks for globalThis and process states
+  // Setup mocks for process states
   beforeEach(() => {
     backgroundTools = new BackgroundTools('test-agent');
 
     // Reset mocks
     vi.resetAllMocks();
-
-    // Setup global browser manager
-    (
-      globalThis as unknown as { __BROWSER_MANAGER__: BrowserManager }
-    ).__BROWSER_MANAGER__ = {
-      closeSession: vi.fn().mockResolvedValue(undefined),
-    } as unknown as BrowserManager;
 
     // Setup mock process states
     const mockProcess = {
@@ -113,32 +97,9 @@ describe('BackgroundTools cleanup', () => {
   afterEach(() => {
     vi.resetAllMocks();
 
-    // Clear global browser manager
-    (
-      globalThis as unknown as { __BROWSER_MANAGER__?: BrowserManager }
-    ).__BROWSER_MANAGER__ = undefined;
-
     // Clear mock states
     processStates.clear();
     agentStates.clear();
-  });
-
-  it('should clean up browser sessions', async () => {
-    // Register a browser tool
-    const browserId = backgroundTools.registerBrowser('https://example.com');
-
-    // Run cleanup
-    await backgroundTools.cleanup();
-
-    // Check that closeSession was called
-    expect(
-      (globalThis as unknown as { __BROWSER_MANAGER__: BrowserManager })
-        .__BROWSER_MANAGER__.closeSession,
-    ).toHaveBeenCalledWith(browserId);
-
-    // Check that tool status was updated
-    const tool = backgroundTools.getToolById(browserId);
-    expect(tool?.status).toBe(BackgroundToolStatus.COMPLETED);
   });
 
   it('should clean up shell processes', async () => {
@@ -185,39 +146,5 @@ describe('BackgroundTools cleanup', () => {
     // Check that tool status was updated
     const tool = backgroundTools.getToolById(agentId);
     expect(tool?.status).toBe(BackgroundToolStatus.TERMINATED);
-  });
-
-  it('should handle errors during cleanup', async () => {
-    // Register a browser tool
-    const browserId = backgroundTools.registerBrowser('https://example.com');
-
-    // Make closeSession throw an error
-    (
-      (globalThis as unknown as { __BROWSER_MANAGER__: BrowserManager })
-        .__BROWSER_MANAGER__.closeSession as ReturnType<typeof vi.fn>
-    ).mockRejectedValue(new Error('Test error'));
-
-    // Run cleanup
-    await backgroundTools.cleanup();
-
-    // Check that tool status was updated to ERROR
-    const tool = backgroundTools.getToolById(browserId);
-    expect(tool?.status).toBe(BackgroundToolStatus.ERROR);
-    expect(tool?.metadata.error).toBe('Test error');
-  });
-
-  it('should only clean up running tools', async () => {
-    // Register a browser tool and mark it as completed
-    const browserId = backgroundTools.registerBrowser('https://example.com');
-    backgroundTools.updateToolStatus(browserId, BackgroundToolStatus.COMPLETED);
-
-    // Run cleanup
-    await backgroundTools.cleanup();
-
-    // Check that closeSession was not called
-    expect(
-      (globalThis as unknown as { __BROWSER_MANAGER__: BrowserManager })
-        .__BROWSER_MANAGER__.closeSession,
-    ).not.toHaveBeenCalled();
   });
 });

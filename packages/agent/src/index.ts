@@ -18,6 +18,8 @@ export * from './tools/browser/browseMessage.js';
 export * from './tools/browser/browseStart.js';
 export * from './tools/browser/PageController.js';
 export * from './tools/browser/BrowserAutomation.js';
+export * from './tools/browser/listBrowsers.js';
+export * from './tools/browser/browserTracker.js';
 
 // Tools - Interaction
 export * from './tools/interaction/subAgent.js';
