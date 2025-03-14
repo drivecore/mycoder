@@ -10,6 +10,7 @@ import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
 import { createMcpTool } from './mcp.js';
 import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
+import { listShellsTool } from './system/listShells.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
 import { shellStartTool } from './system/shellStart.js';
@@ -41,6 +42,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     //respawnTool as unknown as Tool,  this is a confusing tool for now.
     sleepTool as unknown as Tool,
     listBackgroundToolsTool as unknown as Tool,
+    listShellsTool as unknown as Tool,
   ];
 
   // Only include userPrompt tool if enabled

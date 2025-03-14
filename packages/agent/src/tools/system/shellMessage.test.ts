@@ -5,7 +5,8 @@ import { sleep } from '../../utils/sleep.js';
 import { getMockToolContext } from '../getTools.test.js';
 
 import { shellMessageTool, NodeSignals } from './shellMessage.js';
-import { processStates, shellStartTool } from './shellStart.js';
+import { shellStartTool } from './shellStart.js';
+import { shellTracker } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
@@ -23,14 +24,14 @@ describe('shellMessageTool', () => {
   let testInstanceId = '';
 
   beforeEach(() => {
-    processStates.clear();
+    shellTracker.processStates.clear();
   });
 
   afterEach(() => {
-    for (const processState of processStates.values()) {
+    for (const processState of shellTracker.processStates.values()) {
       processState.process.kill();
     }
-    processStates.clear();
+    shellTracker.processStates.clear();
   });
 
   it('should interact with a running process', async () => {
@@ -62,7 +63,7 @@ describe('shellMessageTool', () => {
     expect(result.completed).toBe(false);
 
     // Verify the instance ID is valid
-    expect(processStates.has(testInstanceId)).toBe(true);
+    expect(shellTracker.processStates.has(testInstanceId)).toBe(true);
   });
 
   it('should handle nonexistent process', async () => {
@@ -104,7 +105,7 @@ describe('shellMessageTool', () => {
 
     expect(result.completed).toBe(true);
     // Process should still be in processStates even after completion
-    expect(processStates.has(instanceId)).toBe(true);
+    expect(shellTracker.processStates.has(instanceId)).toBe(true);
   });
 
   it('should handle SIGTERM signal correctly', async () => {
@@ -207,7 +208,7 @@ describe('shellMessageTool', () => {
 
     expect(checkResult.signaled).toBe(true);
     expect(checkResult.completed).toBe(true);
-    expect(processStates.has(instanceId)).toBe(true);
+    expect(shellTracker.processStates.has(instanceId)).toBe(true);
   });
 
   it('should respect showStdIn and showStdout parameters', async () => {
@@ -224,7 +225,7 @@ describe('shellMessageTool', () => {
     const instanceId = getInstanceId(startResult);
 
     // Verify process state has default visibility settings
-    const processState = processStates.get(instanceId);
+    const processState = shellTracker.processStates.get(instanceId);
     expect(processState?.showStdIn).toBe(false);
     expect(processState?.showStdout).toBe(false);
 
@@ -241,7 +242,7 @@ describe('shellMessageTool', () => {
     );
 
     // Verify process state still exists
-    expect(processStates.has(instanceId)).toBe(true);
+    expect(shellTracker.processStates.has(instanceId)).toBe(true);
   });
 
   it('should inherit visibility settings from process state', async () => {
@@ -260,7 +261,7 @@ describe('shellMessageTool', () => {
     const instanceId = getInstanceId(startResult);
 
     // Verify process state has the specified visibility settings
-    const processState = processStates.get(instanceId);
+    const processState = shellTracker.processStates.get(instanceId);
     expect(processState?.showStdIn).toBe(true);
     expect(processState?.showStdout).toBe(true);
 
@@ -275,6 +276,6 @@ describe('shellMessageTool', () => {
     );
 
     // Verify process state still exists
-    expect(processStates.has(instanceId)).toBe(true);
+    expect(shellTracker.processStates.has(instanceId)).toBe(true);
   });
 });
