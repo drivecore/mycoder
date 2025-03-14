@@ -20,7 +20,7 @@ const returnSchema = z.object({
 export const respawnTool: Tool = {
   name: 'respawn',
   description:
-    'Resets the agent context to just the system prompt and provided context',
+    'Resets the current conversation to just the system prompt and provided input context to this tool.',
   logPrefix: '🔄',
   parameters: parameterSchema,
   returns: returnSchema,
