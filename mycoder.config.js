@@ -18,6 +18,9 @@ export default {
   //model: 'llama3.2:3b',
   //provider: 'xai',
   //model: 'grok-2-latest',
+  //provider: 'openai',
+  //model: 'qwen2.5-coder:14b',
+  //baseUrl: 'http://192.168.2.66:80/v1-openai',
   maxTokens: 4096,
   temperature: 0.7,
 

@@ -177,7 +177,7 @@ describe('OpenAIProvider', () => {
       'role' in toolUseMessage
     ) {
       expect(toolUseMessage.role).toBe('assistant');
-      expect(toolUseMessage.content).toBe(null);
+      expect(toolUseMessage.content).toBe(''); // required by gpustack' implementation of openai SDK.
 
       if (
         'tool_calls' in toolUseMessage &&

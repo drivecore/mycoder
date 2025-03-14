@@ -32,9 +32,6 @@ export default {
   provider: 'xai',
   model: 'grok-2-latest',
 
-  // Optional: Set API key directly (environment variable is preferred)
-  // xaiApiKey: 'your_api_key_here',
-
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,

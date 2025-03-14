@@ -38,10 +38,6 @@ export default {
   provider: 'openai',
   model: 'gpt-4o',
 
-  // Optional: Set API key directly (environment variable is preferred)
-  // openaiApiKey: 'your_api_key_here',
-  // openaiOrganization: 'your_organization_id',
-
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,
@@ -59,6 +55,24 @@ MyCoder supports all OpenAI models that have tool/function calling capabilities.
 - `gpt-3.5-turbo` - More affordable option for simpler tasks
 
 You can use any other OpenAI model that supports function calling with MyCoder. The OpenAI provider is not limited to just these listed models.
+
+## Using OpenAI Compatible Providers
+
+A number of providers offer OpenAI compatible REST API endpoints, such as xAI and [GPUStack](https://gpustack.ai). To point the OpenAI provider to a different provider REST API set the `baseUrl` and also, if applicable, the `OPENAI_API_KEY` to their required key. For example:
+
+```javascript
+export default {
+  // Provider selection
+  provider: 'openai',
+  model: 'qwen2.5',
+  baseUrl: 'http://localhost/v1-openai',
+
+  // Other MyCoder settings
+  maxTokens: 4096,
+  temperature: 0.7,
+  // ...
+};
+```
 
 ## Best Practices
 

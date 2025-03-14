@@ -114,18 +114,25 @@ export async function executePrompt(
       throw new Error(`Unknown provider: ${config.provider}`);
     }
 
-    const { keyName } = providerSettings;
+    // only validate key if baseUrl is not set, otherwise we assume the user is using a local provider
     let apiKey: string | undefined = undefined;
+    const { keyName } = providerSettings;
     if (keyName) {
       // Then fall back to environment variable
+      logger.info(`Looking API key in env: ${keyName}`);
       apiKey = process.env[keyName];
-      if (!apiKey) {
-        logger.error(getProviderApiKeyError(config.provider));
-        throw new Error(`${config.provider} API key not found`);
+      if (!config.baseUrl) {
+        if (!apiKey) {
+          logger.error(getProviderApiKeyError(config.provider));
+          throw new Error(`${config.provider} API key not found`);
+        }
       }
     }
 
     logger.info(`LLM: ${config.provider}/${config.model}`);
+    if (apiKey) {
+      logger.info(`Using API key: ${apiKey.slice(0, 4)}...`);
+    }
     if (config.baseUrl) {
       // For Ollama, we check if the base URL is set
       logger.info(`Using base url: ${config.baseUrl}`);

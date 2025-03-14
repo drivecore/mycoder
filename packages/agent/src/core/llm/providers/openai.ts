@@ -154,7 +154,7 @@ export class OpenAIProvider implements LLMProvider {
           // so we'll include it as a function call in an assistant message
           return {
             role: 'assistant',
-            content: null,
+            content: '',
             tool_calls: [
               {
                 id: msg.id,
