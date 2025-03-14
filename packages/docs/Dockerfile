@@ -1,26 +1,14 @@
-FROM node:20-alpine
+FROM node:23-alpine
 
 WORKDIR /app
-
-# Install pnpm
 RUN npm install -g pnpm
-
-# Copy package.json and lock files
-COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies
+COPY . .
 RUN pnpm install --frozen-lockfile
 
-# Copy the rest of the application
-COPY . .
-
-# Build the Docusaurus site
 ENV NODE_ENV=production
-RUN pnpm build
+RUN pnpm --filter mycoder-docs build
 
-# Expose the port the app will run on
 ENV PORT=8080
 EXPOSE ${PORT}
 
-# Command to run the application
-CMD ["pnpm", "serve", "--port", "8080", "--no-open"]
+CMD ["pnpm", "--filter", "mycoder-docs", "start"]

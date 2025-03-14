@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - docs-release
+      - release
   workflow_dispatch:
 
 env:
