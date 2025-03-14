@@ -63,6 +63,12 @@ export const providerConfig: Record<string, ProviderConfig> = {
     baseUrl: 'http://localhost:11434',
     factory: (model, options) => new OllamaProvider(model, options),
   },
+  'local-openai': {
+    docsUrl: 'https://mycoder.ai/docs/provider/local-openai',
+    model: 'llama3.2',
+    baseUrl: 'http://localhost:80',
+    factory: (model, options) => new OpenAIProvider(model, options),
+  },
   xai: {
     keyName: 'XAI_API_KEY',
     docsUrl: 'https://mycoder.ai/docs/provider/xai',
