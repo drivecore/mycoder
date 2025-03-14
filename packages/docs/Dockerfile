@@ -11,4 +11,5 @@ RUN pnpm --filter mycoder-docs build
 ENV PORT=8080
 EXPOSE ${PORT}
 
-CMD ["pnpm", "--filter", "mycoder-docs", "start"]
+CMD ["pnpm", "--filter", "mycoder-docs", "start", "--port", "8080", "--no-open"]
+
