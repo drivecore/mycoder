@@ -44,7 +44,7 @@ const main = async () => {
   mark('Before package.json load');
   const require = createRequire(import.meta.url);
   const packageInfo = require('../package.json') as PackageJson;
-  mark('After package.json load');
+  mark('...After package.json load');
 
   // Set up yargs with the new CLI interface
   mark('Before yargs setup');

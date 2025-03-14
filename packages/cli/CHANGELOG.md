@@ -1,15 +1,13 @@
 # [mycoder-v1.4.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.3.1...mycoder-v1.4.0) (2025-03-14)
 
-
 ### Bug Fixes
 
-* perfect gpustack compatibility, fix openai edge case ([9359f62](https://github.com/drivecore/mycoder/commit/9359f62e5b2f66c0db76bf9bb00161eb6964a888))
-
+- perfect gpustack compatibility, fix openai edge case ([9359f62](https://github.com/drivecore/mycoder/commit/9359f62e5b2f66c0db76bf9bb00161eb6964a888))
 
 ### Features
 
-* replace cosmiconfig with c12 for configuration management ([cc17315](https://github.com/drivecore/mycoder/commit/cc17315da6a8c7a7b63958a7b10f11f7de5e521d)), closes [#260](https://github.com/drivecore/mycoder/issues/260)
-* support multiple line custom prompts in mycoder.config.js ([fa7f45e](https://github.com/drivecore/mycoder/commit/fa7f45ea9e81fa73fba0afa099e127fbdeaf5281)), closes [#249](https://github.com/drivecore/mycoder/issues/249)
+- replace cosmiconfig with c12 for configuration management ([cc17315](https://github.com/drivecore/mycoder/commit/cc17315da6a8c7a7b63958a7b10f11f7de5e521d)), closes [#260](https://github.com/drivecore/mycoder/issues/260)
+- support multiple line custom prompts in mycoder.config.js ([fa7f45e](https://github.com/drivecore/mycoder/commit/fa7f45ea9e81fa73fba0afa099e127fbdeaf5281)), closes [#249](https://github.com/drivecore/mycoder/issues/249)
 
 # [mycoder-v1.3.1](https://github.com/drivecore/mycoder/compare/mycoder-v1.3.0...mycoder-v1.3.1) (2025-03-13)
 
