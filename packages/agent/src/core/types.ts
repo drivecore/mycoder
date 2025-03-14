@@ -23,6 +23,7 @@ export type ToolContext = {
   tokenCache?: boolean;
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
+  agentName?: string; // Name of the agent, used for browser tracker
   provider: ModelProvider;
   model?: string;
   baseUrl?: string;
