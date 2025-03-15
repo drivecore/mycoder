@@ -48,11 +48,25 @@ mycoder --githubMode "Work with GitHub issues and PRs"
 
 ## Configuration
 
-MyCoder is configured using a `mycoder.config.js` file in your project root, similar to ESLint and other modern JavaScript tools. This file exports a configuration object with your preferred settings.
+MyCoder is configured using a configuration file in your project. MyCoder supports multiple configuration file locations and formats, similar to ESLint and other modern JavaScript tools.
+
+### Configuration File Locations
+
+MyCoder will look for configuration in the following locations (in order of precedence):
+
+1. `mycoder.config.js` in your project root
+2. `.mycoder.config.js` in your project root
+3. `.config/mycoder.js` in your project root
+4. `.mycoder.rc` in your project root
+5. `.mycoder.rc` in your home directory
+6. `mycoder` field in `package.json`
+7. `~/.config/mycoder/config.js` (XDG standard user configuration)
+
+Multiple file extensions are supported: `.js`, `.ts`, `.mjs`, `.cjs`, `.json`, `.jsonc`, `.json5`, `.yaml`, `.yml`, and `.toml`.
 
 ### Creating a Configuration File
 
-Create a `mycoder.config.js` file in your project root:
+Create a configuration file in your preferred location:
 
 ```js
 // mycoder.config.js
