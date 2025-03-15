@@ -4,30 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 
-import type { ChildProcess } from 'child_process';
+import { ShellStatus, shellTracker } from './ShellTracker.js';
 
-// Define ProcessState type
-type ProcessState = {
-  process: ChildProcess;
-  command: string;
-  stdout: string[];
-  stderr: string[];
-  state: {
-    completed: boolean;
-    signaled: boolean;
-    exitCode: number | null;
-  };
-  showStdIn: boolean;
-  showStdout: boolean;
-};
-
-// Global map to store process state
-// This is exported so it can be accessed for cleanup
-export const processStates: Map<string, ProcessState> = new Map();
+import type { ProcessState } from './ShellTracker.js';
 
 const parameterSchema = z.object({
   command: z.string().describe('The shell command to execute'),
@@ -99,7 +81,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       showStdIn = false,
       showStdout = false,
     },
-    { logger, workingDirectory, backgroundTools },
+    { logger, workingDirectory },
   ): Promise<ReturnType> => {
     if (showStdIn) {
       logger.info(`Command input: ${command}`);
@@ -111,8 +93,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         // Generate a unique ID for this process
         const instanceId = uuidv4();
 
-        // Register this shell process with the background tool registry
-        backgroundTools.registerShell(command);
+        // Register this shell process with the shell tracker
+        shellTracker.registerShell(command);
 
         let hasResolved = false;
 
@@ -134,8 +116,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           showStdout,
         };
 
-        // Initialize combined process state
-        processStates.set(instanceId, processState);
+        // Initialize process state
+        shellTracker.processStates.set(instanceId, processState);
 
         // Handle process events
         if (process.stdout)
@@ -160,14 +142,10 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           logger.error(`[${instanceId}] Process error: ${error.message}`);
           processState.state.completed = true;
 
-          // Update background tool registry with error status
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.ERROR,
-            {
-              error: error.message,
-            },
-          );
+          // Update shell tracker with error status
+          shellTracker.updateShellStatus(instanceId, ShellStatus.ERROR, {
+            error: error.message,
+          });
 
           if (!hasResolved) {
             hasResolved = true;
@@ -190,12 +168,9 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           processState.state.signaled = signal !== null;
           processState.state.exitCode = code;
 
-          // Update background tool registry with completed status
-          const status =
-            code === 0
-              ? BackgroundToolStatus.COMPLETED
-              : BackgroundToolStatus.ERROR;
-          backgroundTools.updateToolStatus(instanceId, status, {
+          // Update shell tracker with completed status
+          const status = code === 0 ? ShellStatus.COMPLETED : ShellStatus.ERROR;
+          shellTracker.updateShellStatus(instanceId, status, {
             exitCode: code,
             signaled: signal !== null,
           });

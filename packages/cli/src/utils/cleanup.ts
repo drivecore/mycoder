@@ -1,4 +1,4 @@
-import { BrowserManager, processStates } from 'mycoder-agent';
+import { BrowserManager, shellTracker } from 'mycoder-agent';
 import { agentStates } from 'mycoder-agent/dist/tools/interaction/agentStart.js';
 
 /**
@@ -55,29 +55,10 @@ export async function cleanupResources(): Promise<void> {
 
   // 2. Clean up shell processes
   try {
-    if (processStates.size > 0) {
-      console.log(`Terminating ${processStates.size} shell processes...`);
-      for (const [id, state] of processStates.entries()) {
-        if (!state.state.completed) {
-          console.log(`Terminating process ${id}...`);
-          try {
-            state.process.kill('SIGTERM');
-            // Force kill after a short timeout if still running
-            setTimeout(() => {
-              try {
-                if (!state.state.completed) {
-                  state.process.kill('SIGKILL');
-                }
-                // eslint-disable-next-line unused-imports/no-unused-vars
-              } catch (e) {
-                // Ignore errors on forced kill
-              }
-            }, 500);
-          } catch (e) {
-            console.error(`Error terminating process ${id}:`, e);
-          }
-        }
-      }
+    const runningShells = shellTracker.getShells();
+    if (runningShells.length > 0) {
+      console.log(`Terminating ${runningShells.length} shell processes...`);
+      await shellTracker.cleanupAllShells();
     }
   } catch (error) {
     console.error('Error terminating shell processes:', error);
