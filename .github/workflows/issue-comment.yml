@@ -20,7 +20,7 @@ permissions:
   packages: read # Added in case you need to access GitHub packages
 
 env:
-  PNPM_VERSION: 10.2.1
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
   process-comment:
@@ -30,46 +30,20 @@ jobs:
       contains(github.event.comment.body, '/mycoder') && 
       github.event.comment.user.login == 'bhouston'
     steps:
-      - name: Extract prompt from comment
-        id: extract-prompt
-        run: |
-          echo "comment_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
-          echo "comment_id=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install browsers
-        run: cd packages/agent && pnpm exec playwright install --with-deps chromium
-
-      - name: Configure Git
-        run: |
+          version: ${{ vars.PNPM_VERSION }}
+      - run: pnpm install
+      - run: cd packages/agent && pnpm exec playwright install --with-deps chromium
+      - run: |
           git config --global user.name "Ben Houston (via MyCoder)"
           git config --global user.email "neuralsoft@gmail.com"
-
-      - run:
-          pnpm install -g mycoder
-
-          # Auth GitHub CLI with the token
-      - name: Configure GitHub CLI
-        run: |
+      - run: pnpm install -g mycoder
+      - run: |
           echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
-          # Verify auth status
           gh auth status
-
-      - env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          echo "Running MyCoder for issue #${{ github.event.issue.number }} with prompt: ${{ steps.extract-prompt.outputs.prompt }}"
-          mycoder --upgradeCheck false --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} in comment ${{ steps.extract-prompt.outputs.comment_url }} the user invoked the mycoder CLI via /mycoder.  Can you try to do what they requested or if it is unclear, respond with a comment to that affect to encourage them to be more clear."
+      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} in comment ${{ steps.extract-prompt.outputs.comment_url }} the user invoked the mycoder CLI via /mycoder.  Can you try to do what they requested or if it is unclear, respond with a comment to that affect to encourage them to be more clear."

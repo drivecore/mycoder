@@ -12,35 +12,21 @@ permissions:
   contents: read
 
 env:
-  PNPM_VERSION: 10.2.1
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
+          version: ${{ vars.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-
-      - name: Install browsers
-        run: cd packages/agent && pnpm exec playwright install --with-deps chromium
-
-      - name: Test
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: pnpm test
-
-      - name: Lint
-        run: pnpm lint
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: cd packages/agent && pnpm exec playwright install --with-deps chromium
+      - run: pnpm test
+      - run: pnpm lint

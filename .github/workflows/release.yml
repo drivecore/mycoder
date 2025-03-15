@@ -12,8 +12,6 @@ permissions:
   packages: write
 
 env:
-  PNPM_VERSION: 10.2.1
-  NODE_VERSION: 23
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
 jobs:
@@ -21,48 +19,24 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+          version: ${{ vars.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-
-      - name: Install browsers
-        run: cd packages/agent && pnpm exec playwright install --with-deps chromium
-
-      - name: Test
-        run: pnpm test
-
-      - name: Debug - Show recent commits
-        run: git log -n 10 --pretty=format:"%h %s" --date=short
-
-      - name: Debug - Run verify-release-config
-        run: pnpm verify-release-config
-
-      - name: Configure Git
-        run: |
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: cd packages/agent && pnpm exec playwright install --with-deps chromium
+      - run: pnpm test
+      - run: pnpm verify-release-config
+      - run: |
           git config --global user.email "neuralsoft@gmail.com"
           git config --global user.name "Ben Houston (via GitHub Actions)"
-
-      - name: Release
-        env:
+      - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
