@@ -119,9 +119,21 @@ export default {
 };
 ```
 
-## Configuration File Location
+## Configuration File Locations
 
-The `mycoder.config.js` file should be placed in the root directory of your project. MyCoder will automatically detect and use this file when run from within the project directory or any of its subdirectories.
+MyCoder uses the [c12](https://github.com/unjs/c12) library to load configuration files, which supports multiple file locations and formats. Configuration files are searched in the following order:
+
+1. `mycoder.config.js` (or other supported extensions) in the project root directory
+2. `.mycoder.config.js` (or other supported extensions) in the project root directory
+3. `.config/mycoder.js` (or other supported extensions) in the project root directory
+4. `.mycoder.rc` in the project root directory
+5. `.mycoder.rc` in the user's home directory (global configuration)
+6. Configuration from the `mycoder` field in `package.json`
+7. `~/.config/mycoder/config.js` (XDG standard user configuration)
+
+Supported file extensions include `.js`, `.ts`, `.mjs`, `.cjs`, `.json`, `.jsonc`, `.json5`, `.yaml`, `.yml`, and `.toml`.
+
+MyCoder will automatically detect and use these configuration files when run from within the project directory or any of its subdirectories.
 
 ## Overriding Configuration
 
