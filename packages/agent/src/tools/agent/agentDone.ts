@@ -27,6 +27,6 @@ export const agentDoneTool: Tool<Parameters, ReturnType> = {
   execute: ({ result }) => Promise.resolve({ result }),
   logParameters: () => {},
   logReturns: (output, { logger }) => {
-    logger.log(`Completed: ${output}`);
+    logger.log(`Completed: ${output.result}`);
   },
 };
