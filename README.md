@@ -98,7 +98,7 @@ export default {
 
   // Base URL configuration (for providers that need it)
   baseUrl: 'http://localhost:11434', // Example for Ollama
-  
+
   // MCP configuration
   mcp: {
     servers: [

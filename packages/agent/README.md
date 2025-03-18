@@ -69,29 +69,34 @@ MyCoder Agent supports the Model Context Protocol:
 ## Available Tools
 
 ### File & Text Manipulation
+
 - **textEditor**: View, create, and edit files with persistent state
   - Commands: view, create, str_replace, insert, undo_edit
   - Line number support and partial file viewing
 
 ### System Interaction
+
 - **shellStart**: Execute shell commands with sync/async modes
 - **shellMessage**: Interact with running shell processes
 - **shellExecute**: One-shot shell command execution
 - **listShells**: List all running shell processes
 
 ### Agent Management
+
 - **agentStart**: Create sub-agents for parallel tasks
 - **agentMessage**: Send messages to sub-agents
 - **agentDone**: Complete the current agent's execution
 - **listAgents**: List all running agents
 
 ### Network & Web
+
 - **fetch**: Make HTTP requests to APIs
 - **sessionStart**: Start browser automation sessions
 - **sessionMessage**: Control browser sessions (navigation, clicking, typing)
 - **listSessions**: List all browser sessions
 
 ### Utility Tools
+
 - **sleep**: Pause execution for a specified duration
 - **userPrompt**: Request input from the user
 
@@ -145,10 +150,10 @@ const tools = [textEditorTool, shellStartTool];
 
 // Run the agent
 const result = await toolAgent(
-  "Write a simple Node.js HTTP server and save it to server.js",
+  'Write a simple Node.js HTTP server and save it to server.js',
   tools,
   {
-    getSystemPrompt: () => "You are a helpful coding assistant...",
+    getSystemPrompt: () => 'You are a helpful coding assistant...',
     maxIterations: 10,
   },
   {
@@ -157,7 +162,7 @@ const result = await toolAgent(
     model: 'claude-3-opus-20240229',
     apiKey: process.env.ANTHROPIC_API_KEY,
     workingDirectory: process.cwd(),
-  }
+  },
 );
 
 console.log('Agent result:', result);
