@@ -4,10 +4,10 @@ import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
 import { MockLogger } from '../../utils/mockLogger.js';
 import { BrowserTracker } from '../browser/browserTracker.js';
-import { ShellTracker } from '../system/shellTracker.js';
+import { ShellTracker } from '../shell/ShellTracker.js';
 
-import { AgentTracker } from './agentTracker.js';
-import { subAgentTool } from './subAgent.js';
+import { agentExecuteTool } from './agentExecute.js';
+import { AgentTracker } from './AgentTracker.js';
 
 // Mock the toolAgent function
 vi.mock('../../core/toolAgent/toolAgentCore.js', () => ({
@@ -40,9 +40,9 @@ const mockContext: ToolContext = {
   browserTracker: new BrowserTracker('test'),
 };
 
-describe('subAgentTool', () => {
+describe('agentExecuteTool', () => {
   it('should create a sub-agent and return its response', async () => {
-    const result = await subAgentTool.execute(
+    const result = await agentExecuteTool.execute(
       {
         description: 'Test sub-agent',
         goal: 'Test the sub-agent tool',
@@ -58,7 +58,7 @@ describe('subAgentTool', () => {
   it('should use custom working directory when provided', async () => {
     const { toolAgent } = await import('../../core/toolAgent/toolAgentCore.js');
 
-    await subAgentTool.execute(
+    await agentExecuteTool.execute(
       {
         description: 'Test sub-agent with custom directory',
         goal: 'Test the sub-agent tool',
@@ -82,7 +82,7 @@ describe('subAgentTool', () => {
   it('should include relevant files in the prompt when provided', async () => {
     const { toolAgent } = await import('../../core/toolAgent/toolAgentCore.js');
 
-    await subAgentTool.execute(
+    await agentExecuteTool.execute(
       {
         description: 'Test sub-agent with relevant files',
         goal: 'Test the sub-agent tool',

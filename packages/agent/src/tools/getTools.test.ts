@@ -4,10 +4,10 @@ import { TokenTracker } from '../core/tokens.js';
 import { ToolContext } from '../core/types.js';
 import { MockLogger } from '../utils/mockLogger.js';
 
+import { AgentTracker } from './agent/AgentTracker.js';
 import { BrowserTracker } from './browser/browserTracker.js';
 import { getTools } from './getTools.js';
-import { AgentTracker } from './interaction/agentTracker.js';
-import { ShellTracker } from './system/shellTracker.js';
+import { ShellTracker } from './shell/ShellTracker.js';
 
 // Mock context
 export const getMockToolContext = (): ToolContext => ({

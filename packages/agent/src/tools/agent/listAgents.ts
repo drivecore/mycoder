@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
-import { AgentStatus } from '../interaction/agentTracker.js';
+
+import { AgentStatus } from './AgentTracker.js';
 
 const parameterSchema = z.object({
   status: z

@@ -4,7 +4,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { Tool } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { ShellStatus } from './shellTracker.js';
+import { ShellStatus } from './ShellTracker.js';
 
 // Define NodeJS signals as an enum
 export enum NodeSignals {

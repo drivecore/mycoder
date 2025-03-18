@@ -3,14 +3,14 @@
 export * from './tools/io/fetch.js';
 
 // Tools - System
-export * from './tools/system/shellStart.js';
+export * from './tools/shell/shellStart.js';
 export * from './tools/system/sleep.js';
 export * from './tools/system/respawn.js';
-export * from './tools/system/sequenceComplete.js';
-export * from './tools/system/shellMessage.js';
-export * from './tools/system/shellExecute.js';
-export * from './tools/system/listShells.js';
-export * from './tools/system/shellTracker.js';
+export * from './tools/agent/agentDone.js';
+export * from './tools/shell/shellMessage.js';
+export * from './tools/shell/shellExecute.js';
+export * from './tools/shell/listShells.js';
+export * from './tools/shell/ShellTracker.js';
 
 // Tools - Browser
 export * from './tools/browser/BrowserManager.js';
@@ -22,9 +22,9 @@ export * from './tools/browser/BrowserAutomation.js';
 export * from './tools/browser/listBrowsers.js';
 export * from './tools/browser/browserTracker.js';
 
-export * from './tools/interaction/agentTracker.js';
+export * from './tools/agent/AgentTracker.js';
 // Tools - Interaction
-export * from './tools/interaction/subAgent.js';
+export * from './tools/agent/agentExecute.js';
 export * from './tools/interaction/userPrompt.js';
 
 // Core

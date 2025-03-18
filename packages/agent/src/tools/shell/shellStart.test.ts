@@ -101,7 +101,9 @@ describe('shellStartTool', () => {
     );
 
     if (asyncResult.mode === 'async') {
-      expect(toolContext.shellTracker.processStates.has(asyncResult.instanceId)).toBe(true);
+      expect(
+        toolContext.shellTracker.processStates.has(asyncResult.instanceId),
+      ).toBe(true);
     }
   });
 
@@ -120,7 +122,9 @@ describe('shellStartTool', () => {
       expect(result.instanceId).toBeDefined();
       expect(result.error).toBeUndefined();
 
-      const processState = toolContext.shellTracker.processStates.get(result.instanceId);
+      const processState = toolContext.shellTracker.processStates.get(
+        result.instanceId,
+      );
       expect(processState).toBeDefined();
 
       if (processState?.process.stdin) {

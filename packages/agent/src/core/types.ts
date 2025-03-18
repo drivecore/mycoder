@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { JsonSchema7Type } from 'zod-to-json-schema';
 
+import { AgentTracker } from '../tools/agent/AgentTracker.js';
 import { BrowserTracker } from '../tools/browser/browserTracker.js';
-import { AgentTracker } from '../tools/interaction/agentTracker.js';
-import { ShellTracker } from '../tools/system/shellTracker.js';
+import { ShellTracker } from '../tools/shell/ShellTracker.js';
 import { Logger } from '../utils/logger.js';
 
 import { TokenTracker } from './tokens.js';
