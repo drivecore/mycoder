@@ -110,9 +110,10 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
         );
       }
 
-      // Get the current output
+      // Get the current output, reset it to an empty string
       const output =
         agentState.result?.result || agentState.output || 'No output yet';
+      agentState.output = '';
 
       return {
         output,
