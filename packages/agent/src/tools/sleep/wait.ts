@@ -18,8 +18,8 @@ const returnsSchema = z.object({
   sleptFor: z.number().describe('Actual number of seconds slept'),
 });
 
-export const sleepTool: Tool = {
-  name: 'sleep',
+export const waitTool: Tool = {
+  name: 'wait',
   description:
     'Pauses execution for the specified number of seconds, useful when waiting for async tools to make progress before checking on them',
   logPrefix: '💤',

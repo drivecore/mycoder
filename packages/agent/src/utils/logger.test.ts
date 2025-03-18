@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { Logger, LogLevel } from './logger.js';
+import { consoleOutputLogger, Logger, LogLevel } from './logger.js';
 
 describe('Logger', () => {
   let consoleSpy: { [key: string]: any };
@@ -8,8 +8,9 @@ describe('Logger', () => {
   beforeEach(() => {
     // Setup console spies before each test
     consoleSpy = {
-      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
+      debug: vi.spyOn(console, 'debug').mockImplementation(() => {}),
       info: vi.spyOn(console, 'info').mockImplementation(() => {}),
+      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
       warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
       error: vi.spyOn(console, 'error').mockImplementation(() => {}),
     };
@@ -20,26 +21,40 @@ describe('Logger', () => {
     vi.clearAllMocks();
   });
 
-  describe('Basic logging functionality', () => {
+  describe('Basic console output logger', () => {
     const logger = new Logger({ name: 'TestLogger', logLevel: LogLevel.debug });
     const testMessage = 'Test message';
 
-    it('should log debug messages', () => {
-      logger.debug(testMessage);
+    it('should log log messages', () => {
+      consoleOutputLogger(logger, LogLevel.log, [testMessage]);
+      console.log(consoleSpy.log);
       expect(consoleSpy.log).toHaveBeenCalledWith(
         expect.stringContaining(testMessage),
       );
     });
+  });
 
-    it('should log verbose messages', () => {
-      logger.verbose(testMessage);
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+  describe('Basic logging functionality', () => {
+    const logger = new Logger({ name: 'TestLogger', logLevel: LogLevel.debug });
+    logger.listeners.push(consoleOutputLogger);
+    const testMessage = 'Test message';
+
+    it('should log debug messages', () => {
+      logger.debug(testMessage);
+      expect(consoleSpy.debug).toHaveBeenCalledWith(
         expect.stringContaining(testMessage),
       );
     });
 
     it('should log info messages', () => {
       logger.info(testMessage);
+      expect(consoleSpy.info).toHaveBeenCalledWith(
+        expect.stringContaining(testMessage),
+      );
+    });
+
+    it('should log log messages', () => {
+      logger.log(testMessage);
       expect(consoleSpy.log).toHaveBeenCalledWith(
         expect.stringContaining(testMessage),
       );
@@ -72,8 +87,10 @@ describe('Logger', () => {
     });
     const testMessage = 'Nested test message';
 
+    parentLogger.listeners.push(consoleOutputLogger);
+
     it('should include proper indentation for nested loggers', () => {
-      childLogger.info(testMessage);
+      childLogger.log(testMessage);
       expect(consoleSpy.log).toHaveBeenCalledWith(
         expect.stringContaining('  '), // Two spaces of indentation
       );
@@ -81,16 +98,16 @@ describe('Logger', () => {
 
     it('should properly log messages at all levels with nested logger', () => {
       childLogger.debug(testMessage);
-      expect(consoleSpy.log).toHaveBeenCalledWith(
-        expect.stringContaining(testMessage),
-      );
-
-      childLogger.verbose(testMessage);
-      expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect(consoleSpy.debug).toHaveBeenCalledWith(
         expect.stringContaining(testMessage),
       );
 
       childLogger.info(testMessage);
+      expect(consoleSpy.info).toHaveBeenCalledWith(
+        expect.stringContaining(testMessage),
+      );
+
+      childLogger.log(testMessage);
       expect(consoleSpy.log).toHaveBeenCalledWith(
         expect.stringContaining(testMessage),
       );

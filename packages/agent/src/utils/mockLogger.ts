@@ -6,8 +6,8 @@ export class MockLogger extends Logger {
   }
 
   debug(..._messages: any[]): void {}
-  verbose(..._messages: any[]): void {}
   info(..._messages: any[]): void {}
+  log(..._messages: any[]): void {}
   warn(..._messages: any[]): void {}
   error(..._messages: any[]): void {}
 }

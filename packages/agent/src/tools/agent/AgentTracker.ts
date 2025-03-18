@@ -26,6 +26,7 @@ export interface AgentState {
   goal: string;
   prompt: string;
   output: string;
+  capturedLogs: string[]; // Captured log messages from agent and immediate tools
   completed: boolean;
   error?: string;
   result?: ToolAgentResult;

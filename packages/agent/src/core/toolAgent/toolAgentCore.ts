@@ -24,8 +24,8 @@ export const toolAgent = async (
 ): Promise<ToolAgentResult> => {
   const { logger, tokenTracker } = context;
 
-  logger.verbose('Starting agent execution');
-  logger.verbose('Initial prompt:', initialPrompt);
+  logger.debug('Starting agent execution');
+  logger.debug('Initial prompt:', initialPrompt);
 
   let interactions = 0;
 
@@ -53,7 +53,7 @@ export const toolAgent = async (
   });
 
   for (let i = 0; i < config.maxIterations; i++) {
-    logger.verbose(
+    logger.debug(
       `Requesting completion ${i + 1} with ${messages.length} messages with ${
         JSON.stringify(messages).length
       } bytes`,
@@ -80,7 +80,7 @@ export const toolAgent = async (
 
         // Add each message to the conversation
         for (const message of parentMessages) {
-          logger.info(`Message from parent agent: ${message}`);
+          logger.log(`Message from parent agent: ${message}`);
           messages.push({
             role: 'user',
             content: `[Message from parent agent]: ${message}`,
@@ -122,7 +122,7 @@ export const toolAgent = async (
 
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
-      logger.verbose(
+      logger.debug(
         'Received truly empty response from agent (no text and no tool calls), sending reminder',
       );
       messages.push({
@@ -139,7 +139,7 @@ export const toolAgent = async (
         role: 'assistant',
         content: text,
       });
-      logger.info(text);
+      logger.log(text);
     }
 
     // Handle tool calls if any
@@ -157,23 +157,12 @@ export const toolAgent = async (
       );
 
       // Execute the tools and get results
-      const { agentDoned, completionResult, respawn } = await executeTools(
+      const { agentDoned, completionResult } = await executeTools(
         toolCalls,
         tools,
         messages,
         localContext,
       );
-
-      if (respawn) {
-        logger.info('Respawning agent with new context');
-        // Reset messages to just the new context
-        messages.length = 0;
-        messages.push({
-          role: 'user',
-          content: respawn.context,
-        });
-        continue;
-      }
 
       if (agentDoned) {
         const result: ToolAgentResult = {

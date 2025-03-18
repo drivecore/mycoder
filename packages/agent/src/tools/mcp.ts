@@ -191,7 +191,7 @@ export function createMcpTool(config: McpConfig): Tool {
           const client = mcpClients.get(serverFilter);
           if (client) {
             try {
-              logger.verbose(`Fetching resources from server: ${serverFilter}`);
+              logger.debug(`Fetching resources from server: ${serverFilter}`);
               const serverResources = await client.resources();
               resources.push(...(serverResources as any[]));
             } catch (error) {
@@ -207,7 +207,7 @@ export function createMcpTool(config: McpConfig): Tool {
           // Otherwise, check all servers
           for (const [serverName, client] of mcpClients.entries()) {
             try {
-              logger.verbose(`Fetching resources from server: ${serverName}`);
+              logger.debug(`Fetching resources from server: ${serverName}`);
               const serverResources = await client.resources();
               resources.push(...(serverResources as any[]));
             } catch (error) {
@@ -236,7 +236,7 @@ export function createMcpTool(config: McpConfig): Tool {
         }
 
         // Use the MCP SDK to fetch the resource
-        logger.verbose(`Fetching resource: ${uri}`);
+        logger.debug(`Fetching resource: ${uri}`);
         const resource = await client.resource(uri);
         return resource.content;
       } else if (method === 'listTools') {
@@ -249,7 +249,7 @@ export function createMcpTool(config: McpConfig): Tool {
           const client = mcpClients.get(serverFilter);
           if (client) {
             try {
-              logger.verbose(`Fetching tools from server: ${serverFilter}`);
+              logger.debug(`Fetching tools from server: ${serverFilter}`);
               const serverTools = await client.tools();
               tools.push(...(serverTools as any[]));
             } catch (error) {
@@ -265,7 +265,7 @@ export function createMcpTool(config: McpConfig): Tool {
           // Otherwise, check all servers
           for (const [serverName, client] of mcpClients.entries()) {
             try {
-              logger.verbose(`Fetching tools from server: ${serverName}`);
+              logger.debug(`Fetching tools from server: ${serverName}`);
               const serverTools = await client.tools();
               tools.push(...(serverTools as any[]));
             } catch (error) {
@@ -294,7 +294,7 @@ export function createMcpTool(config: McpConfig): Tool {
         }
 
         // Use the MCP SDK to execute the tool
-        logger.verbose(`Executing tool: ${uri} with params:`, toolParams);
+        logger.debug(`Executing tool: ${uri} with params:`, toolParams);
         const result = await client.tool(uri, toolParams);
         return result;
       }
@@ -304,37 +304,37 @@ export function createMcpTool(config: McpConfig): Tool {
 
     logParameters: (params, { logger }) => {
       if (params.method === 'listResources') {
-        logger.verbose(
+        logger.debug(
           `Listing MCP resources${
             params.params?.server ? ` from server: ${params.params.server}` : ''
           }`,
         );
       } else if (params.method === 'getResource') {
-        logger.verbose(`Fetching MCP resource: ${params.params.uri}`);
+        logger.debug(`Fetching MCP resource: ${params.params.uri}`);
       } else if (params.method === 'listTools') {
-        logger.verbose(
+        logger.debug(
           `Listing MCP tools${
             params.params?.server ? ` from server: ${params.params.server}` : ''
           }`,
         );
       } else if (params.method === 'executeTool') {
-        logger.verbose(`Executing MCP tool: ${params.params.uri}`);
+        logger.debug(`Executing MCP tool: ${params.params.uri}`);
       }
     },
 
     logReturns: (result, { logger }) => {
       if (Array.isArray(result)) {
         if (result.length > 0 && 'description' in result[0]) {
-          logger.verbose(`Found ${result.length} MCP tools`);
+          logger.debug(`Found ${result.length} MCP tools`);
         } else {
-          logger.verbose(`Found ${result.length} MCP resources`);
+          logger.debug(`Found ${result.length} MCP resources`);
         }
       } else if (typeof result === 'string') {
-        logger.verbose(
+        logger.debug(
           `Retrieved MCP resource content (${result.length} characters)`,
         );
       } else {
-        logger.verbose(`Executed MCP tool and received result`);
+        logger.debug(`Executed MCP tool and received result`);
       }
     },
   };

@@ -2,46 +2,11 @@ import chalk, { ChalkInstance } from 'chalk';
 
 export enum LogLevel {
   debug = 0,
-  verbose = 1,
-  info = 2,
+  info = 1,
+  log = 2,
   warn = 3,
   error = 4,
 }
-export type LoggerStyler = {
-  getColor(level: LogLevel, indentLevel: number): ChalkInstance;
-  formatPrefix(prefix: string, level: LogLevel): string;
-  showPrefix(level: LogLevel): boolean;
-};
-
-export const BasicLoggerStyler = {
-  getColor: (level: LogLevel, _nesting: number = 0): ChalkInstance => {
-    switch (level) {
-      case LogLevel.error:
-        return chalk.red;
-      case LogLevel.warn:
-        return chalk.yellow;
-      case LogLevel.debug:
-      case LogLevel.verbose:
-        return chalk.white.dim;
-      default:
-        return chalk.white;
-    }
-  },
-  formatPrefix: (
-    prefix: string,
-    level: LogLevel,
-    _nesting: number = 0,
-  ): string =>
-    level === LogLevel.debug || level === LogLevel.verbose
-      ? chalk.dim(prefix)
-      : prefix,
-  showPrefix: (_level: LogLevel): boolean => {
-    // Show prefix for all log levels
-    return false;
-  },
-};
-
-const loggerStyle = BasicLoggerStyler;
 
 export type LoggerProps = {
   name: string;
@@ -50,14 +15,22 @@ export type LoggerProps = {
   customPrefix?: string;
 };
 
+export type LoggerListener = (
+  logger: Logger,
+  logLevel: LogLevel,
+  lines: string[],
+) => void;
+
 export class Logger {
-  private readonly prefix: string;
-  private readonly logLevel: LogLevel;
-  private readonly logLevelIndex: LogLevel;
-  private readonly parent?: Logger;
-  private readonly name: string;
-  private readonly nesting: number;
-  private readonly customPrefix?: string;
+  public readonly prefix: string;
+  public readonly logLevel: LogLevel;
+  public readonly logLevelIndex: LogLevel;
+  public readonly parent?: Logger;
+  public readonly name: string;
+  public readonly nesting: number;
+  public readonly customPrefix?: string;
+
+  readonly listeners: LoggerListener[] = [];
 
   constructor({
     name,
@@ -82,70 +55,105 @@ export class Logger {
     }
 
     this.prefix = ' '.repeat(offsetSpaces);
+
+    if (parent) {
+      this.listeners.push((logger, logLevel, lines) => {
+        parent.listeners.forEach((listener) => {
+          listener(logger, logLevel, lines);
+        });
+      });
+    }
   }
 
-  private toStrings(messages: unknown[]) {
-    return messages
+  private emitMessages(level: LogLevel, messages: unknown[]) {
+    if (LogLevel.debug < this.logLevelIndex) return;
+
+    const lines = messages
       .map((message) =>
         typeof message === 'object'
           ? JSON.stringify(message, null, 2)
           : String(message),
       )
-      .join(' ');
-  }
+      .join('\n')
+      .split('\n');
 
-  private formatMessages(level: LogLevel, messages: unknown[]): string {
-    const formatted = this.toStrings(messages);
-    const messageColor = loggerStyle.getColor(level, this.nesting);
-
-    let combinedPrefix = this.prefix;
-
-    if (loggerStyle.showPrefix(level)) {
-      const prefix = loggerStyle.formatPrefix(
-        `[${this.name}]`,
-        level,
-        this.nesting,
-      );
-
-      if (this.customPrefix) {
-        combinedPrefix = `${this.prefix}${this.customPrefix} `;
-      } else {
-        combinedPrefix = `${this.prefix}${prefix} `;
-      }
-    }
-
-    return formatted
-      .split('\n')
-      .map((line) => `${combinedPrefix}${messageColor(line)}`)
-      .join('\n');
-  }
-
-  log(level: LogLevel, ...messages: unknown[]): void {
-    if (level < this.logLevelIndex) return;
-    console.log(this.formatMessages(level, messages));
+    this.listeners.forEach((listener) => listener(this, level, lines));
   }
 
   debug(...messages: unknown[]): void {
-    if (LogLevel.debug < this.logLevelIndex) return;
-    console.log(this.formatMessages(LogLevel.debug, messages));
-  }
-
-  verbose(...messages: unknown[]): void {
-    if (LogLevel.verbose < this.logLevelIndex) return;
-    console.log(this.formatMessages(LogLevel.verbose, messages));
+    this.emitMessages(LogLevel.debug, messages);
   }
 
   info(...messages: unknown[]): void {
-    if (LogLevel.info < this.logLevelIndex) return;
-    console.log(this.formatMessages(LogLevel.info, messages));
+    this.emitMessages(LogLevel.info, messages);
+  }
+
+  log(...messages: unknown[]): void {
+    this.emitMessages(LogLevel.log, messages);
   }
 
   warn(...messages: unknown[]): void {
-    if (LogLevel.warn < this.logLevelIndex) return;
-    console.warn(this.formatMessages(LogLevel.warn, messages));
+    this.emitMessages(LogLevel.warn, messages);
   }
 
   error(...messages: unknown[]): void {
-    console.error(this.formatMessages(LogLevel.error, messages));
+    this.emitMessages(LogLevel.error, messages);
   }
 }
+
+export const consoleOutputLogger: LoggerListener = (
+  logger: Logger,
+  level: LogLevel,
+  lines: string[],
+) => {
+  const getColor = (level: LogLevel, _nesting: number = 0): ChalkInstance => {
+    switch (level) {
+      case LogLevel.debug:
+      case LogLevel.info:
+        return chalk.white.dim;
+      case LogLevel.log:
+        return chalk.white;
+      case LogLevel.warn:
+        return chalk.yellow;
+      case LogLevel.error:
+        return chalk.red;
+      default:
+        throw new Error(`Unknown log level: ${level}`);
+    }
+  };
+  const formatPrefix = (
+    prefix: string,
+    level: LogLevel,
+    _nesting: number = 0,
+  ): string =>
+    level === LogLevel.debug || level === LogLevel.info
+      ? chalk.dim(prefix)
+      : prefix;
+  const showPrefix = (_level: LogLevel): boolean => {
+    // Show prefix for all log levels
+    return false;
+  };
+
+  // name of enum value
+  const logLevelName = LogLevel[level];
+  const messageColor = getColor(level, logger.nesting);
+
+  let combinedPrefix = logger.prefix;
+
+  if (showPrefix(level)) {
+    const prefix = formatPrefix(`[${logger.name}]`, level, logger.nesting);
+
+    if (logger.customPrefix) {
+      combinedPrefix = `${logger.prefix}${logger.customPrefix} `;
+    } else {
+      combinedPrefix = `${logger.prefix}${prefix} `;
+    }
+  }
+
+  const coloredLies = lines.map(
+    (line) => `${combinedPrefix}${messageColor(line)}`,
+  );
+
+  const consoleOutput = console[logLevelName];
+  coloredLies.forEach((line) => consoleOutput(line));
+};

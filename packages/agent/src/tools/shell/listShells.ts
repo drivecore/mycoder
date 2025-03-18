@@ -47,7 +47,7 @@ export const listShellsTool: Tool<Parameters, ReturnType> = {
     { status = 'all', verbose = false },
     { logger, shellTracker },
   ): Promise<ReturnType> => {
-    logger.verbose(
+    logger.debug(
       `Listing shell processes with status: ${status}, verbose: ${verbose}`,
     );
 
@@ -87,12 +87,12 @@ export const listShellsTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: ({ status = 'all', verbose = false }, { logger }) => {
-    logger.info(
+    logger.log(
       `Listing shell processes with status: ${status}, verbose: ${verbose}`,
     );
   },
 
   logReturns: (output, { logger }) => {
-    logger.info(`Found ${output.count} shell processes`);
+    logger.log(`Found ${output.count} shell processes`);
   },
 };

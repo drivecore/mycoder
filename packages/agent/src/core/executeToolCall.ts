@@ -73,9 +73,9 @@ export const executeToolCall = async (
   if (tool.logParameters) {
     tool.logParameters(validatedJson, toolContext);
   } else {
-    logger.info('Parameters:');
+    logger.log('Parameters:');
     Object.entries(validatedJson).forEach(([name, value]) => {
-      logger.info(`  - ${name}: ${JSON.stringify(value).substring(0, 60)}`);
+      logger.log(`  - ${name}: ${JSON.stringify(value).substring(0, 60)}`);
     });
   }
 
@@ -103,12 +103,12 @@ export const executeToolCall = async (
   if (tool.logReturns) {
     tool.logReturns(output, toolContext);
   } else {
-    logger.info('Results:');
+    logger.log('Results:');
     if (typeof output === 'string') {
-      logger.info(`  - ${output}`);
+      logger.log(`  - ${output}`);
     } else if (typeof output === 'object') {
       Object.entries(output).forEach(([name, value]) => {
-        logger.info(`  - ${name}: ${JSON.stringify(value).substring(0, 60)}`);
+        logger.log(`  - ${name}: ${JSON.stringify(value).substring(0, 60)}`);
       });
     }
   }

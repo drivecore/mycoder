@@ -37,28 +37,7 @@ export async function executeTools(
 
   const { logger } = context;
 
-  logger.verbose(`Executing ${toolCalls.length} tool calls`);
-
-  // Check for respawn tool call
-  const respawnCall = toolCalls.find((call) => call.name === 'respawn');
-  if (respawnCall) {
-    // Add the tool result to messages
-    addToolResultToMessages(messages, respawnCall.id, { success: true }, false);
-
-    return {
-      agentDoned: false,
-      toolResults: [
-        {
-          toolCallId: respawnCall.id,
-          toolName: respawnCall.name,
-          result: { success: true },
-        },
-      ],
-      respawn: {
-        context: JSON.parse(respawnCall.content).respawnContext,
-      },
-    };
-  }
+  logger.debug(`Executing ${toolCalls.length} tool calls`);
 
   const toolResults = await Promise.all(
     toolCalls.map(async (call) => {
@@ -103,7 +82,7 @@ export async function executeTools(
     : undefined;
 
   if (agentDonedTool) {
-    logger.verbose('Sequence completed', { completionResult });
+    logger.debug('Sequence completed', { completionResult });
   }
 
   return {

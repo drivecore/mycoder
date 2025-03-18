@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Logger } from 'mycoder-agent';
+import { consoleOutputLogger, Logger } from 'mycoder-agent';
 
 import { SharedOptions } from '../options.js';
 import { testSentryErrorReporting } from '../sentry/index.js';
@@ -17,6 +17,7 @@ export const command: CommandModule<SharedOptions, TestSentryArgs> = {
       name: 'TestSentry',
       logLevel: nameToLogIndex(argv.logLevel),
     });
+    logger.listeners.push(consoleOutputLogger);
 
     logger.info(chalk.yellow('Testing Sentry.io error reporting...'));
 

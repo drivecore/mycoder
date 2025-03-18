@@ -17,6 +17,7 @@ import {
   SessionTracker,
   ShellTracker,
   AgentTracker,
+  consoleOutputLogger,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 
@@ -49,6 +50,8 @@ export async function executePrompt(
     logLevel: nameToLogIndex(config.logLevel),
     customPrefix: agentExecuteTool.logPrefix,
   });
+
+  logger.listeners.push(consoleOutputLogger);
 
   logger.info(`MyCoder v${packageInfo.version} - AI-powered coding assistant`);
 

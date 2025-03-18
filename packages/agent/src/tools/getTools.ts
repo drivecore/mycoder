@@ -15,7 +15,7 @@ import { sessionStartTool } from './session/sessionStart.js';
 import { listShellsTool } from './shell/listShells.js';
 import { shellMessageTool } from './shell/shellMessage.js';
 import { shellStartTool } from './shell/shellStart.js';
-import { sleepTool } from './sleep/sleep.js';
+import { waitTool } from './sleep/wait.js';
 import { textEditorTool } from './textEditor/textEditor.js';
 
 // Import these separately to avoid circular dependencies
@@ -49,7 +49,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     sessionMessageTool as unknown as Tool,
     listSessionsTool as unknown as Tool,
 
-    sleepTool as unknown as Tool,
+    waitTool as unknown as Tool,
   ];
 
   // Only include userPrompt tool if enabled

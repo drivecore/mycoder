@@ -4,7 +4,7 @@ export * from './tools/fetch/fetch.js';
 
 // Tools - System
 export * from './tools/shell/shellStart.js';
-export * from './tools/sleep/sleep.js';
+export * from './tools/sleep/wait.js';
 export * from './tools/agent/agentDone.js';
 export * from './tools/shell/shellMessage.js';
 export * from './tools/shell/shellExecute.js';

@@ -9,7 +9,7 @@ import { Logger } from '../utils/logger.js';
 import { TokenTracker } from './tokens.js';
 import { ModelProvider } from './toolAgent/config.js';
 
-export type TokenLevel = 'debug' | 'verbose' | 'info' | 'warn' | 'error';
+export type TokenLevel = 'debug' | 'info' | 'log' | 'warn' | 'error';
 
 export type pageFilter = 'simple' | 'none' | 'readability';
 

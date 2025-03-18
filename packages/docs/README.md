@@ -7,6 +7,7 @@ This package contains the official documentation for MyCoder, an AI-powered codi
 ### Documentation Structure
 
 - **Core Documentation**
+
   - **Introduction**: Overview of MyCoder and its capabilities
   - **Getting Started**: Platform-specific setup instructions for Windows, macOS, and Linux
   - **Usage Guides**: Detailed information on features, configuration, and capabilities

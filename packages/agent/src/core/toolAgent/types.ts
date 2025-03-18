@@ -10,7 +10,6 @@ export interface ToolCallResult {
   agentDoned: boolean;
   completionResult?: string;
   toolResults: unknown[];
-  respawn?: { context: string };
 }
 
 export type ErrorResult = {

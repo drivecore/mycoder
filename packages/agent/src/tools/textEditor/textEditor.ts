@@ -313,7 +313,7 @@ export const textEditorTool: Tool<Parameters, ReturnType> = {
       }
     }
 
-    logger.info(
+    logger.log(
       `${input.command} operation on "${displayPath}", ${input.description}`,
     );
   },

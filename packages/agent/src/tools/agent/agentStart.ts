@@ -7,6 +7,7 @@ import {
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
+import { LogLevel, LoggerListener } from '../../utils/logger.js';
 import { getTools } from '../getTools.js';
 
 import { AgentStatus, AgentState } from './AgentTracker.js';
@@ -88,7 +89,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     // Register this agent with the agent tracker
     const instanceId = agentTracker.registerAgent(goal);
 
-    logger.verbose(`Registered agent with ID: ${instanceId}`);
+    logger.debug(`Registered agent with ID: ${instanceId}`);
 
     // Construct a well-structured prompt
     const prompt = [
@@ -111,6 +112,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       goal,
       prompt,
       output: '',
+      capturedLogs: [], // Initialize empty array for captured logs
       completed: false,
       context: { ...context },
       workingDirectory: workingDirectory ?? context.workingDirectory,
@@ -118,6 +120,51 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       aborted: false,
       parentMessages: [], // Initialize empty array for parent messages
     };
+
+    // Add a logger listener to capture log, warn, and error level messages
+    const logCaptureListener: LoggerListener = (logger, logLevel, lines) => {
+      // Only capture log, warn, and error levels (not debug or info)
+      if (
+        logLevel === LogLevel.log ||
+        logLevel === LogLevel.warn ||
+        logLevel === LogLevel.error
+      ) {
+        // Only capture logs from the agent and its immediate tools (not deeper than that)
+        // We can identify this by the nesting level of the logger
+        if (logger.nesting <= 1) {
+          const logPrefix =
+            logLevel === LogLevel.warn
+              ? '[WARN] '
+              : logLevel === LogLevel.error
+                ? '[ERROR] '
+                : '';
+
+          // Add each line to the capturedLogs array with logger name for context
+          lines.forEach((line) => {
+            const loggerPrefix = logger.name !== 'agent' ? `[${logger.name}] ` : '';
+            agentState.capturedLogs.push(`${logPrefix}${loggerPrefix}${line}`);
+          });
+        }
+      }
+    };
+
+    // Add the listener to the context logger
+    context.logger.listeners.push(logCaptureListener);
+    
+    // Create a new logger specifically for the sub-agent if needed
+    // This is wrapped in a try-catch to maintain backward compatibility with tests
+    let subAgentLogger = context.logger;
+    try {
+      subAgentLogger = new Logger({
+        name: 'agent',
+        parent: context.logger,
+      });
+      // Add the listener to the sub-agent logger as well
+      subAgentLogger.listeners.push(logCaptureListener);
+    } catch (e) {
+      // If Logger instantiation fails (e.g., in tests), fall back to using the context logger
+      context.logger.debug('Failed to create sub-agent logger, using context logger instead');
+    }
 
     // Register agent state with the tracker
     agentTracker.registerAgentState(instanceId, agentState);
@@ -131,6 +178,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       try {
         const result = await toolAgent(prompt, tools, agentConfig, {
           ...context,
+          logger: subAgentLogger, // Use the sub-agent specific logger if available
           workingDirectory: workingDirectory ?? context.workingDirectory,
           currentAgentId: instanceId, // Pass the agent's ID to the context
         });
@@ -171,9 +219,9 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     };
   },
   logParameters: (input, { logger }) => {
-    logger.info(`Starting sub-agent for task "${input.description}"`);
+    logger.log(`Starting sub-agent for task "${input.description}"`);
   },
   logReturns: (output, { logger }) => {
-    logger.info(`Sub-agent started with instance ID: ${output.instanceId}`);
+    logger.log(`Sub-agent started with instance ID: ${output.instanceId}`);
   },
 };

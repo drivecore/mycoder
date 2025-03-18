@@ -46,12 +46,12 @@ export const fetchTool: Tool<Parameters, ReturnType> = {
     { method, url, params, body, headers }: Parameters,
     { logger },
   ): Promise<ReturnType> => {
-    logger.verbose(`Starting ${method} request to ${url}`);
+    logger.debug(`Starting ${method} request to ${url}`);
     const urlObj = new URL(url);
 
     // Add query parameters
     if (params) {
-      logger.verbose('Adding query parameters:', params);
+      logger.debug('Adding query parameters:', params);
       Object.entries(params).forEach(([key, value]) =>
         urlObj.searchParams.append(key, value as string),
       );
@@ -73,9 +73,9 @@ export const fetchTool: Tool<Parameters, ReturnType> = {
         }),
     };
 
-    logger.verbose('Request options:', options);
+    logger.debug('Request options:', options);
     const response = await fetch(urlObj.toString(), options);
-    logger.verbose(
+    logger.debug(
       `Request completed with status ${response.status} ${response.statusText}`,
     );
 
@@ -84,7 +84,7 @@ export const fetchTool: Tool<Parameters, ReturnType> = {
       ? await response.json()
       : await response.text();
 
-    logger.verbose('Response content-type:', contentType);
+    logger.debug('Response content-type:', contentType);
 
     return {
       status: response.status,
@@ -95,13 +95,13 @@ export const fetchTool: Tool<Parameters, ReturnType> = {
   },
   logParameters(params, { logger }) {
     const { method, url, params: queryParams } = params;
-    logger.info(
+    logger.log(
       `${method} ${url}${queryParams ? `?${new URLSearchParams(queryParams).toString()}` : ''}`,
     );
   },
 
   logReturns: (result, { logger }) => {
     const { status, statusText } = result;
-    logger.info(`${status} ${statusText}`);
+    logger.log(`${status} ${statusText}`);
   },
 };
