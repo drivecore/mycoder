@@ -2,16 +2,16 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import {
-  BackgroundTools,
-  BackgroundToolStatus,
-} from '../../core/backgroundTools.js';
-import {
   getDefaultSystemPrompt,
   AgentConfig,
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
+import { BrowserTracker } from '../browser/browserTracker.js';
 import { getTools } from '../getTools.js';
+import { ShellTracker } from '../system/ShellTracker.js';
+
+import { AgentTracker } from './agentTracker.js';
 
 const parameterSchema = z.object({
   description: z
@@ -69,7 +69,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
-    const { logger, backgroundTools } = context;
+    const { logger, agentTracker } = context;
 
     // Validate parameters
     const {
@@ -81,13 +81,15 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
     } = parameterSchema.parse(params);
 
     // Register this sub-agent with the background tool registry
-    const subAgentId = backgroundTools.registerAgent(goal);
+    const subAgentId = agentTracker.registerAgent(goal);
     logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
 
     const localContext = {
       ...context,
       workingDirectory: workingDirectory ?? context.workingDirectory,
-      backgroundTools: new BackgroundTools(`subAgent: ${goal}`),
+      agentTracker: new AgentTracker(subAgentId),
+      shellTracker: new ShellTracker(subAgentId),
+      browserTracker: new BrowserTracker(subAgentId),
     };
 
     // Construct a well-structured prompt
@@ -114,24 +116,14 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       const result = await toolAgent(prompt, tools, config, localContext);
 
       // Update background tool registry with completed status
-      backgroundTools.updateToolStatus(
-        subAgentId,
-        BackgroundToolStatus.COMPLETED,
-        {
-          result:
-            result.result.substring(0, 100) +
-            (result.result.length > 100 ? '...' : ''),
-        },
-      );
 
       return { response: result.result };
-    } catch (error) {
-      // Update background tool registry with error status
-      backgroundTools.updateToolStatus(subAgentId, BackgroundToolStatus.ERROR, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-
-      throw error;
+    } finally {
+      await Promise.all([
+        localContext.agentTracker.cleanup(),
+        localContext.shellTracker.cleanup(),
+        localContext.browserTracker.cleanup(),
+      ]);
     }
   },
   logParameters: (input, { logger }) => {

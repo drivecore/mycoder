@@ -4,7 +4,7 @@ import { ToolContext } from '../../core/types.js';
 import { getMockToolContext } from '../getTools.test.js';
 
 import { listShellsTool } from './listShells.js';
-import { ShellStatus, shellTracker } from './ShellTracker.js';
+import { ShellStatus, ShellTracker } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
@@ -15,6 +15,7 @@ vi.spyOn(Date, 'now').mockImplementation(() => mockNow);
 describe('listShellsTool', () => {
   beforeEach(() => {
     // Clear shells before each test
+    const shellTracker = new ShellTracker('test');
     shellTracker['shells'] = new Map();
 
     // Set up some test shells with different statuses

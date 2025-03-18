@@ -4,13 +4,13 @@ import { Tool } from '../core/types.js';
 // Import tools
 import { browseMessageTool } from './browser/browseMessage.js';
 import { browseStartTool } from './browser/browseStart.js';
+import { listBrowsersTool } from './browser/listBrowsers.js';
 import { subAgentTool } from './interaction/subAgent.js';
 import { userPromptTool } from './interaction/userPrompt.js';
 import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
 import { createMcpTool } from './mcp.js';
 import { listAgentsTool } from './system/listAgents.js';
-import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
 import { listShellsTool } from './system/listShells.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
 import { shellMessageTool } from './system/shellMessage.js';
@@ -32,6 +32,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
   const tools: Tool[] = [
     textEditorTool as unknown as Tool,
     subAgentTool as unknown as Tool,
+    listBrowsersTool as unknown as Tool,
     /*agentStartTool as unknown as Tool,
     agentMessageTool as unknown as Tool,*/
     sequenceCompleteTool as unknown as Tool,
@@ -42,7 +43,6 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     browseMessageTool as unknown as Tool,
     //respawnTool as unknown as Tool,  this is a confusing tool for now.
     sleepTool as unknown as Tool,
-    listBackgroundToolsTool as unknown as Tool,
     listShellsTool as unknown as Tool,
     listAgentsTool as unknown as Tool,
   ];

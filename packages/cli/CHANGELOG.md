@@ -1,9 +1,8 @@
 # [mycoder-v1.4.1](https://github.com/drivecore/mycoder/compare/mycoder-v1.4.0...mycoder-v1.4.1) (2025-03-14)
 
-
 ### Bug Fixes
 
-* improve profiling ([79a3df2](https://github.com/drivecore/mycoder/commit/79a3df2db13b8372666c6604ebe1666d33663be9))
+- improve profiling ([79a3df2](https://github.com/drivecore/mycoder/commit/79a3df2db13b8372666c6604ebe1666d33663be9))
 
 # [mycoder-v1.4.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.3.1...mycoder-v1.4.0) (2025-03-14)
 

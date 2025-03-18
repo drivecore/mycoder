@@ -5,11 +5,13 @@ import { sleep } from '../../utils/sleep.js';
 import { getMockToolContext } from '../getTools.test.js';
 
 import { shellStartTool } from './shellStart.js';
-import { shellTracker } from './ShellTracker.js';
+import { ShellTracker } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
 describe('shellStartTool', () => {
+  const shellTracker = new ShellTracker('test');
+
   beforeEach(() => {
     shellTracker.processStates.clear();
   });

@@ -1,13 +1,12 @@
 import { chromium } from '@playwright/test';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
+import { BrowserSessionStatus } from './browserTracker.js';
 import { filterPageContent } from './filterPageContent.js';
 import { browserSessions } from './types.js';
 
@@ -43,7 +42,14 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { url, timeout = 30000 },
-    { logger, headless, userSession, pageFilter, backgroundTools },
+    {
+      logger,
+      headless,
+      userSession,
+      pageFilter,
+      browserTracker,
+      ..._ // Unused parameters
+    },
   ): Promise<ReturnType> => {
     logger.verbose(`Starting browser session${url ? ` at ${url}` : ''}`);
     logger.verbose(
@@ -52,10 +58,8 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
     logger.verbose(`Webpage processing mode: ${pageFilter}`);
 
     try {
-      const instanceId = uuidv4();
-
-      // Register this browser session with the background tool registry
-      backgroundTools.registerBrowser(url);
+      // Register this browser session with the tracker
+      const instanceId = browserTracker.registerBrowser(url);
 
       // Launch browser
       const launchOptions = {
@@ -95,10 +99,10 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       // Setup cleanup handlers
       browser.on('disconnected', () => {
         browserSessions.delete(instanceId);
-        // Update background tool registry when browser disconnects
-        backgroundTools.updateToolStatus(
+        // Update browser tracker when browser disconnects
+        browserTracker.updateSessionStatus(
           instanceId,
-          BackgroundToolStatus.TERMINATED,
+          BrowserSessionStatus.TERMINATED,
         );
       });
 
@@ -142,10 +146,10 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       logger.verbose('Browser session started successfully');
       logger.verbose(`Content length: ${content.length} characters`);
 
-      // Update background tool registry with running status
-      backgroundTools.updateToolStatus(
+      // Update browser tracker with running status
+      browserTracker.updateSessionStatus(
         instanceId,
-        BackgroundToolStatus.RUNNING,
+        BrowserSessionStatus.RUNNING,
         {
           url: url || 'about:blank',
           contentLength: content.length,
@@ -160,7 +164,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
     } catch (error) {
       logger.error(`Failed to start browser: ${errorToString(error)}`);
 
-      // No need to update background tool registry here as we don't have a valid instanceId
+      // No need to update browser tracker here as we don't have a valid instanceId
       // when an error occurs before the browser is properly initialized
 
       return {

@@ -1,9 +1,11 @@
 import { z } from 'zod';
 import { JsonSchema7Type } from 'zod-to-json-schema';
 
+import { BrowserTracker } from '../tools/browser/browserTracker.js';
+import { AgentTracker } from '../tools/interaction/agentTracker.js';
+import { ShellTracker } from '../tools/system/ShellTracker.js';
 import { Logger } from '../utils/logger.js';
 
-import { BackgroundTools } from './backgroundTools.js';
 import { TokenTracker } from './tokens.js';
 import { ModelProvider } from './toolAgent/config.js';
 
@@ -23,13 +25,16 @@ export type ToolContext = {
   tokenCache?: boolean;
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
+  agentName?: string; // Name of the agent, used for browser tracker
   provider: ModelProvider;
   model?: string;
   baseUrl?: string;
   apiKey?: string;
   maxTokens: number;
   temperature: number;
-  backgroundTools: BackgroundTools;
+  agentTracker: AgentTracker;
+  shellTracker: ShellTracker;
+  browserTracker: BrowserTracker;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

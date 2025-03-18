@@ -39,7 +39,7 @@ export class AgentTracker {
   private agents: Map<string, Agent> = new Map();
   private agentStates: Map<string, AgentState> = new Map();
 
-  constructor(readonly ownerName: string) {}
+  constructor(public ownerAgentId: string | undefined) {}
 
   // Register a new agent
   public registerAgent(goal: string): string {
@@ -131,9 +131,9 @@ export class AgentTracker {
         agentState.completed = true;
 
         // Clean up resources owned by this sub-agent
-        if (agentState.context.backgroundTools) {
-          await agentState.context.backgroundTools.cleanup();
-        }
+        await agentState.context.agentTracker.cleanup();
+        await agentState.context.shellTracker.cleanup();
+        await agentState.context.browserTracker.cleanup();
       }
       this.updateAgentStatus(id, AgentStatus.TERMINATED);
     } catch (error) {
@@ -143,6 +143,3 @@ export class AgentTracker {
     }
   }
 }
-
-// Create a singleton instance
-export const agentTracker = new AgentTracker('global');

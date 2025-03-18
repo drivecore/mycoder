@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
-import { AgentStatus, agentTracker } from '../interaction/agentTracker.js';
+import { AgentStatus } from '../interaction/agentTracker.js';
 
 const parameterSchema = z.object({
   status: z
@@ -45,7 +45,7 @@ export const listAgentsTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { status = 'all', verbose = false },
-    { logger },
+    { logger, agentTracker },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Listing agents with status: ${status}, verbose: ${verbose}`,

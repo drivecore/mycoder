@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
+import { BrowserSessionStatus } from './browserTracker.js';
 import { filterPageContent } from './filterPageContent.js';
 import { browserSessions, SelectorType } from './types.js';
 
@@ -72,7 +72,7 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, actionType, url, selector, selectorType, text },
-    { logger, pageFilter, backgroundTools },
+    { logger, pageFilter, browserTracker, ..._ },
   ): Promise<ReturnType> => {
     // Validate action format
 
@@ -186,10 +186,10 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
           await session.browser.close();
           browserSessions.delete(instanceId);
 
-          // Update background tool registry when browser is explicitly closed
-          backgroundTools.updateToolStatus(
+          // Update browser tracker when browser is explicitly closed
+          browserTracker.updateSessionStatus(
             instanceId,
-            BackgroundToolStatus.COMPLETED,
+            BrowserSessionStatus.COMPLETED,
             {
               closedExplicitly: true,
             },
@@ -206,11 +206,15 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
     } catch (error) {
       logger.error('Browser action failed:', { error });
 
-      // Update background tool registry with error status if action fails
-      backgroundTools.updateToolStatus(instanceId, BackgroundToolStatus.ERROR, {
-        error: errorToString(error),
-        actionType,
-      });
+      // Update browser tracker with error status if action fails
+      browserTracker.updateSessionStatus(
+        instanceId,
+        BrowserSessionStatus.ERROR,
+        {
+          error: errorToString(error),
+          actionType,
+        },
+      );
 
       return {
         status: 'error',

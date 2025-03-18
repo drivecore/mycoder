@@ -6,7 +6,7 @@ import { getMockToolContext } from '../getTools.test.js';
 
 import { shellMessageTool, NodeSignals } from './shellMessage.js';
 import { shellStartTool } from './shellStart.js';
-import { shellTracker } from './ShellTracker.js';
+import { ShellTracker } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
@@ -22,6 +22,7 @@ const getInstanceId = (
 
 describe('shellMessageTool', () => {
   let testInstanceId = '';
+  const shellTracker = new ShellTracker('test');
 
   beforeEach(() => {
     shellTracker.processStates.clear();

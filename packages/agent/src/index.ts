@@ -9,7 +9,6 @@ export * from './tools/system/respawn.js';
 export * from './tools/system/sequenceComplete.js';
 export * from './tools/system/shellMessage.js';
 export * from './tools/system/shellExecute.js';
-export * from './tools/system/listBackgroundTools.js';
 export * from './tools/system/listShells.js';
 export * from './tools/system/ShellTracker.js';
 
@@ -20,7 +19,10 @@ export * from './tools/browser/browseMessage.js';
 export * from './tools/browser/browseStart.js';
 export * from './tools/browser/PageController.js';
 export * from './tools/browser/BrowserAutomation.js';
+export * from './tools/browser/listBrowsers.js';
+export * from './tools/browser/browserTracker.js';
 
+export * from './tools/interaction/agentTracker.js';
 // Tools - Interaction
 export * from './tools/interaction/subAgent.js';
 export * from './tools/interaction/userPrompt.js';
@@ -28,7 +30,6 @@ export * from './tools/interaction/userPrompt.js';
 // Core
 export * from './core/executeToolCall.js';
 export * from './core/types.js';
-export * from './core/backgroundTools.js';
 // Tool Agent Core
 export { toolAgent } from './core/toolAgent/toolAgentCore.js';
 export * from './core/toolAgent/config.js';

@@ -4,7 +4,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { Tool } from '../../core/types.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { ShellStatus, shellTracker } from './ShellTracker.js';
+import { ShellStatus } from './ShellTracker.js';
 
 // Define NodeJS signals as an enum
 export enum NodeSignals {
@@ -95,7 +95,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, stdin, signal, showStdIn, showStdout },
-    { logger },
+    { logger, shellTracker },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Interacting with shell process ${instanceId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
@@ -227,7 +227,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
     }
   },
 
-  logParameters: (input, { logger }) => {
+  logParameters: (input, { logger, shellTracker }) => {
     const processState = shellTracker.processStates.get(input.instanceId);
     const showStdIn =
       input.showStdIn !== undefined

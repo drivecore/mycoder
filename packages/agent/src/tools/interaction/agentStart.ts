@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import {
   getDefaultSystemPrompt,
   AgentConfig,
@@ -10,7 +9,7 @@ import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { getTools } from '../getTools.js';
 
-import { AgentStatus, agentTracker, AgentState } from './agentTracker.js';
+import { AgentStatus, AgentState } from './agentTracker.js';
 
 // For backward compatibility
 export const agentStates = new Map<string, AgentState>();
@@ -74,7 +73,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async (params, context) => {
-    const { logger, backgroundTools } = context;
+    const { logger, agentTracker } = context;
 
     // Validate parameters
     const {
@@ -88,9 +87,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     // Register this agent with the agent tracker
     const instanceId = agentTracker.registerAgent(goal);
-
-    // For backward compatibility, also register with background tools
-    backgroundTools.registerAgent(goal);
 
     logger.verbose(`Registered agent with ID: ${instanceId}`);
 
@@ -150,20 +146,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
               result.result.substring(0, 100) +
               (result.result.length > 100 ? '...' : ''),
           });
-
-          // For backward compatibility
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.COMPLETED,
-            {
-              result:
-                result.result.substring(0, 100) +
-                (result.result.length > 100 ? '...' : ''),
-            },
-          );
-
-          // Clean up resources when agent completes successfully
-          await backgroundTools.cleanup();
         }
       } catch (error) {
         // Update agent state with the error
@@ -176,18 +158,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           agentTracker.updateAgentStatus(instanceId, AgentStatus.ERROR, {
             error: error instanceof Error ? error.message : String(error),
           });
-
-          // For backward compatibility
-          backgroundTools.updateToolStatus(
-            instanceId,
-            BackgroundToolStatus.ERROR,
-            {
-              error: error instanceof Error ? error.message : String(error),
-            },
-          );
-
-          // Clean up resources when agent encounters an error
-          await backgroundTools.cleanup();
         }
       }
       return true;

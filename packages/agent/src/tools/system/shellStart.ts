@@ -7,7 +7,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 
-import { ShellStatus, shellTracker } from './ShellTracker.js';
+import { ShellStatus } from './ShellTracker.js';
 
 import type { ProcessState } from './ShellTracker.js';
 
@@ -81,7 +81,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       showStdIn = false,
       showStdout = false,
     },
-    { logger, workingDirectory },
+    { logger, workingDirectory, shellTracker },
   ): Promise<ReturnType> => {
     if (showStdIn) {
       logger.info(`Command input: ${command}`);
