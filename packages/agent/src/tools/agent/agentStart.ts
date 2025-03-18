@@ -116,6 +116,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       workingDirectory: workingDirectory ?? context.workingDirectory,
       tools,
       aborted: false,
+      parentMessages: [], // Initialize empty array for parent messages
     };
 
     // Register agent state with the tracker
@@ -131,6 +132,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
         const result = await toolAgent(prompt, tools, agentConfig, {
           ...context,
           workingDirectory: workingDirectory ?? context.workingDirectory,
+          currentAgentId: instanceId, // Pass the agent's ID to the context
         });
 
         // Update agent state with the result

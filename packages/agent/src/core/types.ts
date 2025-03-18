@@ -26,6 +26,7 @@ export type ToolContext = {
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
   agentName?: string; // Name of the agent, used for browser tracker
+  currentAgentId?: string; // ID of the current agent, used for parent-to-subagent communication
   provider: ModelProvider;
   model?: string;
   baseUrl?: string;
