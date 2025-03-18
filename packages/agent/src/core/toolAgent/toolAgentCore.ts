@@ -88,6 +88,30 @@ export const toolAgent = async (
         }
       }
     }
+    
+    // Check for messages from user (for main agent only)
+    // Import this at the top of the file
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { userMessages } = await import('../../tools/interaction/userMessage.js');
+      
+      if (userMessages && userMessages.length > 0) {
+        // Get all user messages and clear the queue
+        const pendingUserMessages = [...userMessages];
+        userMessages.length = 0;
+        
+        // Add each message to the conversation
+        for (const message of pendingUserMessages) {
+          logger.log(`Message from user: ${message}`);
+          messages.push({
+            role: 'user',
+            content: `[Correction from user]: ${message}`,
+          });
+        }
+      }
+    } catch (error) {
+      logger.debug('Error checking for user messages:', error);
+    }
 
     // Convert tools to function definitions
     const functionDefinitions = tools.map((tool) => ({

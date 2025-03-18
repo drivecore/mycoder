@@ -20,6 +20,7 @@ import {
   consoleOutputLogger,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
+import { initInteractiveInput } from 'mycoder-agent/dist/utils/interactiveInput.js';
 
 import { SharedOptions } from '../options.js';
 import { captureException } from '../sentry/index.js';
@@ -106,6 +107,9 @@ export async function executePrompt(
   // Use command line option if provided, otherwise use config value
   tokenTracker.tokenCache = config.tokenCache;
 
+  // Initialize interactive input if enabled
+  let cleanupInteractiveInput: (() => void) | undefined;
+  
   try {
     // Early API key check based on model provider
     const providerSettings =
@@ -164,6 +168,12 @@ export async function executePrompt(
       );
       process.exit(0);
     });
+    
+    // Initialize interactive input if enabled
+    if (config.interactive) {
+      logger.info(chalk.green('Interactive correction mode enabled. Press Ctrl+M to send a correction to the agent.'));
+      cleanupInteractiveInput = initInteractiveInput();
+    }
 
     // Create a config for the agent
     const agentConfig: AgentConfig = {
@@ -206,7 +216,11 @@ export async function executePrompt(
     // Capture the error with Sentry
     captureException(error);
   } finally {
-    // No cleanup needed here as it's handled by the cleanup utility
+    // Clean up interactive input if it was initialized
+    if (cleanupInteractiveInput) {
+      cleanupInteractiveInput();
+    }
+    // Other cleanup is handled by the cleanup utility
   }
 
   logger.log(
