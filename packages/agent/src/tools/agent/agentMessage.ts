@@ -33,6 +33,14 @@ const returnSchema = z.object({
     .boolean()
     .optional()
     .describe('Whether the sub-agent was terminated by this message'),
+  messageSent: z
+    .boolean()
+    .optional()
+    .describe('Whether a message was sent to the sub-agent'),
+  messageCount: z
+    .number()
+    .optional()
+    .describe("The number of messages in the sub-agent's queue"),
 });
 
 type Parameters = z.infer<typeof parameterSchema>;
@@ -68,6 +76,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
           output: agentState.output || 'Sub-agent was previously terminated',
           completed: true,
           terminated: true,
+          messageSent: false,
+          messageCount: 0,
         };
       }
 
@@ -80,19 +90,24 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
           output: agentState.output || 'Sub-agent terminated before completion',
           completed: true,
           terminated: true,
+          messageSent: false,
+          messageCount: 0,
         };
       }
 
-      // Add guidance to the agent state for future implementation
-      // In a more advanced implementation, this could inject the guidance
-      // into the agent's execution context
+      // Add guidance to the agent state's parentMessages array
+      // The sub-agent will check for these messages on each iteration
       if (guidance) {
         logger.info(
           `Guidance provided to sub-agent ${instanceId}: ${guidance}`,
         );
-        // This is a placeholder for future implementation
-        // In a real implementation, we would need to interrupt the agent's
-        // execution and inject this guidance
+
+        // Add the guidance to the parentMessages array
+        agentState.parentMessages.push(guidance);
+
+        logger.verbose(
+          `Added message to sub-agent ${instanceId}'s parentMessages queue. Total messages: ${agentState.parentMessages.length}`,
+        );
       }
 
       // Get the current output
@@ -103,6 +118,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
         output,
         completed: agentState.completed,
         ...(agentState.error && { error: agentState.error }),
+        messageSent: guidance ? true : false,
+        messageCount: agentState.parentMessages.length,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -112,6 +129,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
           output: '',
           completed: false,
           error: error.message,
+          messageSent: false,
+          messageCount: 0,
         };
       }
 
@@ -123,6 +142,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
         output: '',
         completed: false,
         error: `Unknown error occurred: ${errorMessage}`,
+        messageSent: false,
+        messageCount: 0,
       };
     }
   },
@@ -141,6 +162,12 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       logger.info('Sub-agent has completed its task');
     } else {
       logger.info('Sub-agent is still running');
+    }
+
+    if (output.messageSent) {
+      logger.info(
+        `Message sent to sub-agent. Queue now has ${output.messageCount || 0} message(s).`,
+      );
     }
   },
 };

@@ -61,6 +61,34 @@ export const toolAgent = async (
 
     interactions++;
 
+    // Check for messages from parent agent
+    // This assumes the context has an agentTracker and the current agent's ID
+    if (context.agentTracker && context.currentAgentId) {
+      const agentState = context.agentTracker.getAgentState(
+        context.currentAgentId,
+      );
+
+      // Process any new parent messages
+      if (
+        agentState &&
+        agentState.parentMessages &&
+        agentState.parentMessages.length > 0
+      ) {
+        // Get all parent messages and clear the queue
+        const parentMessages = [...agentState.parentMessages];
+        agentState.parentMessages = [];
+
+        // Add each message to the conversation
+        for (const message of parentMessages) {
+          logger.info(`Message from parent agent: ${message}`);
+          messages.push({
+            role: 'user',
+            content: `[Message from parent agent]: ${message}`,
+          });
+        }
+      }
+    }
+
     // Convert tools to function definitions
     const functionDefinitions = tools.map((tool) => ({
       name: tool.name,

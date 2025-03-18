@@ -33,6 +33,7 @@ export interface AgentState {
   workingDirectory: string;
   tools: unknown[];
   aborted: boolean;
+  parentMessages: string[]; // Messages from parent agent
 }
 
 export class AgentTracker {
