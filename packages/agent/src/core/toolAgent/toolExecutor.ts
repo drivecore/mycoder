@@ -37,7 +37,7 @@ export async function executeTools(
 
   const { logger } = context;
 
-  logger.debug(`Executing ${toolCalls.length} tool calls`);
+  logger.info(`Executing ${toolCalls.length} tool calls`);
 
   const toolResults = await Promise.all(
     toolCalls.map(async (call) => {

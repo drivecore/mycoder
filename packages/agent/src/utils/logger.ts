@@ -66,7 +66,8 @@ export class Logger {
   }
 
   private emitMessages(level: LogLevel, messages: unknown[]) {
-    if (LogLevel.debug < this.logLevelIndex) return;
+    // Allow all messages at the configured log level or higher
+    if (level < this.logLevelIndex) return;
 
     const lines = messages
       .map((message) =>

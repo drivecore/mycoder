@@ -54,7 +54,7 @@ export type Config = {
 
 // Default configuration
 const defaultConfig: Config = {
-  logLevel: 'info',
+  logLevel: 'log',
 
   // GitHub integration
   githubMode: true,

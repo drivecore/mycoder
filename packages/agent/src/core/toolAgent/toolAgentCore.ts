@@ -102,7 +102,7 @@ export const toolAgent = async (
         
         // Add each message to the conversation
         for (const message of pendingUserMessages) {
-          logger.log(`Message from user: ${message}`);
+          logger.info(`Message from user: ${message}`);
           messages.push({
             role: 'user',
             content: `[Correction from user]: ${message}`,
