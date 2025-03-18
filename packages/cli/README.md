@@ -92,13 +92,27 @@ If GitHub mode is enabled but the requirements are not met, MyCoder will provide
 
 ## Configuration
 
-MyCoder is configured using a `mycoder.config.js` file in your project root, similar to ESLint and other modern JavaScript tools. This file exports a configuration object with your preferred settings.
+MyCoder is configured using a configuration file in your project. MyCoder supports multiple configuration file locations and formats, similar to ESLint and other modern JavaScript tools.
 
-You can create a `mycoder.config.js` file in your project root with your preferred settings.
+### Configuration File Locations
 
-Example configuration file:
+MyCoder will look for configuration in the following locations (in order of precedence):
 
-```javascript
+1. `mycoder.config.js` in your project root
+2. `.mycoder.config.js` in your project root
+3. `.config/mycoder.js` in your project root
+4. `.mycoder.rc` in your project root
+5. `.mycoder.rc` in your home directory
+6. `mycoder` field in `package.json`
+7. `~/.config/mycoder/config.js` (XDG standard user configuration)
+
+Multiple file extensions are supported: `.js`, `.ts`, `.mjs`, `.cjs`, `.json`, `.jsonc`, `.json5`, `.yaml`, `.yml`, and `.toml`.
+
+### Creating a Configuration File
+
+Create a configuration file in your preferred location:
+
+```js
 // mycoder.config.js
 export default {
   // GitHub integration
@@ -116,10 +130,20 @@ export default {
   temperature: 0.7,
 
   // Custom settings
+  // customPrompt can be a string or an array of strings for multiple lines
   customPrompt: '',
+  // Example of multiple line custom prompts:
+  // customPrompt: [
+  //   'Custom instruction line 1',
+  //   'Custom instruction line 2',
+  //   'Custom instruction line 3',
+  // ],
   profile: false,
   tokenCache: true,
 
+  // Base URL configuration (for providers that need it)
+  baseUrl: 'http://localhost:11434', // Example for Ollama
+  
   // MCP configuration
   mcp: {
     servers: [
@@ -133,7 +157,37 @@ export default {
       },
     ],
     defaultResources: ['example://docs/api'],
+    defaultTools: ['example://tools/search'],
   },
+  
+  // Custom commands
+  // Uncomment and modify to add your own commands
+  /*
+  commands: {
+    // Function-based command example
+    "search": {
+      description: "Search for a term in the codebase",
+      args: [
+        { name: "term", description: "Search term", required: true }
+      ],
+      execute: (args) => {
+        return `Find all instances of ${args.term} in the codebase and suggest improvements`;
+      }
+    },
+    
+    // Another example with multiple arguments
+    "fix-issue": {
+      description: "Fix a GitHub issue",
+      args: [
+        { name: "issue", description: "Issue number", required: true },
+        { name: "scope", description: "Scope of the fix", default: "full" }
+      ],
+      execute: (args) => {
+        return `Analyze GitHub issue #${args.issue} and implement a ${args.scope} fix`;
+      }
+    }
+  }
+  */
 };
 ```
 
@@ -168,13 +222,14 @@ export default {
 
 ### Available Configuration Options
 
-- `githubMode`: Enable GitHub mode (requires "gh" cli to be installed) for working with issues and PRs (default: `false`)
+- `githubMode`: Enable GitHub mode (requires "gh" cli to be installed) for working with issues and PRs (default: `true`)
 - `headless`: Run browser in headless mode with no UI showing (default: `true`)
 - `userSession`: Use user's existing browser session instead of sandboxed session (default: `false`)
 - `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
 - `tokenCache`: Enable token caching for LLM API calls (default: `true`)
 - `mcp`: Configuration for Model Context Protocol (MCP) integration (default: `{ servers: [], defaultResources: [] }`)
+- `commands`: Custom commands that can be executed via the CLI (default: `{}`)
 
 ### Model Context Protocol (MCP) Configuration
 
@@ -242,26 +297,7 @@ These options are available only as command-line parameters and are not stored i
 - `upgradeCheck`: Disable version upgrade check for automated/remote usage (default: `true`)
 - `userPrompt`: Enable or disable the userPrompt tool (default: `true`)
 
-Example configuration in `mycoder.config.js`:
-
-```js
-// mycoder.config.js
-export default {
-  // Browser settings
-  headless: false, // Show browser UI
-  userSession: true, // Use existing browser session
-  pageFilter: 'readability', // Use readability for webpage processing
-
-  // Custom settings
-  customPrompt:
-    'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
-  tokenCache: false, // Disable token caching for LLM API calls
-
-  // Other configuration options...
-};
-```
-
-You can also set these options via CLI arguments (which will override the config file):
+Example setting these options via CLI arguments (which will override the config file):
 
 ```bash
 # Set browser to show UI for this session only
@@ -275,6 +311,7 @@ mycoder --userSession true "Your prompt here"
 
 - `ANTHROPIC_API_KEY`: Your Anthropic API key (required when using Anthropic models)
 - `OPENAI_API_KEY`: Your OpenAI API key (required when using OpenAI models)
+- `SENTRY_DSN`: Optional Sentry DSN for error tracking
 
 Note: Ollama models do not require an API key as they run locally or on a specified server.
 
