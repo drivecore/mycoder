@@ -11,6 +11,7 @@ Command-line interface for AI-powered coding tasks. Full details available on th
 - 🔍 **Smart Logging**: Hierarchical, color-coded logging system for clear output
 - 👤 **Human Compatible**: Uses README.md, project files and shell commands to build its own context
 - 🌐 **GitHub Integration**: GitHub mode for working with issues and PRs as part of workflow
+- 📄 **Model Context Protocol**: Support for MCP to access external context sources
 
 Please join the MyCoder.ai discord for support: https://discord.gg/5K6TYrHGHt
 
@@ -36,14 +37,12 @@ mycoder -f prompt.txt
 
 # Disable user prompts for fully automated sessions
 mycoder --userPrompt false "Generate a basic Express.js server"
-# or using the alias
-mycoder --userPrompt false "Generate a basic Express.js server"
 
 # Disable user consent warning and version upgrade check for automated environments
 mycoder --upgradeCheck false "Generate a basic Express.js server"
 
 # Enable GitHub mode via CLI option (overrides config file)
-mycoder --githubMode "Work with GitHub issues and PRs"
+mycoder --githubMode true "Work with GitHub issues and PRs"
 ```
 
 ## Configuration
@@ -99,6 +98,22 @@ export default {
 
   // Base URL configuration (for providers that need it)
   baseUrl: 'http://localhost:11434', // Example for Ollama
+  
+  // MCP configuration
+  mcp: {
+    servers: [
+      {
+        name: 'example',
+        url: 'https://mcp.example.com',
+        auth: {
+          type: 'bearer',
+          token: 'your-token-here',
+        },
+      },
+    ],
+    defaultResources: ['example://docs/api'],
+    defaultTools: ['example://tools/search'],
+  },
 };
 ```
 
