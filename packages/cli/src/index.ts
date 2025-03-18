@@ -13,7 +13,7 @@ import { command as toolsCommand } from './commands/tools.js';
 import { SharedOptions, sharedOptions } from './options.js';
 import { initSentry, captureException } from './sentry/index.js';
 import { getConfigFromArgv, loadConfig } from './settings/config.js';
-import { cleanupResources, setupForceExit } from './utils/cleanup.js';
+import { setupForceExit } from './utils/cleanup.js';
 import { enableProfiling, mark, reportTimings } from './utils/performance.js';
 
 mark('After imports');
@@ -89,9 +89,6 @@ await main()
   .finally(async () => {
     // Report timings if profiling is enabled
     await reportTimings();
-
-    // Clean up all resources before exit
-    await cleanupResources();
 
     // Setup a force exit as a failsafe
     // This ensures the process will exit even if there are lingering handles

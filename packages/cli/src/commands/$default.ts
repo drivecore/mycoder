@@ -14,7 +14,9 @@ import {
   DEFAULT_CONFIG,
   AgentConfig,
   ModelProvider,
-  BackgroundTools,
+  BrowserTracker,
+  ShellTracker,
+  AgentTracker,
 } from 'mycoder-agent';
 import { TokenTracker } from 'mycoder-agent/dist/core/tokens.js';
 
@@ -101,8 +103,6 @@ export async function executePrompt(
   // Use command line option if provided, otherwise use config value
   tokenTracker.tokenCache = config.tokenCache;
 
-  const backgroundTools = new BackgroundTools('mainAgent');
-
   try {
     // Early API key check based on model provider
     const providerSettings =
@@ -183,7 +183,9 @@ export async function executePrompt(
       model: config.model,
       maxTokens: config.maxTokens,
       temperature: config.temperature,
-      backgroundTools,
+      shellTracker: new ShellTracker('mainAgent'),
+      agentTracker: new AgentTracker('mainAgent'),
+      browserTracker: new BrowserTracker('mainAgent'),
       apiKey,
     });
 
@@ -201,7 +203,7 @@ export async function executePrompt(
     // Capture the error with Sentry
     captureException(error);
   } finally {
-    await backgroundTools.cleanup();
+    // No cleanup needed here as it's handled by the cleanup utility
   }
 
   logger.log(

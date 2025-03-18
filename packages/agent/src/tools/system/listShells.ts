@@ -3,7 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
 
-import { ShellStatus, shellTracker } from './ShellTracker.js';
+import { ShellStatus } from './shellTracker.js';
 
 const parameterSchema = z.object({
   status: z
@@ -45,7 +45,7 @@ export const listShellsTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { status = 'all', verbose = false },
-    { logger },
+    { logger, shellTracker },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Listing shell processes with status: ${status}, verbose: ${verbose}`,

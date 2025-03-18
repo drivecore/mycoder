@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { ShellStatus, shellTracker } from './ShellTracker.js';
+import { ShellStatus, ShellTracker } from './shellTracker.js';
 
 // Mock uuid to return predictable IDs for testing
 vi.mock('uuid', () => ({
@@ -12,6 +12,8 @@ vi.mock('uuid', () => ({
 }));
 
 describe('ShellTracker', () => {
+  const shellTracker = new ShellTracker('test');
+
   beforeEach(() => {
     // Clear all registered shells before each test
     shellTracker['shells'] = new Map();

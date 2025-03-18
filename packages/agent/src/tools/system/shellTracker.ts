@@ -44,20 +44,10 @@ export interface ShellProcess {
  * Registry to keep track of shell processes
  */
 export class ShellTracker {
-  private static instance: ShellTracker;
   private shells: Map<string, ShellProcess> = new Map();
   public processStates: Map<string, ProcessState> = new Map();
 
-  // Private constructor for singleton pattern
-  private constructor() {}
-
-  // Get the singleton instance
-  public static getInstance(): ShellTracker {
-    if (!ShellTracker.instance) {
-      ShellTracker.instance = new ShellTracker();
-    }
-    return ShellTracker.instance;
-  }
+  constructor(public ownerAgentId: string | undefined) {}
 
   // Register a new shell process
   public registerShell(command: string): string {
@@ -158,7 +148,7 @@ export class ShellTracker {
   /**
    * Cleans up all running shell processes
    */
-  public async cleanupAllShells(): Promise<void> {
+  public async cleanup(): Promise<void> {
     const runningShells = this.getShells(ShellStatus.RUNNING);
     const cleanupPromises = runningShells.map((shell) =>
       this.cleanupShellProcess(shell.id),
@@ -166,6 +156,3 @@ export class ShellTracker {
     await Promise.all(cleanupPromises);
   }
 }
-
-// Export a singleton instance
-export const shellTracker = ShellTracker.getInstance();

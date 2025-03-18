@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { BackgroundToolStatus } from '../../core/backgroundTools.js';
 import { Tool } from '../../core/types.js';
 
 import { agentStates } from './agentStart.js';
@@ -51,7 +50,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { instanceId, guidance, terminate },
-    { logger, backgroundTools },
+    { logger, ..._ },
   ): Promise<ReturnType> => {
     logger.verbose(
       `Interacting with sub-agent ${instanceId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
@@ -76,18 +75,6 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       if (terminate) {
         agentState.aborted = true;
         agentState.completed = true;
-
-        // Update background tool registry with terminated status
-        backgroundTools.updateToolStatus(
-          instanceId,
-          BackgroundToolStatus.TERMINATED,
-          {
-            terminatedByUser: true,
-          },
-        );
-
-        // Clean up resources when agent is terminated
-        await backgroundTools.cleanup();
 
         return {
           output: agentState.output || 'Sub-agent terminated before completion',
