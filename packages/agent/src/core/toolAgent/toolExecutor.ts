@@ -39,27 +39,6 @@ export async function executeTools(
 
   logger.verbose(`Executing ${toolCalls.length} tool calls`);
 
-  // Check for respawn tool call
-  const respawnCall = toolCalls.find((call) => call.name === 'respawn');
-  if (respawnCall) {
-    // Add the tool result to messages
-    addToolResultToMessages(messages, respawnCall.id, { success: true }, false);
-
-    return {
-      agentDoned: false,
-      toolResults: [
-        {
-          toolCallId: respawnCall.id,
-          toolName: respawnCall.name,
-          result: { success: true },
-        },
-      ],
-      respawn: {
-        context: JSON.parse(respawnCall.content).respawnContext,
-      },
-    };
-  }
-
   const toolResults = await Promise.all(
     toolCalls.map(async (call) => {
       let toolResult = '';

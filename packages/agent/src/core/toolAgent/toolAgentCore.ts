@@ -157,23 +157,12 @@ export const toolAgent = async (
       );
 
       // Execute the tools and get results
-      const { agentDoned, completionResult, respawn } = await executeTools(
+      const { agentDoned, completionResult } = await executeTools(
         toolCalls,
         tools,
         messages,
         localContext,
       );
-
-      if (respawn) {
-        logger.info('Respawning agent with new context');
-        // Reset messages to just the new context
-        messages.length = 0;
-        messages.push({
-          role: 'user',
-          content: respawn.context,
-        });
-        continue;
-      }
 
       if (agentDoned) {
         const result: ToolAgentResult = {
