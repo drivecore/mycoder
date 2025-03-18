@@ -3,7 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
 
-import { BrowserSessionStatus } from './browserTracker.js';
+import { SessionStatus } from './SessionTracker.js';
 
 const parameterSchema = z.object({
   status: z
@@ -36,8 +36,8 @@ const returnSchema = z.object({
 type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
-export const listBrowsersTool: Tool<Parameters, ReturnType> = {
-  name: 'listBrowsers',
+export const listSessionsTool: Tool<Parameters, ReturnType> = {
+  name: 'listSessions',
   description: 'Lists all browser sessions and their status',
   logPrefix: '🔍',
   parameters: parameterSchema,
@@ -62,8 +62,8 @@ export const listBrowsersTool: Tool<Parameters, ReturnType> = {
         ? sessions
         : sessions.filter((session) => {
             const statusEnum =
-              status.toUpperCase() as keyof typeof BrowserSessionStatus;
-            return session.status === BrowserSessionStatus[statusEnum];
+              status.toUpperCase() as keyof typeof SessionStatus;
+            return session.status === SessionStatus[statusEnum];
           });
 
     // Format the response

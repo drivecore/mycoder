@@ -7,7 +7,7 @@ export interface BrowserConfig {
 }
 
 // Browser session
-export interface BrowserSession {
+export interface Session {
   browser: Browser;
   page: Page;
   id: string;
@@ -54,7 +54,7 @@ export interface SelectorOptions {
 }
 
 // Global map to store browser sessions
-export const browserSessions: Map<string, BrowserSession> = new Map();
+export const browserSessions: Map<string, Session> = new Map();
 
 // Browser action types
 export type BrowserAction =

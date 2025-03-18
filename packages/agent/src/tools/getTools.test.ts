@@ -4,10 +4,10 @@ import { TokenTracker } from '../core/tokens.js';
 import { ToolContext } from '../core/types.js';
 import { MockLogger } from '../utils/mockLogger.js';
 
-import { BrowserTracker } from './browser/browserTracker.js';
+import { AgentTracker } from './agent/AgentTracker.js';
 import { getTools } from './getTools.js';
-import { AgentTracker } from './interaction/agentTracker.js';
-import { ShellTracker } from './system/shellTracker.js';
+import { SessionTracker } from './session/SessionTracker.js';
+import { ShellTracker } from './shell/ShellTracker.js';
 
 // Mock context
 export const getMockToolContext = (): ToolContext => ({
@@ -24,7 +24,7 @@ export const getMockToolContext = (): ToolContext => ({
   temperature: 0.7,
   agentTracker: new AgentTracker('test'),
   shellTracker: new ShellTracker('test'),
-  browserTracker: new BrowserTracker('test'),
+  browserTracker: new SessionTracker('test'),
 });
 
 describe('getTools', () => {

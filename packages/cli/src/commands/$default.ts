@@ -9,12 +9,12 @@ import {
   providerConfig,
   userPrompt,
   LogLevel,
-  subAgentTool,
+  agentExecuteTool,
   errorToString,
   DEFAULT_CONFIG,
   AgentConfig,
   ModelProvider,
-  BrowserTracker,
+  SessionTracker,
   ShellTracker,
   AgentTracker,
 } from 'mycoder-agent';
@@ -47,7 +47,7 @@ export async function executePrompt(
   const logger = new Logger({
     name: 'Default',
     logLevel: nameToLogIndex(config.logLevel),
-    customPrefix: subAgentTool.logPrefix,
+    customPrefix: agentExecuteTool.logPrefix,
   });
 
   logger.info(`MyCoder v${packageInfo.version} - AI-powered coding assistant`);
@@ -185,7 +185,7 @@ export async function executePrompt(
       temperature: config.temperature,
       shellTracker: new ShellTracker('mainAgent'),
       agentTracker: new AgentTracker('mainAgent'),
-      browserTracker: new BrowserTracker('mainAgent'),
+      browserTracker: new SessionTracker('mainAgent'),
       apiKey,
     });
 
@@ -246,7 +246,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const logger = new Logger({
         name: 'Default',
         logLevel: nameToLogIndex(config.logLevel),
-        customPrefix: subAgentTool.logPrefix,
+        customPrefix: agentExecuteTool.logPrefix,
       });
 
       logger.error(

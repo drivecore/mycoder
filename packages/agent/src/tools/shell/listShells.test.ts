@@ -4,7 +4,7 @@ import { ToolContext } from '../../core/types.js';
 import { getMockToolContext } from '../getTools.test.js';
 
 import { listShellsTool } from './listShells.js';
-import { ShellStatus } from './shellTracker.js';
+import { ShellStatus } from './ShellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 

@@ -3,12 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
 import { MockLogger } from '../../utils/mockLogger.js';
-import { BrowserTracker } from '../browser/browserTracker.js';
-import { ShellTracker } from '../system/shellTracker.js';
+import { SessionTracker } from '../session/SessionTracker.js';
+import { ShellTracker } from '../shell/ShellTracker.js';
 
 import { agentMessageTool } from './agentMessage.js';
 import { agentStartTool, agentStates } from './agentStart.js';
-import { AgentTracker } from './agentTracker.js';
+import { AgentTracker } from './AgentTracker.js';
 
 // Mock the toolAgent function
 vi.mock('../../core/toolAgent/toolAgentCore.js', () => ({
@@ -33,7 +33,7 @@ const mockContext: ToolContext = {
   temperature: 0.7,
   agentTracker: new AgentTracker('test'),
   shellTracker: new ShellTracker('test'),
-  browserTracker: new BrowserTracker('test'),
+  browserTracker: new SessionTracker('test'),
 };
 
 describe('Agent Tools', () => {

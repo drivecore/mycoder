@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { BrowserManager } from './BrowserManager.js';
+import { SessionManager } from './SessionManager.js';
 import { BrowserError, BrowserErrorCode } from './types.js';
 
-describe('BrowserManager', () => {
-  let browserManager: BrowserManager;
+describe('SessionManager', () => {
+  let browserManager: SessionManager;
 
   beforeEach(() => {
-    browserManager = new BrowserManager();
+    browserManager = new SessionManager();
   });
 
   afterEach(async () => {

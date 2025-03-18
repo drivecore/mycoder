@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { JsonSchema7Type } from 'zod-to-json-schema';
 
-import { BrowserTracker } from '../tools/browser/browserTracker.js';
-import { AgentTracker } from '../tools/interaction/agentTracker.js';
-import { ShellTracker } from '../tools/system/shellTracker.js';
+import { AgentTracker } from '../tools/agent/AgentTracker.js';
+import { SessionTracker } from '../tools/session/SessionTracker.js';
+import { ShellTracker } from '../tools/shell/ShellTracker.js';
 import { Logger } from '../utils/logger.js';
 
 import { TokenTracker } from './tokens.js';
@@ -34,7 +34,7 @@ export type ToolContext = {
   temperature: number;
   agentTracker: AgentTracker;
   shellTracker: ShellTracker;
-  browserTracker: BrowserTracker;
+  browserTracker: SessionTracker;
 };
 
 export type Tool<TParams = Record<string, any>, TReturn = any> = {

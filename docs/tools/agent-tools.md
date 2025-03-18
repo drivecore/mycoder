@@ -2,15 +2,15 @@
 
 The agent tools provide ways to create and interact with sub-agents. There are two approaches available:
 
-1. The original `subAgent` tool (synchronous, blocking)
+1. The original `agentExecute` tool (synchronous, blocking)
 2. The new `agentStart` and `agentMessage` tools (asynchronous, non-blocking)
 
-## subAgent Tool
+## agentExecute Tool
 
-The `subAgent` tool creates a sub-agent that runs synchronously until completion. The parent agent waits for the sub-agent to complete before continuing.
+The `agentExecute` tool creates a sub-agent that runs synchronously until completion. The parent agent waits for the sub-agent to complete before continuing.
 
 ```typescript
-subAgent({
+agentExecute({
   description: "A brief description of the sub-agent's purpose",
   goal: 'The main objective that the sub-agent needs to achieve',
   projectContext: 'Context about the problem or environment',
@@ -123,7 +123,7 @@ while (!agent1Completed || !agent2Completed) {
 
 ## Choosing Between Approaches
 
-- Use `subAgent` for simpler tasks where blocking execution is acceptable
+- Use `agentExecute` for simpler tasks where blocking execution is acceptable
 - Use `agentStart` and `agentMessage` for:
   - Parallel execution of multiple sub-agents
   - Tasks where you need to monitor progress

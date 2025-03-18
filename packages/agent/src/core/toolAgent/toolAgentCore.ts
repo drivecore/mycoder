@@ -100,7 +100,7 @@ export const toolAgent = async (
       messages.push({
         role: 'user',
         content:
-          'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
+          'I notice you sent an empty response. If you are done with your tasks, please call the agentDone tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
       });
       continue;
     }
@@ -129,8 +129,12 @@ export const toolAgent = async (
       );
 
       // Execute the tools and get results
-      const { sequenceCompleted, completionResult, respawn } =
-        await executeTools(toolCalls, tools, messages, localContext);
+      const { agentDoned, completionResult, respawn } = await executeTools(
+        toolCalls,
+        tools,
+        messages,
+        localContext,
+      );
 
       if (respawn) {
         logger.info('Respawning agent with new context');
@@ -143,7 +147,7 @@ export const toolAgent = async (
         continue;
       }
 
-      if (sequenceCompleted) {
+      if (agentDoned) {
         const result: ToolAgentResult = {
           result: completionResult ?? 'Sequence explicitly completed',
           interactions,

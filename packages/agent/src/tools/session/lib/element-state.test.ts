@@ -8,19 +8,19 @@ import {
   vi,
 } from 'vitest';
 
-import { BrowserManager } from './BrowserManager.js';
-import { BrowserSession } from './types.js';
+import { SessionManager } from './SessionManager.js';
+import { Session } from './types.js';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Element State Tests', () => {
-  let browserManager: BrowserManager;
-  let session: BrowserSession;
+  let browserManager: SessionManager;
+  let session: Session;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
-    browserManager = new BrowserManager();
+    browserManager = new SessionManager();
     session = await browserManager.createSession({ headless: true });
   });
 

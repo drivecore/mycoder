@@ -1,12 +1,12 @@
-import { BrowserManager } from './BrowserManager.js';
 import { PageController } from './PageController.js';
+import { SessionManager } from './SessionManager.js';
 
 export class BrowserAutomation {
   private static instance: BrowserAutomation;
-  private browserManager: BrowserManager;
+  private browserManager: SessionManager;
 
   private constructor() {
-    this.browserManager = new BrowserManager();
+    this.browserManager = new SessionManager();
   }
 
   static getInstance(): BrowserAutomation {

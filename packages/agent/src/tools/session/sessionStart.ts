@@ -6,9 +6,9 @@ import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { BrowserSessionStatus } from './browserTracker.js';
-import { filterPageContent } from './filterPageContent.js';
-import { browserSessions } from './types.js';
+import { filterPageContent } from './lib/filterPageContent.js';
+import { browserSessions } from './lib/types.js';
+import { SessionStatus } from './SessionTracker.js';
 
 const parameterSchema = z.object({
   url: z.string().url().optional().describe('Initial URL to navigate to'),
@@ -31,8 +31,8 @@ const returnSchema = z.object({
 type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
-export const browseStartTool: Tool<Parameters, ReturnType> = {
-  name: 'browseStart',
+export const sessionStartTool: Tool<Parameters, ReturnType> = {
+  name: 'sessionStart',
   logPrefix: '🏄',
   description: 'Starts a new browser session with optional initial URL',
   parameters: parameterSchema,
@@ -102,7 +102,7 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
         // Update browser tracker when browser disconnects
         browserTracker.updateSessionStatus(
           instanceId,
-          BrowserSessionStatus.TERMINATED,
+          SessionStatus.TERMINATED,
         );
       });
 
@@ -147,14 +147,10 @@ export const browseStartTool: Tool<Parameters, ReturnType> = {
       logger.verbose(`Content length: ${content.length} characters`);
 
       // Update browser tracker with running status
-      browserTracker.updateSessionStatus(
-        instanceId,
-        BrowserSessionStatus.RUNNING,
-        {
-          url: url || 'about:blank',
-          contentLength: content.length,
-        },
-      );
+      browserTracker.updateSessionStatus(instanceId, SessionStatus.RUNNING, {
+        url: url || 'about:blank',
+        contentLength: content.length,
+      });
 
       return {
         instanceId,

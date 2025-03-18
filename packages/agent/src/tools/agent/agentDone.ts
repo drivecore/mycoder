@@ -16,8 +16,8 @@ const returnSchema = z.object({
 type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
-export const sequenceCompleteTool: Tool<Parameters, ReturnType> = {
-  name: 'sequenceComplete',
+export const agentDoneTool: Tool<Parameters, ReturnType> = {
+  name: 'agentDone',
   description: 'Completes the tool use sequence and returns the final result',
   logPrefix: '✅',
   parameters: parameterSchema,

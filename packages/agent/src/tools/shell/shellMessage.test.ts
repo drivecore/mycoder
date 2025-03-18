@@ -62,7 +62,9 @@ describe('shellMessageTool', () => {
     expect(result.completed).toBe(false);
 
     // Verify the instance ID is valid
-    expect(toolContext.shellTracker.processStates.has(testInstanceId)).toBe(true);
+    expect(toolContext.shellTracker.processStates.has(testInstanceId)).toBe(
+      true,
+    );
   });
 
   it('should handle nonexistent process', async () => {
