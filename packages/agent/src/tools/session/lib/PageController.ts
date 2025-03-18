@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-import { errorToString } from '../../utils/errorToString.js';
+import { errorToString } from '../../../utils/errorToString.js';
 
 import {
   SelectorType,

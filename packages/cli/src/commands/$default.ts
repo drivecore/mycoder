@@ -14,7 +14,7 @@ import {
   DEFAULT_CONFIG,
   AgentConfig,
   ModelProvider,
-  BrowserTracker,
+  SessionTracker,
   ShellTracker,
   AgentTracker,
 } from 'mycoder-agent';
@@ -185,7 +185,7 @@ export async function executePrompt(
       temperature: config.temperature,
       shellTracker: new ShellTracker('mainAgent'),
       agentTracker: new AgentTracker('mainAgent'),
-      browserTracker: new BrowserTracker('mainAgent'),
+      browserTracker: new SessionTracker('mainAgent'),
       apiKey,
     });
 

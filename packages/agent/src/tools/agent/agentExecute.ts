@@ -7,8 +7,8 @@ import {
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
-import { BrowserTracker } from '../browser/browserTracker.js';
 import { getTools } from '../getTools.js';
+import { SessionTracker } from '../session/SessionTracker.js';
 import { ShellTracker } from '../shell/ShellTracker.js';
 
 import { AgentTracker } from './AgentTracker.js';
@@ -89,7 +89,7 @@ export const agentExecuteTool: Tool<Parameters, ReturnType> = {
       workingDirectory: workingDirectory ?? context.workingDirectory,
       agentTracker: new AgentTracker(subAgentId),
       shellTracker: new ShellTracker(subAgentId),
-      browserTracker: new BrowserTracker(subAgentId),
+      browserTracker: new SessionTracker(subAgentId),
     };
 
     // Construct a well-structured prompt

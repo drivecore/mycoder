@@ -5,13 +5,13 @@ import { Tool } from '../core/types.js';
 import { agentDoneTool } from './agent/agentDone.js';
 import { agentExecuteTool } from './agent/agentExecute.js';
 import { listAgentsTool } from './agent/listAgents.js';
-import { browseMessageTool } from './browser/browseMessage.js';
-import { browseStartTool } from './browser/browseStart.js';
-import { listBrowsersTool } from './browser/listBrowsers.js';
 import { userPromptTool } from './interaction/userPrompt.js';
 import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
 import { createMcpTool } from './mcp.js';
+import { listSessionsTool } from './session/listSessions.js';
+import { sessionMessageTool } from './session/sessionMessage.js';
+import { sessionStartTool } from './session/sessionStart.js';
 import { listShellsTool } from './shell/listShells.js';
 import { shellMessageTool } from './shell/shellMessage.js';
 import { shellStartTool } from './shell/shellStart.js';
@@ -32,15 +32,15 @@ export function getTools(options?: GetToolsOptions): Tool[] {
   const tools: Tool[] = [
     textEditorTool as unknown as Tool,
     agentExecuteTool as unknown as Tool,
-    listBrowsersTool as unknown as Tool,
+    listSessionsTool as unknown as Tool,
     /*agentStartTool as unknown as Tool,
     agentMessageTool as unknown as Tool,*/
     agentDoneTool as unknown as Tool,
     fetchTool as unknown as Tool,
     shellStartTool as unknown as Tool,
     shellMessageTool as unknown as Tool,
-    browseStartTool as unknown as Tool,
-    browseMessageTool as unknown as Tool,
+    sessionStartTool as unknown as Tool,
+    sessionMessageTool as unknown as Tool,
     //respawnTool as unknown as Tool,  this is a confusing tool for now.
     sleepTool as unknown as Tool,
     listShellsTool as unknown as Tool,

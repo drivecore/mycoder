@@ -5,13 +5,13 @@ import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { BrowserSessionStatus } from './browserTracker.js';
-import { filterPageContent } from './filterPageContent.js';
-import { browserSessions, SelectorType } from './types.js';
+import { filterPageContent } from './lib/filterPageContent.js';
+import { browserSessions, SelectorType } from './lib/types.js';
+import { SessionStatus } from './SessionTracker.js';
 
 // Main parameter schema
 const parameterSchema = z.object({
-  instanceId: z.string().describe('The ID returned by browseStart'),
+  instanceId: z.string().describe('The ID returned by sessionStart'),
   actionType: z
     .enum(['goto', 'click', 'type', 'wait', 'content', 'close'])
     .describe('Browser action to perform'),
@@ -61,8 +61,8 @@ const getSelector = (selector: string, type?: SelectorType): string => {
   }
 };
 
-export const browseMessageTool: Tool<Parameters, ReturnType> = {
-  name: 'browseMessage',
+export const sessionMessageTool: Tool<Parameters, ReturnType> = {
+  name: 'sessionMessage',
   logPrefix: '🏄',
   description: 'Performs actions in an active browser session',
   parameters: parameterSchema,
@@ -189,7 +189,7 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
           // Update browser tracker when browser is explicitly closed
           browserTracker.updateSessionStatus(
             instanceId,
-            BrowserSessionStatus.COMPLETED,
+            SessionStatus.COMPLETED,
             {
               closedExplicitly: true,
             },
@@ -207,14 +207,10 @@ export const browseMessageTool: Tool<Parameters, ReturnType> = {
       logger.error('Browser action failed:', { error });
 
       // Update browser tracker with error status if action fails
-      browserTracker.updateSessionStatus(
-        instanceId,
-        BrowserSessionStatus.ERROR,
-        {
-          error: errorToString(error),
-          actionType,
-        },
-      );
+      browserTracker.updateSessionStatus(instanceId, SessionStatus.ERROR, {
+        error: errorToString(error),
+        actionType,
+      });
 
       return {
         status: 'error',

@@ -3,13 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   BrowserConfig,
-  BrowserSession,
+  Session,
   BrowserError,
   BrowserErrorCode,
 } from './types.js';
 
-export class BrowserManager {
-  private sessions: Map<string, BrowserSession> = new Map();
+export class SessionManager {
+  private sessions: Map<string, Session> = new Map();
   private readonly defaultConfig: BrowserConfig = {
     headless: true,
     defaultTimeout: 30000,
@@ -24,7 +24,7 @@ export class BrowserManager {
     this.setupGlobalCleanup();
   }
 
-  async createSession(config?: BrowserConfig): Promise<BrowserSession> {
+  async createSession(config?: BrowserConfig): Promise<Session> {
     try {
       const sessionConfig = { ...this.defaultConfig, ...config };
       const browser = await chromium.launch({
@@ -41,7 +41,7 @@ export class BrowserManager {
       const page = await context.newPage();
       page.setDefaultTimeout(sessionConfig.defaultTimeout ?? 1000);
 
-      const session: BrowserSession = {
+      const session: Session = {
         browser,
         page,
         id: uuidv4(),
@@ -83,7 +83,7 @@ export class BrowserManager {
     }
   }
 
-  private setupCleanup(session: BrowserSession): void {
+  private setupCleanup(session: Session): void {
     // Handle browser disconnection
     session.browser.on('disconnected', () => {
       this.sessions.delete(session.id);
@@ -139,7 +139,7 @@ export class BrowserManager {
     await Promise.all(closePromises);
   }
 
-  getSession(sessionId: string): BrowserSession {
+  getSession(sessionId: string): Session {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new BrowserError(

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { TokenTracker } from '../../core/tokens.js';
 import { ToolContext } from '../../core/types.js';
 import { MockLogger } from '../../utils/mockLogger.js';
-import { BrowserTracker } from '../browser/browserTracker.js';
+import { SessionTracker } from '../session/SessionTracker.js';
 import { ShellTracker } from '../shell/ShellTracker.js';
 
 import { agentExecuteTool } from './agentExecute.js';
@@ -37,7 +37,7 @@ const mockContext: ToolContext = {
   temperature: 0.7,
   agentTracker: new AgentTracker('test'),
   shellTracker: new ShellTracker('test'),
-  browserTracker: new BrowserTracker('test'),
+  browserTracker: new SessionTracker('test'),
 };
 
 describe('agentExecuteTool', () => {

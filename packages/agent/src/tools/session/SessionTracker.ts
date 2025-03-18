@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { BrowserManager } from './BrowserManager.js';
-import { browserSessions } from './types.js';
+import { SessionManager } from './lib/SessionManager.js';
+import { browserSessions } from './lib/types.js';
 
 // Status of a browser session
-export enum BrowserSessionStatus {
+export enum SessionStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   ERROR = 'error',
@@ -12,9 +12,9 @@ export enum BrowserSessionStatus {
 }
 
 // Browser session tracking data
-export interface BrowserSessionInfo {
+export interface SessionInfo {
   id: string;
-  status: BrowserSessionStatus;
+  status: SessionStatus;
   startTime: Date;
   endTime?: Date;
   metadata: {
@@ -29,17 +29,17 @@ export interface BrowserSessionInfo {
 /**
  * Registry to keep track of browser sessions
  */
-export class BrowserTracker {
-  private sessions: Map<string, BrowserSessionInfo> = new Map();
+export class SessionTracker {
+  private sessions: Map<string, SessionInfo> = new Map();
 
   constructor(public ownerAgentId: string | undefined) {}
 
   // Register a new browser session
   public registerBrowser(url?: string): string {
     const id = uuidv4();
-    const session: BrowserSessionInfo = {
+    const session: SessionInfo = {
       id,
-      status: BrowserSessionStatus.RUNNING,
+      status: SessionStatus.RUNNING,
       startTime: new Date(),
       metadata: {
         url,
@@ -52,7 +52,7 @@ export class BrowserTracker {
   // Update the status of a browser session
   public updateSessionStatus(
     id: string,
-    status: BrowserSessionStatus,
+    status: SessionStatus,
     metadata?: Record<string, any>,
   ): boolean {
     const session = this.sessions.get(id);
@@ -63,9 +63,9 @@ export class BrowserTracker {
     session.status = status;
 
     if (
-      status === BrowserSessionStatus.COMPLETED ||
-      status === BrowserSessionStatus.ERROR ||
-      status === BrowserSessionStatus.TERMINATED
+      status === SessionStatus.COMPLETED ||
+      status === SessionStatus.ERROR ||
+      status === SessionStatus.TERMINATED
     ) {
       session.endTime = new Date();
     }
@@ -78,19 +78,17 @@ export class BrowserTracker {
   }
 
   // Get all browser sessions
-  public getSessions(): BrowserSessionInfo[] {
+  public getSessions(): SessionInfo[] {
     return Array.from(this.sessions.values());
   }
 
   // Get a specific browser session by ID
-  public getSessionById(id: string): BrowserSessionInfo | undefined {
+  public getSessionById(id: string): SessionInfo | undefined {
     return this.sessions.get(id);
   }
 
   // Filter sessions by status
-  public getSessionsByStatus(
-    status: BrowserSessionStatus,
-  ): BrowserSessionInfo[] {
+  public getSessionsByStatus(status: SessionStatus): SessionInfo[] {
     return this.getSessions().filter((session) => session.status === status);
   }
 
@@ -99,11 +97,11 @@ export class BrowserTracker {
    * @returns A promise that resolves when cleanup is complete
    */
   public async cleanup(): Promise<void> {
-    const sessions = this.getSessionsByStatus(BrowserSessionStatus.RUNNING);
+    const sessions = this.getSessionsByStatus(SessionStatus.RUNNING);
 
     // Create cleanup promises for each session
     const cleanupPromises = sessions.map((session) =>
-      this.cleanupBrowserSession(session),
+      this.cleanupSession(session),
     );
 
     // Wait for all cleanup operations to complete in parallel
@@ -114,18 +112,16 @@ export class BrowserTracker {
    * Cleans up a browser session
    * @param session The browser session to clean up
    */
-  private async cleanupBrowserSession(
-    session: BrowserSessionInfo,
-  ): Promise<void> {
+  private async cleanupSession(session: SessionInfo): Promise<void> {
     try {
       const browserManager = (
-        globalThis as unknown as { __BROWSER_MANAGER__?: BrowserManager }
+        globalThis as unknown as { __BROWSER_MANAGER__?: SessionManager }
       ).__BROWSER_MANAGER__;
 
       if (browserManager) {
         await browserManager.closeSession(session.id);
       } else {
-        // Fallback to closing via browserSessions if BrowserManager is not available
+        // Fallback to closing via browserSessions if SessionManager is not available
         const browserSession = browserSessions.get(session.id);
         if (browserSession) {
           await browserSession.page.context().close();
@@ -134,9 +130,9 @@ export class BrowserTracker {
         }
       }
 
-      this.updateSessionStatus(session.id, BrowserSessionStatus.COMPLETED);
+      this.updateSessionStatus(session.id, SessionStatus.COMPLETED);
     } catch (error) {
-      this.updateSessionStatus(session.id, BrowserSessionStatus.ERROR, {
+      this.updateSessionStatus(session.id, SessionStatus.ERROR, {
         error: error instanceof Error ? error.message : String(error),
       });
     }

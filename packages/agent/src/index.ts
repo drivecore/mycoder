@@ -13,14 +13,14 @@ export * from './tools/shell/listShells.js';
 export * from './tools/shell/ShellTracker.js';
 
 // Tools - Browser
-export * from './tools/browser/BrowserManager.js';
-export * from './tools/browser/types.js';
-export * from './tools/browser/browseMessage.js';
-export * from './tools/browser/browseStart.js';
-export * from './tools/browser/PageController.js';
-export * from './tools/browser/BrowserAutomation.js';
-export * from './tools/browser/listBrowsers.js';
-export * from './tools/browser/browserTracker.js';
+export * from './tools/session/lib/SessionManager.js';
+export * from './tools/session/lib/types.js';
+export * from './tools/session/sessionMessage.js';
+export * from './tools/session/sessionStart.js';
+export * from './tools/session/lib/PageController.js';
+export * from './tools/session/lib/BrowserAutomation.js';
+export * from './tools/session/listSessions.js';
+export * from './tools/session/SessionTracker.js';
 
 export * from './tools/agent/AgentTracker.js';
 // Tools - Interaction
