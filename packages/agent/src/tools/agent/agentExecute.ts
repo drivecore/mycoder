@@ -45,22 +45,22 @@ type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
 // Sub-agent specific configuration
-const subAgentConfig: AgentConfig = {
+const agentExecuteConfig: AgentConfig = {
   maxIterations: 200,
   getSystemPrompt: (context: ToolContext) => {
     return [
       getDefaultSystemPrompt(context),
       'You are a focused AI sub-agent handling a specific task.',
       'You have access to the same tools as the main agent but should focus only on your assigned task.',
-      'When complete, call the sequenceComplete tool with your results.',
+      'When complete, call the agentComplete tool with your results.',
       'Follow any specific conventions or requirements provided in the task context.',
       'Ask the main agent for clarification if critical information is missing.',
     ].join('\n');
   },
 };
 
-export const subAgentTool: Tool<Parameters, ReturnType> = {
-  name: 'subAgent',
+export const agentExecuteTool: Tool<Parameters, ReturnType> = {
+  name: 'agentExecute',
   description:
     'Creates a sub-agent that has access to all tools to solve a specific task',
   logPrefix: '🤖',
@@ -81,13 +81,13 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
     } = parameterSchema.parse(params);
 
     // Register this sub-agent with the background tool registry
-    const subAgentId = backgroundTools.registerAgent(goal);
-    logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
+    const agentExecuteId = backgroundTools.registerAgent(goal);
+    logger.verbose(`Registered sub-agent with ID: ${agentExecuteId}`);
 
     const localContext = {
       ...context,
       workingDirectory: workingDirectory ?? context.workingDirectory,
-      backgroundTools: new BackgroundTools(`subAgent: ${goal}`),
+      backgroundTools: new BackgroundTools(`agentExecute: ${goal}`),
     };
 
     // Construct a well-structured prompt
@@ -105,9 +105,9 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
 
     const tools = getTools({ userPrompt: false });
 
-    // Use the subAgentConfig
+    // Use the agentExecuteConfig
     const config: AgentConfig = {
-      ...subAgentConfig,
+      ...agentExecuteConfig,
     };
 
     try {
@@ -115,7 +115,7 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
 
       // Update background tool registry with completed status
       backgroundTools.updateToolStatus(
-        subAgentId,
+        agentExecuteId,
         BackgroundToolStatus.COMPLETED,
         {
           result:
@@ -127,9 +127,13 @@ export const subAgentTool: Tool<Parameters, ReturnType> = {
       return { response: result.result };
     } catch (error) {
       // Update background tool registry with error status
-      backgroundTools.updateToolStatus(subAgentId, BackgroundToolStatus.ERROR, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      backgroundTools.updateToolStatus(
+        agentExecuteId,
+        BackgroundToolStatus.ERROR,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
 
       throw error;
     }

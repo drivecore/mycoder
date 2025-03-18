@@ -9,7 +9,7 @@ import {
   providerConfig,
   userPrompt,
   LogLevel,
-  subAgentTool,
+  agentExecuteTool,
   errorToString,
   DEFAULT_CONFIG,
   AgentConfig,
@@ -45,7 +45,7 @@ export async function executePrompt(
   const logger = new Logger({
     name: 'Default',
     logLevel: nameToLogIndex(config.logLevel),
-    customPrefix: subAgentTool.logPrefix,
+    customPrefix: agentExecuteTool.logPrefix,
   });
 
   logger.info(`MyCoder v${packageInfo.version} - AI-powered coding assistant`);
@@ -244,7 +244,7 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
       const logger = new Logger({
         name: 'Default',
         logLevel: nameToLogIndex(config.logLevel),
-        customPrefix: subAgentTool.logPrefix,
+        customPrefix: agentExecuteTool.logPrefix,
       });
 
       logger.error(

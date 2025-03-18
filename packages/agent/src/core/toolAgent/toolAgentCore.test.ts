@@ -13,7 +13,7 @@ describe('toolAgentCore empty response detection', () => {
         content: [
           {
             type: 'text',
-            text: 'I notice you sent an empty response. If you are done with your tasks, please call the sequenceComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
+            text: 'I notice you sent an empty response. If you are done with your tasks, please call the agentComplete tool with your results. If you are waiting for other tools to complete, you can use the sleep tool to wait before checking again.',
           },
         ],
       });

@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // These imports will be used by the cleanup method
+import { agentStates } from '../tools/agent/agentStart.js';
 import { BrowserManager } from '../tools/browser/BrowserManager.js';
-import { agentStates } from '../tools/interaction/agentStart.js';
-import { shellTracker } from '../tools/system/ShellTracker.js';
+import { shellTracker } from '../tools/shell/ShellTracker.js';
 
 // Types of background processes we can track
 export enum BackgroundToolType {
@@ -157,7 +157,7 @@ export class BackgroundTools {
       this.cleanupBrowserSession(tool),
     );
     const agentCleanupPromises = agentTools.map((tool) =>
-      this.cleanupSubAgent(tool),
+      this.cleanupagentExecute(tool),
     );
 
     // Clean up shell processes using ShellTracker
@@ -193,7 +193,7 @@ export class BackgroundTools {
    * Cleans up a sub-agent
    * @param tool The agent tool to clean up
    */
-  private async cleanupSubAgent(tool: AgentBackgroundTool): Promise<void> {
+  private async cleanupagentExecute(tool: AgentBackgroundTool): Promise<void> {
     try {
       const agentState = agentStates.get(tool.id);
       if (agentState && !agentState.aborted) {

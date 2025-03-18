@@ -146,7 +146,7 @@ export function getDefaultSystemPrompt(toolContext: ToolContext): string {
     githubModeInstructions,
     '',
     'You prefer to call tools in parallel when possible because it leads to faster execution and less resource usage.',
-    'When done, call the sequenceComplete tool with your results to indicate that the sequence has completed.',
+    'When done, call the agentComplete tool with your results to indicate that the sequence has completed.',
     '',
     'For coding tasks:',
     '0. Try to break large tasks into smaller sub-tasks that can be completed and verified sequentially.',

@@ -43,14 +43,7 @@ export const listShellsTool: Tool<Parameters, ReturnType> = {
   parametersJsonSchema: zodToJsonSchema(parameterSchema),
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
-  execute: async (
-    { status = 'all', verbose = false },
-    { logger },
-  ): Promise<ReturnType> => {
-    logger.verbose(
-      `Listing shell processes with status: ${status}, verbose: ${verbose}`,
-    );
-
+  execute: async ({ status = 'all', verbose = false }): Promise<ReturnType> => {
     // Get all shells
     let shells = shellTracker.getShells();
 

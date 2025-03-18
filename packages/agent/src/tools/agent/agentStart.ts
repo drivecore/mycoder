@@ -64,14 +64,14 @@ type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
 // Sub-agent specific configuration
-const subAgentConfig: AgentConfig = {
+const agentExecuteConfig: AgentConfig = {
   maxIterations: 200,
   getSystemPrompt: (context: ToolContext) => {
     return [
       getDefaultSystemPrompt(context),
       'You are a focused AI sub-agent handling a specific task.',
       'You have access to the same tools as the main agent but should focus only on your assigned task.',
-      'When complete, call the sequenceComplete tool with your results.',
+      'When complete, call the agentComplete tool with your results.',
       'Follow any specific conventions or requirements provided in the task context.',
       'Ask the main agent for clarification if critical information is missing.',
     ].join('\n');
@@ -140,7 +140,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     // eslint-disable-next-line promise/catch-or-return
     Promise.resolve().then(async () => {
       try {
-        const result = await toolAgent(prompt, tools, subAgentConfig, {
+        const result = await toolAgent(prompt, tools, agentExecuteConfig, {
           ...context,
           workingDirectory: workingDirectory ?? context.workingDirectory,
         });

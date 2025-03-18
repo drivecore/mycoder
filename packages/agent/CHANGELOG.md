@@ -1,9 +1,8 @@
 # [mycoder-agent-v1.4.2](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.1...mycoder-agent-v1.4.2) (2025-03-14)
 
-
 ### Bug Fixes
 
-* improve profiling ([79a3df2](https://github.com/drivecore/mycoder/commit/79a3df2db13b8372666c6604ebe1666d33663be9))
+- improve profiling ([79a3df2](https://github.com/drivecore/mycoder/commit/79a3df2db13b8372666c6604ebe1666d33663be9))
 
 # [mycoder-agent-v1.4.1](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.0...mycoder-agent-v1.4.1) (2025-03-14)
 
@@ -56,7 +55,7 @@
 - llm choice working well for openai, anthropic and ollama ([68d34ab](https://github.com/drivecore/mycoder/commit/68d34abf8a73ed533a072359ce334a9364753425))
 - **openai:** add OpenAI dependency to agent package and enable provider in config ([30b0807](https://github.com/drivecore/mycoder/commit/30b0807d4f3ecdd24f53b7ee4160645a4ed10444))
 - replace @semantic-release/npm with @anolilab/semantic-release-pnpm to properly resolve workspace references ([bacb51f](https://github.com/drivecore/mycoder/commit/bacb51f637f2b2d3b1039bdfdbd33e3d704b6cde))
-- up subagent iterations to 200 from 50 ([b405f1e](https://github.com/drivecore/mycoder/commit/b405f1e6d62eb5304dc1aa6c0ff28dc49dc67dce))
+- up agentExecute iterations to 200 from 50 ([b405f1e](https://github.com/drivecore/mycoder/commit/b405f1e6d62eb5304dc1aa6c0ff28dc49dc67dce))
 
 ### Features
 

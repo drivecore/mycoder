@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 // Import mocked modules
+import { agentStates } from '../tools/agent/agentStart.js';
 import { BrowserManager } from '../tools/browser/BrowserManager.js';
-import { agentStates } from '../tools/interaction/agentStart.js';
-import { shellTracker } from '../tools/system/ShellTracker.js';
+import { shellTracker } from '../tools/shell/ShellTracker.js';
 
 import { BackgroundTools, BackgroundToolStatus } from './backgroundTools';
 import { Tool } from './types';
@@ -43,7 +43,7 @@ vi.mock('../tools/browser/BrowserManager.js', () => {
   };
 });
 
-vi.mock('../tools/system/ShellTracker.js', () => {
+vi.mock('../tools/shell/ShellTracker.js', () => {
   return {
     shellTracker: {
       processStates: new Map<string, MockProcessState>(),
@@ -52,7 +52,7 @@ vi.mock('../tools/system/ShellTracker.js', () => {
   };
 });
 
-vi.mock('../tools/interaction/agentStart.js', () => {
+vi.mock('../tools/agent/agentStart.js', () => {
   return {
     agentStates: new Map<string, MockAgentState>(),
   };

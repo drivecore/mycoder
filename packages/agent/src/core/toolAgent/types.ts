@@ -7,7 +7,7 @@ export interface ToolAgentResult {
 }
 
 export interface ToolCallResult {
-  sequenceCompleted: boolean;
+  agentCompleted: boolean;
   completionResult?: string;
   toolResults: unknown[];
   respawn?: { context: string };

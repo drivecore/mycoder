@@ -32,8 +32,8 @@ const returnSchema = z.object({
 type Parameters = z.infer<typeof parameterSchema>;
 type ReturnType = z.infer<typeof returnSchema>;
 
-export const browseStartTool: Tool<Parameters, ReturnType> = {
-  name: 'browseStart',
+export const sessionStartTool: Tool<Parameters, ReturnType> = {
+  name: 'sessionStart',
   logPrefix: '🏄',
   description: 'Starts a new browser session with optional initial URL',
   parameters: parameterSchema,

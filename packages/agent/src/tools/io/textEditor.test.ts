@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ToolContext } from '../../core/types.js';
 import { MockLogger } from '../../utils/mockLogger.js';
 import { getMockToolContext } from '../getTools.test.js';
-import { shellExecuteTool } from '../system/shellExecute.js';
+import { shellExecuteTool } from '../shell/shellExecute.js';
 
 import { textEditorTool } from './textEditor.js';
 

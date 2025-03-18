@@ -32,7 +32,7 @@ export async function executeTools(
   context: ToolContext,
 ): Promise<ToolCallResult> {
   if (toolCalls.length === 0) {
-    return { sequenceCompleted: false, toolResults: [] };
+    return { agentCompleted: false, toolResults: [] };
   }
 
   const { logger } = context;
@@ -46,7 +46,7 @@ export async function executeTools(
     addToolResultToMessages(messages, respawnCall.id, { success: true }, false);
 
     return {
-      sequenceCompleted: false,
+      agentCompleted: false,
       toolResults: [
         {
           toolCallId: respawnCall.id,
@@ -97,19 +97,19 @@ export async function executeTools(
     }),
   );
 
-  const sequenceCompletedTool = toolResults.find(
-    (r) => r.toolName === 'sequenceComplete',
+  const agentCompletedTool = toolResults.find(
+    (r) => r.toolName === 'agentComplete',
   );
-  const completionResult = sequenceCompletedTool
-    ? (sequenceCompletedTool.result as { result: string }).result
+  const completionResult = agentCompletedTool
+    ? (agentCompletedTool.result as { result: string }).result
     : undefined;
 
-  if (sequenceCompletedTool) {
+  if (agentCompletedTool) {
     logger.verbose('Sequence completed', { completionResult });
   }
 
   return {
-    sequenceCompleted: sequenceCompletedTool !== undefined,
+    agentCompleted: agentCompletedTool !== undefined,
     completionResult,
     toolResults,
   };
