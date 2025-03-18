@@ -9,6 +9,7 @@ import { userPromptTool } from './interaction/userPrompt.js';
 import { fetchTool } from './io/fetch.js';
 import { textEditorTool } from './io/textEditor.js';
 import { createMcpTool } from './mcp.js';
+import { listAgentsTool } from './system/listAgents.js';
 import { listBackgroundToolsTool } from './system/listBackgroundTools.js';
 import { listShellsTool } from './system/listShells.js';
 import { sequenceCompleteTool } from './system/sequenceComplete.js';
@@ -43,6 +44,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     sleepTool as unknown as Tool,
     listBackgroundToolsTool as unknown as Tool,
     listShellsTool as unknown as Tool,
+    listAgentsTool as unknown as Tool,
   ];
 
   // Only include userPrompt tool if enabled

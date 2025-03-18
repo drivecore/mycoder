@@ -3,35 +3,27 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 // Import mocked modules
 import { BrowserManager } from '../tools/browser/BrowserManager.js';
 import { agentStates } from '../tools/interaction/agentStart.js';
+import { agentTracker } from '../tools/interaction/agentTracker.js';
 import { shellTracker } from '../tools/system/ShellTracker.js';
 
 import { BackgroundTools, BackgroundToolStatus } from './backgroundTools';
-import { Tool } from './types';
+
+// Import the ChildProcess type for mocking
+import type { ChildProcess } from 'child_process';
 
 // Define types for our mocks that match the actual types
 type MockProcessState = {
-  process: { kill: ReturnType<typeof vi.fn> };
-  state: { completed: boolean };
-  command?: string;
-  stdout?: string[];
-  stderr?: string[];
-  showStdIn?: boolean;
-  showStdout?: boolean;
-};
-
-type MockAgentState = {
-  aborted: boolean;
-  completed: boolean;
-  context: {
-    backgroundTools: {
-      cleanup: ReturnType<typeof vi.fn>;
-    };
+  process: ChildProcess & { kill: ReturnType<typeof vi.fn> };
+  state: {
+    completed: boolean;
+    signaled: boolean;
+    exitCode: number | null;
   };
-  goal?: string;
-  prompt?: string;
-  output?: string;
-  workingDirectory?: string;
-  tools?: Tool[];
+  command: string;
+  stdout: string[];
+  stderr: string[];
+  showStdIn: boolean;
+  showStdout: boolean;
 };
 
 // Mock dependencies
@@ -52,9 +44,28 @@ vi.mock('../tools/system/ShellTracker.js', () => {
   };
 });
 
-vi.mock('../tools/interaction/agentStart.js', () => {
+vi.mock('../tools/interaction/agentTracker.js', () => {
   return {
-    agentStates: new Map<string, MockAgentState>(),
+    agentTracker: {
+      terminateAgent: vi.fn().mockResolvedValue(undefined),
+      getAgentState: vi.fn().mockImplementation((id: string) => {
+        return {
+          id,
+          aborted: false,
+          completed: false,
+          context: {
+            backgroundTools: {
+              cleanup: vi.fn().mockResolvedValue(undefined),
+            },
+          },
+          goal: 'test goal',
+          prompt: 'test prompt',
+          output: '',
+          workingDirectory: '/test',
+          tools: [],
+        };
+      }),
+    },
   };
 });
 
@@ -78,11 +89,19 @@ describe('BackgroundTools cleanup', () => {
     // Setup mock process states
     const mockProcess = {
       kill: vi.fn(),
-    };
+      stdin: null,
+      stdout: null,
+      stderr: null,
+      stdio: null,
+    } as unknown as ChildProcess & { kill: ReturnType<typeof vi.fn> };
 
     const mockProcessState: MockProcessState = {
       process: mockProcess,
-      state: { completed: false },
+      state: {
+        completed: false,
+        signaled: false,
+        exitCode: null,
+      },
       command: 'test command',
       stdout: [],
       stderr: [],
@@ -93,24 +112,8 @@ describe('BackgroundTools cleanup', () => {
     shellTracker.processStates.clear();
     shellTracker.processStates.set('shell-1', mockProcessState as any);
 
-    // Setup mock agent states
-    const mockAgentState: MockAgentState = {
-      aborted: false,
-      completed: false,
-      context: {
-        backgroundTools: {
-          cleanup: vi.fn().mockResolvedValue(undefined),
-        },
-      },
-      goal: 'test goal',
-      prompt: 'test prompt',
-      output: '',
-      workingDirectory: '/test',
-      tools: [],
-    };
-
-    agentStates.clear();
-    agentStates.set('agent-1', mockAgentState as any);
+    // Reset the agentTracker mock
+    vi.mocked(agentTracker.terminateAgent).mockClear();
   });
 
   afterEach(() => {
@@ -156,21 +159,11 @@ describe('BackgroundTools cleanup', () => {
     // Register an agent tool
     const agentId = backgroundTools.registerAgent('Test goal');
 
-    // Get mock agent state
-    const mockAgentState = agentStates.get('agent-1');
-
-    // Set the agent ID to match
-    agentStates.set(agentId, agentStates.get('agent-1') as any);
-
     // Run cleanup
     await backgroundTools.cleanup();
 
-    // Check that agent was marked as aborted
-    expect(mockAgentState?.aborted).toBe(true);
-    expect(mockAgentState?.completed).toBe(true);
-
-    // Check that cleanup was called on the agent's background tools
-    expect(mockAgentState?.context.backgroundTools.cleanup).toHaveBeenCalled();
+    // Check that terminateAgent was called with the agent ID
+    expect(agentTracker.terminateAgent).toHaveBeenCalledWith(agentId);
 
     // Check that tool status was updated
     const tool = backgroundTools.getToolById(agentId);
