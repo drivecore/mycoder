@@ -19,6 +19,7 @@ export type Config = {
   userPrompt: boolean;
   upgradeCheck: boolean;
   tokenUsage: boolean;
+  interactive: boolean;
 
   baseUrl?: string;
 
@@ -53,7 +54,7 @@ export type Config = {
 
 // Default configuration
 const defaultConfig: Config = {
-  logLevel: 'info',
+  logLevel: 'log',
 
   // GitHub integration
   githubMode: true,
@@ -75,6 +76,7 @@ const defaultConfig: Config = {
   userPrompt: true,
   upgradeCheck: true,
   tokenUsage: false,
+  interactive: false,
 
   // MCP configuration
   mcp: {
@@ -100,6 +102,7 @@ export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {
     userPrompt: argv.userPrompt,
     upgradeCheck: argv.upgradeCheck,
     tokenUsage: argv.tokenUsage,
+    interactive: argv.interactive,
   };
 };
 

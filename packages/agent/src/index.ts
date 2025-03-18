@@ -25,6 +25,7 @@ export * from './tools/agent/AgentTracker.js';
 // Tools - Interaction
 export * from './tools/agent/agentExecute.js';
 export * from './tools/interaction/userPrompt.js';
+export * from './tools/interaction/userMessage.js';
 
 // Core
 export * from './core/executeToolCall.js';
@@ -49,3 +50,4 @@ export * from './utils/logger.js';
 export * from './utils/mockLogger.js';
 export * from './utils/stringifyLimited.js';
 export * from './utils/userPrompt.js';
+export * from './utils/interactiveInput.js';

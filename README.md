@@ -35,6 +35,9 @@ mycoder "Implement a React component that displays a list of items"
 # Run with a prompt from a file
 mycoder -f prompt.txt
 
+# Enable interactive corrections during execution (press Ctrl+M to send corrections)
+mycoder --interactive "Implement a React component that displays a list of items"
+
 # Disable user prompts for fully automated sessions
 mycoder --userPrompt false "Generate a basic Express.js server"
 
@@ -118,6 +121,35 @@ export default {
 ```
 
 CLI arguments will override settings in your configuration file.
+
+## Interactive Corrections
+
+MyCoder supports sending corrections to the main agent while it's running. This is useful when you notice the agent is going off track or needs additional information.
+
+### Usage
+
+1. Start MyCoder with the `--interactive` flag:
+   ```bash
+   mycoder --interactive "Implement a React component"
+   ```
+
+2. While the agent is running, press `Ctrl+M` to enter correction mode
+3. Type your correction or additional context
+4. Press Enter to send the correction to the agent
+
+The agent will receive your message and incorporate it into its decision-making process, similar to how parent agents can send messages to sub-agents.
+
+### Configuration
+
+You can enable interactive corrections in your configuration file:
+
+```js
+// mycoder.config.js
+export default {
+  // ... other options
+  interactive: true,
+};
+```
 
 ### GitHub Comment Commands
 

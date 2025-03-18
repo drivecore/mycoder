@@ -7,7 +7,7 @@ import {
 } from '../../core/toolAgent/config.js';
 import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
-import { LogLevel, LoggerListener } from '../../utils/logger.js';
+import { LogLevel, Logger, LoggerListener } from '../../utils/logger.js';
 import { getTools } from '../getTools.js';
 
 import { AgentStatus, AgentState } from './AgentTracker.js';
@@ -161,7 +161,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       });
       // Add the listener to the sub-agent logger as well
       subAgentLogger.listeners.push(logCaptureListener);
-    } catch (e) {
+    } catch {
       // If Logger instantiation fails (e.g., in tests), fall back to using the context logger
       context.logger.debug('Failed to create sub-agent logger, using context logger instead');
     }

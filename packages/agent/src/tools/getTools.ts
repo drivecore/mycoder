@@ -8,6 +8,7 @@ import { agentStartTool } from './agent/agentStart.js';
 import { listAgentsTool } from './agent/listAgents.js';
 import { fetchTool } from './fetch/fetch.js';
 import { userPromptTool } from './interaction/userPrompt.js';
+import { userMessageTool } from './interaction/userMessage.js';
 import { createMcpTool } from './mcp.js';
 import { listSessionsTool } from './session/listSessions.js';
 import { sessionMessageTool } from './session/sessionMessage.js';
@@ -52,9 +53,10 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     waitTool as unknown as Tool,
   ];
 
-  // Only include userPrompt tool if enabled
+  // Only include user interaction tools if enabled
   if (userPrompt) {
     tools.push(userPromptTool as unknown as Tool);
+    tools.push(userMessageTool as unknown as Tool);
   }
 
   // Add MCP tool if we have any servers configured
