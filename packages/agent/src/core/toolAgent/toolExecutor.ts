@@ -37,7 +37,7 @@ export async function executeTools(
 
   const { logger } = context;
 
-  logger.verbose(`Executing ${toolCalls.length} tool calls`);
+  logger.debug(`Executing ${toolCalls.length} tool calls`);
 
   const toolResults = await Promise.all(
     toolCalls.map(async (call) => {
@@ -82,7 +82,7 @@ export async function executeTools(
     : undefined;
 
   if (agentDonedTool) {
-    logger.verbose('Sequence completed', { completionResult });
+    logger.debug('Sequence completed', { completionResult });
   }
 
   return {

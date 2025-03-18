@@ -24,11 +24,11 @@ export const userPromptTool: Tool<Parameters, ReturnType> = {
   returns: returnSchema,
   returnsJsonSchema: zodToJsonSchema(returnSchema),
   execute: async ({ prompt }, { logger }) => {
-    logger.verbose(`Prompting user with: ${prompt}`);
+    logger.debug(`Prompting user with: ${prompt}`);
 
     const response = await userPrompt(prompt);
 
-    logger.verbose(`Received user response: ${response}`);
+    logger.debug(`Received user response: ${response}`);
 
     return { userText: response };
   },

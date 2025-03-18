@@ -82,7 +82,7 @@ export const agentExecuteTool: Tool<Parameters, ReturnType> = {
 
     // Register this sub-agent with the background tool registry
     const subAgentId = agentTracker.registerAgent(goal);
-    logger.verbose(`Registered sub-agent with ID: ${subAgentId}`);
+    logger.debug(`Registered sub-agent with ID: ${subAgentId}`);
 
     const localContext = {
       ...context,
@@ -127,7 +127,7 @@ export const agentExecuteTool: Tool<Parameters, ReturnType> = {
     }
   },
   logParameters: (input, { logger }) => {
-    logger.info(`Delegating task "${input.description}"`);
+    logger.log(`Delegating task "${input.description}"`);
   },
   logReturns: () => {},
 };

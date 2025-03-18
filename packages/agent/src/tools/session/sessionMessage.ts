@@ -84,8 +84,8 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
       };
     }
 
-    logger.verbose(`Executing browser action: ${actionType}`);
-    logger.verbose(`Webpage processing mode: ${pageFilter}`);
+    logger.debug(`Executing browser action: ${actionType}`);
+    logger.debug(`Webpage processing mode: ${pageFilter}`);
 
     try {
       const session = browserSessions.get(instanceId);
@@ -103,24 +103,22 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
 
           try {
             // Try with 'domcontentloaded' first which is more reliable than 'networkidle'
-            logger.verbose(
+            logger.debug(
               `Navigating to ${url} with 'domcontentloaded' waitUntil`,
             );
             await page.goto(url, { waitUntil: 'domcontentloaded' });
             await sleep(3000);
             const content = await filterPageContent(page, pageFilter);
-            logger.verbose(`Content: ${content}`);
-            logger.verbose(
-              'Navigation completed with domcontentloaded strategy',
-            );
-            logger.verbose(`Content length: ${content.length} characters`);
+            logger.debug(`Content: ${content}`);
+            logger.debug('Navigation completed with domcontentloaded strategy');
+            logger.debug(`Content length: ${content.length} characters`);
             return { status: 'success', content };
           } catch (navError) {
             // If that fails, try with no waitUntil option
             logger.warn(
               `Failed with domcontentloaded strategy: ${errorToString(navError)}`,
             );
-            logger.verbose(
+            logger.debug(
               `Retrying navigation to ${url} with no waitUntil option`,
             );
 
@@ -128,8 +126,8 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
               await page.goto(url);
               await sleep(3000);
               const content = await filterPageContent(page, pageFilter);
-              logger.verbose(`Content: ${content}`);
-              logger.verbose('Navigation completed with basic strategy');
+              logger.debug(`Content: ${content}`);
+              logger.debug('Navigation completed with basic strategy');
               return { status: 'success', content };
             } catch (innerError) {
               logger.error(
@@ -148,9 +146,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
           await page.click(clickSelector);
           await sleep(1000); // Wait for any content changes after click
           const content = await filterPageContent(page, pageFilter);
-          logger.verbose(
-            `Click action completed on selector: ${clickSelector}`,
-          );
+          logger.debug(`Click action completed on selector: ${clickSelector}`);
           return { status: 'success', content };
         }
 
@@ -160,7 +156,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
           }
           const typeSelector = getSelector(selector, selectorType);
           await page.fill(typeSelector, text);
-          logger.verbose(`Type action completed on selector: ${typeSelector}`);
+          logger.debug(`Type action completed on selector: ${typeSelector}`);
           return { status: 'success' };
         }
 
@@ -170,14 +166,14 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
           }
           const waitSelector = getSelector(selector, selectorType);
           await page.waitForSelector(waitSelector);
-          logger.verbose(`Wait action completed for selector: ${waitSelector}`);
+          logger.debug(`Wait action completed for selector: ${waitSelector}`);
           return { status: 'success' };
         }
 
         case 'content': {
           const content = await filterPageContent(page, pageFilter);
-          logger.verbose('Page content retrieved successfully');
-          logger.verbose(`Content length: ${content.length} characters`);
+          logger.debug('Page content retrieved successfully');
+          logger.debug(`Content length: ${content.length} characters`);
           return { status: 'success', content };
         }
 
@@ -195,7 +191,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
             },
           );
 
-          logger.verbose('Browser session closed successfully');
+          logger.debug('Browser session closed successfully');
           return { status: 'closed' };
         }
 
@@ -223,7 +219,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     { actionType, description },
     { logger, pageFilter = 'simple' },
   ) => {
-    logger.info(
+    logger.log(
       `Performing browser action: ${actionType} with ${pageFilter} processing, ${description}`,
     );
   },
@@ -232,7 +228,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     if (output.error) {
       logger.error(`Browser action failed: ${output.error}`);
     } else {
-      logger.info(`Browser action completed with status: ${output.status}`);
+      logger.log(`Browser action completed with status: ${output.status}`);
     }
   },
 };

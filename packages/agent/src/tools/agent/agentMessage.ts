@@ -60,7 +60,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
     { instanceId, guidance, terminate },
     { logger, ..._ },
   ): Promise<ReturnType> => {
-    logger.verbose(
+    logger.debug(
       `Interacting with sub-agent ${instanceId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
     );
 
@@ -98,21 +98,35 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       // Add guidance to the agent state's parentMessages array
       // The sub-agent will check for these messages on each iteration
       if (guidance) {
-        logger.info(
-          `Guidance provided to sub-agent ${instanceId}: ${guidance}`,
-        );
+        logger.log(`Guidance provided to sub-agent ${instanceId}: ${guidance}`);
 
         // Add the guidance to the parentMessages array
         agentState.parentMessages.push(guidance);
 
-        logger.verbose(
+        logger.debug(
           `Added message to sub-agent ${instanceId}'s parentMessages queue. Total messages: ${agentState.parentMessages.length}`,
         );
       }
 
-      // Get the current output, reset it to an empty string
-      const output =
+      // Get the current output and captured logs
+      let output =
         agentState.result?.result || agentState.output || 'No output yet';
+
+      // Append captured logs if there are any
+      if (agentState.capturedLogs && agentState.capturedLogs.length > 0) {
+        // Only append logs if there's actual output or if logs are the only content
+        if (output !== 'No output yet' || agentState.capturedLogs.length > 0) {
+          const logContent = agentState.capturedLogs.join('\n');
+          output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
+          
+          // Log that we're returning captured logs
+          logger.debug(`Returning ${agentState.capturedLogs.length} captured log messages for agent ${instanceId}`);
+        }
+        // Clear the captured logs after retrieving them
+        agentState.capturedLogs = [];
+      }
+
+      // Reset the output to an empty string
       agentState.output = '';
 
       return {
@@ -124,7 +138,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       };
     } catch (error) {
       if (error instanceof Error) {
-        logger.verbose(`Sub-agent interaction failed: ${error.message}`);
+        logger.debug(`Sub-agent interaction failed: ${error.message}`);
 
         return {
           output: '',
@@ -150,7 +164,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (input, { logger }) => {
-    logger.info(
+    logger.log(
       `Interacting with sub-agent ${input.instanceId}, ${input.description}${input.terminate ? ' (terminating)' : ''}`,
     );
   },
@@ -158,15 +172,15 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
     if (output.error) {
       logger.error(`Sub-agent interaction error: ${output.error}`);
     } else if (output.terminated) {
-      logger.info('Sub-agent was terminated');
+      logger.log('Sub-agent was terminated');
     } else if (output.completed) {
-      logger.info('Sub-agent has completed its task');
+      logger.log('Sub-agent has completed its task');
     } else {
-      logger.info('Sub-agent is still running');
+      logger.log('Sub-agent is still running');
     }
 
     if (output.messageSent) {
-      logger.info(
+      logger.log(
         `Message sent to sub-agent. Queue now has ${output.messageCount || 0} message(s).`,
       );
     }

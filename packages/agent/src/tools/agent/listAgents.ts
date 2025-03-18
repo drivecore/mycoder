@@ -48,9 +48,7 @@ export const listAgentsTool: Tool<Parameters, ReturnType> = {
     { status = 'all', verbose = false },
     { logger, agentTracker },
   ): Promise<ReturnType> => {
-    logger.verbose(
-      `Listing agents with status: ${status}, verbose: ${verbose}`,
-    );
+    logger.debug(`Listing agents with status: ${status}, verbose: ${verbose}`);
 
     // Get all agents
     let agents = agentTracker.getAgents();
@@ -107,10 +105,10 @@ export const listAgentsTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: ({ status = 'all', verbose = false }, { logger }) => {
-    logger.info(`Listing agents with status: ${status}, verbose: ${verbose}`);
+    logger.log(`Listing agents with status: ${status}, verbose: ${verbose}`);
   },
 
   logReturns: (output, { logger }) => {
-    logger.info(`Found ${output.count} agents`);
+    logger.log(`Found ${output.count} agents`);
   },
 };

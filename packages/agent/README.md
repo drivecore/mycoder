@@ -84,9 +84,11 @@ MyCoder Agent supports the Model Context Protocol:
 ### Agent Management
 
 - **agentStart**: Create sub-agents for parallel tasks
-- **agentMessage**: Send messages to sub-agents
+- **agentMessage**: Send messages to sub-agents and retrieve their output (including captured logs)
 - **agentDone**: Complete the current agent's execution
 - **listAgents**: List all running agents
+
+The agent system automatically captures log, warn, and error messages from agents and their immediate tools, which are included in the output returned by agentMessage.
 
 ### Network & Web
 

@@ -7,7 +7,7 @@ describe('toolAgentCore empty response detection', () => {
     const fileContent = `
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
-      logger.verbose('Received truly empty response from agent (no text and no tool calls), sending reminder');
+      logger.debug('Received truly empty response from agent (no text and no tool calls), sending reminder');
       messages.push({
         role: 'user',
         content: [

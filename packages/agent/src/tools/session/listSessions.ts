@@ -49,7 +49,7 @@ export const listSessionsTool: Tool<Parameters, ReturnType> = {
     { status = 'all', verbose = false },
     { logger, browserTracker, ..._ },
   ): Promise<ReturnType> => {
-    logger.verbose(
+    logger.debug(
       `Listing browser sessions with status: ${status}, verbose: ${verbose}`,
     );
 
@@ -91,12 +91,12 @@ export const listSessionsTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: ({ status = 'all', verbose = false }, { logger }) => {
-    logger.info(
+    logger.log(
       `Listing browser sessions with status: ${status}, verbose: ${verbose}`,
     );
   },
 
   logReturns: (output, { logger }) => {
-    logger.info(`Found ${output.count} browser sessions`);
+    logger.log(`Found ${output.count} browser sessions`);
   },
 };

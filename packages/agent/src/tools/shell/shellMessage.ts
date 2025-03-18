@@ -97,7 +97,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
     { instanceId, stdin, signal, showStdIn, showStdout },
     { logger, shellTracker },
   ): Promise<ReturnType> => {
-    logger.verbose(
+    logger.debug(
       `Interacting with shell process ${instanceId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
     );
 
@@ -123,7 +123,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
             signalAttempted: signal,
           });
 
-          logger.verbose(
+          logger.debug(
             `Failed to send signal ${signal}: ${String(error)}, but marking as signaled anyway`,
           );
         }
@@ -156,7 +156,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
         const shouldShowStdIn =
           showStdIn !== undefined ? showStdIn : processState.showStdIn;
         if (shouldShowStdIn) {
-          logger.info(`[${instanceId}] stdin: ${stdin}`);
+          logger.log(`[${instanceId}] stdin: ${stdin}`);
         }
 
         // No special handling for 'cat' command - let the actual process handle the echo
@@ -179,22 +179,22 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
       processState.stdout = [];
       processState.stderr = [];
 
-      logger.verbose('Interaction completed successfully');
+      logger.debug('Interaction completed successfully');
 
       // Determine whether to show stdout (prefer explicit parameter, fall back to process state)
       const shouldShowStdout =
         showStdout !== undefined ? showStdout : processState.showStdout;
 
       if (stdout) {
-        logger.verbose(`stdout: ${stdout.trim()}`);
+        logger.debug(`stdout: ${stdout.trim()}`);
         if (shouldShowStdout) {
-          logger.info(`[${instanceId}] stdout: ${stdout.trim()}`);
+          logger.log(`[${instanceId}] stdout: ${stdout.trim()}`);
         }
       }
       if (stderr) {
-        logger.verbose(`stderr: ${stderr.trim()}`);
+        logger.debug(`stderr: ${stderr.trim()}`);
         if (shouldShowStdout) {
-          logger.info(`[${instanceId}] stderr: ${stderr.trim()}`);
+          logger.log(`[${instanceId}] stderr: ${stderr.trim()}`);
         }
       }
 
@@ -206,7 +206,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
       };
     } catch (error) {
       if (error instanceof Error) {
-        logger.verbose(`Process interaction failed: ${error.message}`);
+        logger.debug(`Process interaction failed: ${error.message}`);
 
         return {
           stdout: '',
@@ -238,7 +238,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
         ? input.showStdout
         : processState?.showStdout || false;
 
-    logger.info(
+    logger.log(
       `Interacting with shell command "${processState ? processState.command : '<unknown instanceId>'}", ${input.description} (showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
     );
   },

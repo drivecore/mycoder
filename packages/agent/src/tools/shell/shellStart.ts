@@ -84,9 +84,9 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
     { logger, workingDirectory, shellTracker },
   ): Promise<ReturnType> => {
     if (showStdIn) {
-      logger.info(`Command input: ${command}`);
+      logger.log(`Command input: ${command}`);
     }
-    logger.verbose(`Starting shell command: ${command}`);
+    logger.debug(`Starting shell command: ${command}`);
 
     return new Promise((resolve) => {
       try {
@@ -124,7 +124,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           process.stdout.on('data', (data) => {
             const output = data.toString();
             processState.stdout.push(output);
-            logger[processState.showStdout ? 'info' : 'verbose'](
+            logger[processState.showStdout ? 'log' : 'debug'](
               `[${instanceId}] stdout: ${output.trim()}`,
             );
           });
@@ -133,7 +133,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           process.stderr.on('data', (data) => {
             const output = data.toString();
             processState.stderr.push(output);
-            logger[processState.showStdout ? 'info' : 'verbose'](
+            logger[processState.showStdout ? 'log' : 'debug'](
               `[${instanceId}] stderr: ${output.trim()}`,
             );
           });
@@ -160,7 +160,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         });
 
         process.on('exit', (code, signal) => {
-          logger.verbose(
+          logger.debug(
             `[${instanceId}] Process exited with code ${code} and signal ${signal}`,
           );
 
@@ -240,13 +240,13 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
     },
     { logger },
   ) => {
-    logger.info(
+    logger.log(
       `Running "${command}", ${description} (timeout: ${timeout}ms, showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
     );
   },
   logReturns: (output, { logger }) => {
     if (output.mode === 'async') {
-      logger.info(`Process started with instance ID: ${output.instanceId}`);
+      logger.log(`Process started with instance ID: ${output.instanceId}`);
     } else {
       if (output.exitCode !== 0) {
         logger.error(`Process quit with exit code: ${output.exitCode}`);

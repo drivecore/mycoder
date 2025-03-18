@@ -56,7 +56,7 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
     { command, timeout = 30000 },
     { logger },
   ): Promise<ReturnType> => {
-    logger.verbose(
+    logger.debug(
       `Executing shell command with ${timeout}ms timeout: ${command}`,
     );
 
@@ -66,10 +66,10 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
         maxBuffer: 10 * 1024 * 1024, // 10MB buffer
       });
 
-      logger.verbose('Command executed successfully');
-      logger.verbose(`stdout: ${stdout.trim()}`);
+      logger.debug('Command executed successfully');
+      logger.debug(`stdout: ${stdout.trim()}`);
       if (stderr.trim()) {
-        logger.verbose(`stderr: ${stderr.trim()}`);
+        logger.debug(`stderr: ${stderr.trim()}`);
       }
 
       return {
@@ -84,7 +84,7 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
         const execError = error as ExtendedExecException;
         const isTimeout = error.message.includes('timeout');
 
-        logger.verbose(`Command execution failed: ${error.message}`);
+        logger.debug(`Command execution failed: ${error.message}`);
 
         return {
           error: isTimeout
@@ -109,7 +109,7 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
     }
   },
   logParameters: (input, { logger }) => {
-    logger.info(`Running "${input.command}", ${input.description}`);
+    logger.log(`Running "${input.command}", ${input.description}`);
   },
   logReturns: () => {},
 };

@@ -51,11 +51,9 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       ..._ // Unused parameters
     },
   ): Promise<ReturnType> => {
-    logger.verbose(`Starting browser session${url ? ` at ${url}` : ''}`);
-    logger.verbose(
-      `User session mode: ${userSession ? 'enabled' : 'disabled'}`,
-    );
-    logger.verbose(`Webpage processing mode: ${pageFilter}`);
+    logger.debug(`Starting browser session${url ? ` at ${url}` : ''}`);
+    logger.debug(`User session mode: ${userSession ? 'enabled' : 'disabled'}`);
+    logger.debug(`Webpage processing mode: ${pageFilter}`);
 
     try {
       // Register this browser session with the tracker
@@ -68,7 +66,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
 
       // Use system Chrome installation if userSession is true
       if (userSession) {
-        logger.verbose('Using system Chrome installation');
+        logger.debug('Using system Chrome installation');
         // For Chrome, we use the channel option to specify Chrome
         launchOptions['channel'] = 'chrome';
       }
@@ -111,20 +109,20 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       if (url) {
         try {
           // Try with 'domcontentloaded' first which is more reliable than 'networkidle'
-          logger.verbose(
+          logger.debug(
             `Navigating to ${url} with 'domcontentloaded' waitUntil`,
           );
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
           await sleep(3000);
           content = await filterPageContent(page, pageFilter);
-          logger.verbose(`Content: ${content}`);
-          logger.verbose('Navigation completed with domcontentloaded strategy');
+          logger.debug(`Content: ${content}`);
+          logger.debug('Navigation completed with domcontentloaded strategy');
         } catch (error) {
           // If that fails, try with no waitUntil option at all (most basic)
           logger.warn(
             `Failed with domcontentloaded strategy: ${errorToString(error)}`,
           );
-          logger.verbose(
+          logger.debug(
             `Retrying navigation to ${url} with no waitUntil option`,
           );
 
@@ -132,8 +130,8 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
             await page.goto(url, { timeout });
             await sleep(3000);
             content = await filterPageContent(page, pageFilter);
-            logger.verbose(`Content: ${content}`);
-            logger.verbose('Navigation completed with basic strategy');
+            logger.debug(`Content: ${content}`);
+            logger.debug('Navigation completed with basic strategy');
           } catch (innerError) {
             logger.error(
               `Failed with basic navigation strategy: ${errorToString(innerError)}`,
@@ -143,8 +141,8 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
         }
       }
 
-      logger.verbose('Browser session started successfully');
-      logger.verbose(`Content length: ${content.length} characters`);
+      logger.debug('Browser session started successfully');
+      logger.debug(`Content length: ${content.length} characters`);
 
       // Update browser tracker with running status
       browserTracker.updateSessionStatus(instanceId, SessionStatus.RUNNING, {
@@ -172,7 +170,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: ({ url, description }, { logger, pageFilter = 'simple' }) => {
-    logger.info(
+    logger.log(
       `Starting browser session${url ? ` at ${url}` : ''} with ${pageFilter} processing, ${description}`,
     );
   },
@@ -181,7 +179,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
     if (output.error) {
       logger.error(`Browser start failed: ${output.error}`);
     } else {
-      logger.info(`Browser session started with ID: ${output.instanceId}`);
+      logger.log(`Browser session started with ID: ${output.instanceId}`);
     }
   },
 };

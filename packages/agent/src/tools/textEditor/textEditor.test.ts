@@ -389,7 +389,7 @@ describe('textEditor', () => {
   it('should convert absolute paths to relative paths in log messages', () => {
     // Create a mock logger with a spy on the info method
     const mockLogger = new MockLogger();
-    const infoSpy = vi.spyOn(mockLogger, 'info');
+    const logSpy = vi.spyOn(mockLogger, 'log');
 
     // Create a context with a specific working directory
     const contextWithWorkingDir: ToolContext = {
@@ -410,12 +410,12 @@ describe('textEditor', () => {
     );
 
     // Verify the log message contains the relative path
-    expect(infoSpy).toHaveBeenCalledWith(
+    expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining('./packages/agent/src/file.ts'),
     );
 
     // Test with an absolute path outside the working directory
-    infoSpy.mockClear();
+    logSpy.mockClear();
     const externalPath = '/etc/config.json';
     textEditorTool.logParameters?.(
       {
@@ -427,10 +427,10 @@ describe('textEditor', () => {
     );
 
     // Verify the log message keeps the absolute path
-    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining(externalPath));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(externalPath));
 
     // Test with a relative path
-    infoSpy.mockClear();
+    logSpy.mockClear();
     const relativePath = 'src/file.ts';
     textEditorTool.logParameters?.(
       {
@@ -442,6 +442,6 @@ describe('textEditor', () => {
     );
 
     // Verify the log message keeps the relative path as is
-    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining(relativePath));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(relativePath));
   });
 });
