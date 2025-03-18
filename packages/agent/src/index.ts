@@ -10,7 +10,7 @@ export * from './tools/system/sequenceComplete.js';
 export * from './tools/system/shellMessage.js';
 export * from './tools/system/shellExecute.js';
 export * from './tools/system/listShells.js';
-export * from './tools/system/ShellTracker.js';
+export * from './tools/system/shellTracker.js';
 
 // Tools - Browser
 export * from './tools/browser/BrowserManager.js';

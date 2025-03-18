@@ -7,7 +7,7 @@ import { MockLogger } from '../utils/mockLogger.js';
 import { BrowserTracker } from './browser/browserTracker.js';
 import { getTools } from './getTools.js';
 import { AgentTracker } from './interaction/agentTracker.js';
-import { ShellTracker } from './system/ShellTracker.js';
+import { ShellTracker } from './system/shellTracker.js';
 
 // Mock context
 export const getMockToolContext = (): ToolContext => ({

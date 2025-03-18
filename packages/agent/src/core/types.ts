@@ -3,7 +3,7 @@ import { JsonSchema7Type } from 'zod-to-json-schema';
 
 import { BrowserTracker } from '../tools/browser/browserTracker.js';
 import { AgentTracker } from '../tools/interaction/agentTracker.js';
-import { ShellTracker } from '../tools/system/ShellTracker.js';
+import { ShellTracker } from '../tools/system/shellTracker.js';
 import { Logger } from '../utils/logger.js';
 
 import { TokenTracker } from './tokens.js';

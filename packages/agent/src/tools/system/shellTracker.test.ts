@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { ShellStatus, ShellTracker } from './ShellTracker.js';
+import { ShellStatus, ShellTracker } from './shellTracker.js';
 
 // Mock uuid to return predictable IDs for testing
 vi.mock('uuid', () => ({

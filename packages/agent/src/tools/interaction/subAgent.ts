@@ -9,7 +9,7 @@ import { toolAgent } from '../../core/toolAgent/toolAgentCore.js';
 import { Tool, ToolContext } from '../../core/types.js';
 import { BrowserTracker } from '../browser/browserTracker.js';
 import { getTools } from '../getTools.js';
-import { ShellTracker } from '../system/ShellTracker.js';
+import { ShellTracker } from '../system/shellTracker.js';
 
 import { AgentTracker } from './agentTracker.js';
 

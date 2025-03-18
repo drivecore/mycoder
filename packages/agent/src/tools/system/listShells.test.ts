@@ -4,7 +4,7 @@ import { ToolContext } from '../../core/types.js';
 import { getMockToolContext } from '../getTools.test.js';
 
 import { listShellsTool } from './listShells.js';
-import { ShellStatus, ShellTracker } from './ShellTracker.js';
+import { ShellStatus } from './shellTracker.js';
 
 const toolContext: ToolContext = getMockToolContext();
 
@@ -15,8 +15,7 @@ vi.spyOn(Date, 'now').mockImplementation(() => mockNow);
 describe('listShellsTool', () => {
   beforeEach(() => {
     // Clear shells before each test
-    const shellTracker = new ShellTracker('test');
-    shellTracker['shells'] = new Map();
+    toolContext.shellTracker['shells'] = new Map();
 
     // Set up some test shells with different statuses
     const shell1 = {
@@ -52,9 +51,9 @@ describe('listShellsTool', () => {
     };
 
     // Add the shells to the tracker
-    shellTracker['shells'].set('shell-1', shell1);
-    shellTracker['shells'].set('shell-2', shell2);
-    shellTracker['shells'].set('shell-3', shell3);
+    toolContext.shellTracker['shells'].set('shell-1', shell1);
+    toolContext.shellTracker['shells'].set('shell-2', shell2);
+    toolContext.shellTracker['shells'].set('shell-3', shell3);
   });
 
   it('should list all shells by default', async () => {
@@ -82,7 +81,6 @@ describe('listShellsTool', () => {
 
     expect(result.shells.length).toBe(1);
     expect(result.count).toBe(1);
-    expect(result.shells.length).toBe(1);
     expect(result.shells[0]!.id).toBe('shell-1');
     expect(result.shells[0]!.status).toBe(ShellStatus.RUNNING);
   });
@@ -106,7 +104,6 @@ describe('listShellsTool', () => {
       toolContext,
     );
 
-    expect(result.shells.length).toBe(1);
     expect(result.shells.length).toBe(1);
     expect(result.shells[0]!.id).toBe('shell-3');
     expect(result.shells[0]!.status).toBe(ShellStatus.ERROR);
