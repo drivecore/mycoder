@@ -44,9 +44,8 @@ export const initInteractiveInput = () => {
   // Create interceptor
   const interceptor = new OutputInterceptor(originalStdout);
 
-  // Replace stdout with our interceptor
-  // @ts-expect-error - This is a hack to replace stdout
-  process.stdout = interceptor;
+  // We no longer try to replace process.stdout as it's not allowed in newer Node.js versions
+  // Instead, we'll just use the interceptor for readline
 
   // Create readline interface for listening to key presses
   const rl = readline.createInterface({
@@ -120,8 +119,7 @@ export const initInteractiveInput = () => {
 
   // Return a cleanup function
   return () => {
-    // Restore original stdout
-    process.stdout = originalStdout;
+    // We no longer need to restore process.stdout
 
     // Disable raw mode
     if (process.stdin.isTTY) {
