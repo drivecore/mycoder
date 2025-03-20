@@ -27,8 +27,6 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "clean": "rimraf dist",
-    "clean:all": "rimraf node_modules dist",
     "semantic-release": "pnpm exec semantic-release -e semantic-release-monorepo"
   },
   "keywords": [
@@ -62,6 +60,7 @@
   "devDependencies": {
     "@types/node": "^18",
     "@types/uuid": "^10",
+    "@vitest/coverage-v8": "^3",
     "rimraf": "^5",
     "type-fest": "^4",
     "typescript": "^5",
