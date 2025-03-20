@@ -120,12 +120,12 @@ export const consoleOutputLogger: LoggerListener = (
     if (level === LogLevel.warn) {
       return chalk.yellow;
     }
-    
+
     // Use logger's color if available for log level
     if (level === LogLevel.log && logger.color) {
       return logger.color;
     }
-    
+
     // Default colors for different log levels
     switch (level) {
       case LogLevel.debug:

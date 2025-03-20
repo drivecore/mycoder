@@ -1,6 +1,6 @@
+import chalk from 'chalk';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import chalk from 'chalk';
 
 import {
   getDefaultSystemPrompt,
@@ -28,7 +28,7 @@ const getRandomAgentColor = () => {
     chalk.blueBright,
     chalk.greenBright,
     chalk.cyanBright,
-    chalk.magentaBright
+    chalk.magentaBright,
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 };
@@ -159,7 +159,8 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
           // Add each line to the capturedLogs array with logger name for context
           lines.forEach((line) => {
-            const loggerPrefix = logger.name !== 'agent' ? `[${logger.name}] ` : '';
+            const loggerPrefix =
+              logger.name !== 'agent' ? `[${logger.name}] ` : '';
             agentState.capturedLogs.push(`${logPrefix}${loggerPrefix}${line}`);
           });
         }
@@ -168,14 +169,14 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     // Add the listener to the context logger
     context.logger.listeners.push(logCaptureListener);
-    
+
     // Create a new logger specifically for the sub-agent if needed
     // This is wrapped in a try-catch to maintain backward compatibility with tests
     let subAgentLogger = context.logger;
     try {
       // Generate a random color for this agent
       const agentColor = getRandomAgentColor();
-      
+
       subAgentLogger = new Logger({
         name: 'agent',
         parent: context.logger,
@@ -185,7 +186,9 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       subAgentLogger.listeners.push(logCaptureListener);
     } catch {
       // If Logger instantiation fails (e.g., in tests), fall back to using the context logger
-      context.logger.debug('Failed to create sub-agent logger, using context logger instead');
+      context.logger.debug(
+        'Failed to create sub-agent logger, using context logger instead',
+      );
     }
 
     // Register agent state with the tracker

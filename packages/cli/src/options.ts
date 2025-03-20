@@ -51,7 +51,8 @@ export const sharedOptions = {
   interactive: {
     type: 'boolean',
     alias: 'i',
-    description: 'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections)',
+    description:
+      'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections)',
     default: false,
   } as const,
   file: {

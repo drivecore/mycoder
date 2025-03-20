@@ -19,9 +19,7 @@ const returnSchema = z.object({
   received: z
     .boolean()
     .describe('Whether the message was received by the main agent'),
-  messageCount: z
-    .number()
-    .describe('The number of messages in the queue'),
+  messageCount: z.number().describe('The number of messages in the queue'),
 });
 
 type Parameters = z.infer<typeof parameterSchema>;
@@ -40,8 +38,10 @@ export const userMessageTool: Tool<Parameters, ReturnType> = {
 
     // Add the message to the queue
     userMessages.push(message);
-    
-    logger.debug(`Added message to queue. Total messages: ${userMessages.length}`);
+
+    logger.debug(
+      `Added message to queue. Total messages: ${userMessages.length}`,
+    );
 
     return {
       received: true,

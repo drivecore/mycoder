@@ -88,18 +88,20 @@ export const toolAgent = async (
         }
       }
     }
-    
+
     // Check for messages from user (for main agent only)
     // Import this at the top of the file
     try {
       // Dynamic import to avoid circular dependencies
-      const { userMessages } = await import('../../tools/interaction/userMessage.js');
-      
+      const { userMessages } = await import(
+        '../../tools/interaction/userMessage.js'
+      );
+
       if (userMessages && userMessages.length > 0) {
         // Get all user messages and clear the queue
         const pendingUserMessages = [...userMessages];
         userMessages.length = 0;
-        
+
         // Add each message to the conversation
         for (const message of pendingUserMessages) {
           logger.info(`Message from user: ${message}`);
