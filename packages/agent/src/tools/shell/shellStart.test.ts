@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ToolContext } from '../../core/types';
 import { shellStartTool } from './shellStart';
 
 // Mock child_process.spawn
@@ -36,6 +37,23 @@ describe('shellStartTool', () => {
     processStates: new Map(),
   };
 
+  // Create a mock ToolContext with all required properties
+  const mockToolContext: ToolContext = {
+    logger: mockLogger as any,
+    workingDirectory: '/test',
+    headless: false,
+    userSession: false,
+    pageFilter: 'none',
+    tokenTracker: { trackTokens: vi.fn() } as any,
+    githubMode: false,
+    provider: 'anthropic',
+    maxTokens: 4000,
+    temperature: 0,
+    agentTracker: { registerAgent: vi.fn() } as any,
+    shellTracker: mockShellTracker as any,
+    browserTracker: { registerSession: vi.fn() } as any,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -53,11 +71,7 @@ describe('shellStartTool', () => {
         description: 'Testing command',
         timeout: 0, // Force async mode for testing
       },
-      {
-        logger: mockLogger as any,
-        workingDirectory: '/test',
-        shellTracker: mockShellTracker as any,
-      },
+      mockToolContext,
     );
 
     expect(spawn).toHaveBeenCalledWith('echo "test"', [], {
@@ -87,17 +101,17 @@ describe('shellStartTool', () => {
         timeout: 0, // Force async mode for testing
         stdinContent: 'test content',
       },
-      {
-        logger: mockLogger as any,
-        workingDirectory: '/test',
-        shellTracker: mockShellTracker as any,
-      },
+      mockToolContext,
     );
 
     // Check that spawn was called with the correct base64 encoding command
     expect(spawn).toHaveBeenCalledWith(
       'bash',
-      ['-c', expect.stringContaining('echo') && expect.stringContaining('base64 -d | cat')],
+      [
+        '-c',
+        expect.stringContaining('echo') &&
+          expect.stringContaining('base64 -d | cat'),
+      ],
       { cwd: '/test' },
     );
 
@@ -129,17 +143,17 @@ describe('shellStartTool', () => {
         timeout: 0, // Force async mode for testing
         stdinContent: 'test content',
       },
-      {
-        logger: mockLogger as any,
-        workingDirectory: '/test',
-        shellTracker: mockShellTracker as any,
-      },
+      mockToolContext,
     );
 
     // Check that spawn was called with the correct PowerShell command
     expect(spawn).toHaveBeenCalledWith(
       'powershell',
-      ['-Command', expect.stringContaining('[System.Text.Encoding]::UTF8.GetString') && expect.stringContaining('cat')],
+      [
+        '-Command',
+        expect.stringContaining('[System.Text.Encoding]::UTF8.GetString') &&
+          expect.stringContaining('cat'),
+      ],
       { cwd: '/test' },
     );
 
@@ -157,23 +171,25 @@ describe('shellStartTool', () => {
   });
 
   it('should include stdinContent information in log messages', async () => {
+    // Use a timeout of 0 to force async mode and avoid waiting
     await shellStartTool.execute(
       {
         command: 'cat',
         description: 'Testing log messages',
         stdinContent: 'test content',
         showStdIn: true,
+        timeout: 0,
       },
-      {
-        logger: mockLogger as any,
-        workingDirectory: '/test',
-        shellTracker: mockShellTracker as any,
-      },
+      mockToolContext,
     );
 
     expect(mockLogger.log).toHaveBeenCalledWith('Command input: cat');
     expect(mockLogger.log).toHaveBeenCalledWith('Stdin content: test content');
-    expect(mockLogger.debug).toHaveBeenCalledWith('Starting shell command: cat');
-    expect(mockLogger.debug).toHaveBeenCalledWith('With stdin content of length: 12');
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Starting shell command: cat',
+    );
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'With stdin content of length: 12',
+    );
   });
 });

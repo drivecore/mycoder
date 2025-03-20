@@ -112,50 +112,45 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         let hasResolved = false;
 
         // Determine if we need to use a special approach for stdin content
-        const isWindows = process.platform === 'win32';
-        let proc;
+        const isWindows = typeof process !== 'undefined' && process.platform === 'win32';
+        let childProcess;
 
         if (stdinContent && stdinContent.length > 0) {
           if (isWindows) {
             // Windows approach using PowerShell
             const encodedContent = Buffer.from(stdinContent).toString('base64');
-            proc = spawn(
+            childProcess = spawn(
               'powershell',
               [
                 '-Command',
-                `[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${encodedContent}')) | ${command}`
+                `[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${encodedContent}')) | ${command}`,
               ],
               {
                 cwd: workingDirectory,
-              }
+              },
             );
           } else {
             // POSIX approach (Linux/macOS)
             const encodedContent = Buffer.from(stdinContent).toString('base64');
-            proc = spawn(
+            childProcess = spawn(
               'bash',
-              [
-                '-c',
-                `echo "${encodedContent}" | base64 -d | ${command}`
-              ],
+              ['-c', `echo "${encodedContent}" | base64 -d | ${command}`],
               {
                 cwd: workingDirectory,
-              }
+              },
             );
           }
         } else {
           // No stdin content, use normal approach
-          proc = spawn(command, [], {
+          childProcess = spawn(command, [], {
             shell: true,
             cwd: workingDirectory,
           });
         }
-        
-        const process = proc;
 
         const processState: ProcessState = {
           command,
-          process,
+          process: childProcess,
           stdout: [],
           stderr: [],
           state: { completed: false, signaled: false, exitCode: null },
@@ -167,8 +162,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         shellTracker.processStates.set(instanceId, processState);
 
         // Handle process events
-        if (process.stdout)
-          process.stdout.on('data', (data) => {
+        if (childProcess.stdout)
+          childProcess.stdout.on('data', (data) => {
             const output = data.toString();
             processState.stdout.push(output);
             logger[processState.showStdout ? 'log' : 'debug'](
@@ -176,8 +171,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             );
           });
 
-        if (process.stderr)
-          process.stderr.on('data', (data) => {
+        if (childProcess.stderr)
+          childProcess.stderr.on('data', (data) => {
             const output = data.toString();
             processState.stderr.push(output);
             logger[processState.showStdout ? 'log' : 'debug'](
@@ -185,7 +180,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             );
           });
 
-        process.on('error', (error) => {
+        childProcess.on('error', (error) => {
           logger.error(`[${instanceId}] Process error: ${error.message}`);
           processState.state.completed = true;
 
@@ -206,7 +201,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           }
         });
 
-        process.on('exit', (code, signal) => {
+        childProcess.on('exit', (code, signal) => {
           logger.debug(
             `[${instanceId}] Process exited with code ${code} and signal ${signal}`,
           );
