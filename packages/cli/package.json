@@ -1,7 +1,7 @@
 {
   "name": "mycoder",
   "description": "A command line tool using agent that can do arbitrary tasks, including coding tasks",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "type": "module",
   "bin": "./bin/cli.js",
   "main": "./dist/index.js",
