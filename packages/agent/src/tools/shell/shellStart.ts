@@ -112,7 +112,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         let hasResolved = false;
 
         // Determine if we need to use a special approach for stdin content
-        const isWindows = typeof process !== 'undefined' && process.platform === 'win32';
+        const isWindows =
+          typeof process !== 'undefined' && process.platform === 'win32';
         let childProcess;
 
         if (stdinContent && stdinContent.length > 0) {

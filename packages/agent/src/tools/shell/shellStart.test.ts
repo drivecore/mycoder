@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ToolContext } from '../../core/types';
 import { shellStartTool } from './shellStart';
+
+import type { ToolContext } from '../../core/types';
 
 // Mock child_process.spawn
 vi.mock('child_process', () => {
