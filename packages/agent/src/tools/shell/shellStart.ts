@@ -34,6 +34,12 @@ const parameterSchema = z.object({
     .describe(
       'Whether to show command output to the user, or keep the output clean (default: false)',
     ),
+  stdinContent: z
+    .string()
+    .optional()
+    .describe(
+      'Content to pipe into the shell command as stdin (useful for passing multiline content to commands)',
+    ),
 });
 
 const returnSchema = z.union([
@@ -80,13 +86,20 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       timeout = DEFAULT_TIMEOUT,
       showStdIn = false,
       showStdout = false,
+      stdinContent,
     },
     { logger, workingDirectory, shellTracker },
   ): Promise<ReturnType> => {
     if (showStdIn) {
       logger.log(`Command input: ${command}`);
+      if (stdinContent) {
+        logger.log(`Stdin content: ${stdinContent}`);
+      }
     }
     logger.debug(`Starting shell command: ${command}`);
+    if (stdinContent) {
+      logger.debug(`With stdin content of length: ${stdinContent.length}`);
+    }
 
     return new Promise((resolve) => {
       try {
@@ -98,13 +111,47 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
         let hasResolved = false;
 
-        // Split command into command and args
-        // Use command directly with shell: true
-        // Use shell option instead of explicit shell path to avoid platform-specific issues
-        const process = spawn(command, [], {
-          shell: true,
-          cwd: workingDirectory,
-        });
+        // Determine if we need to use a special approach for stdin content
+        const isWindows = process.platform === 'win32';
+        let proc;
+
+        if (stdinContent && stdinContent.length > 0) {
+          if (isWindows) {
+            // Windows approach using PowerShell
+            const encodedContent = Buffer.from(stdinContent).toString('base64');
+            proc = spawn(
+              'powershell',
+              [
+                '-Command',
+                `[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${encodedContent}')) | ${command}`
+              ],
+              {
+                cwd: workingDirectory,
+              }
+            );
+          } else {
+            // POSIX approach (Linux/macOS)
+            const encodedContent = Buffer.from(stdinContent).toString('base64');
+            proc = spawn(
+              'bash',
+              [
+                '-c',
+                `echo "${encodedContent}" | base64 -d | ${command}`
+              ],
+              {
+                cwd: workingDirectory,
+              }
+            );
+          }
+        } else {
+          // No stdin content, use normal approach
+          proc = spawn(command, [], {
+            shell: true,
+            cwd: workingDirectory,
+          });
+        }
+        
+        const process = proc;
 
         const processState: ProcessState = {
           command,
@@ -237,11 +284,12 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
       timeout = DEFAULT_TIMEOUT,
       showStdIn = false,
       showStdout = false,
+      stdinContent,
     },
     { logger },
   ) => {
     logger.log(
-      `Running "${command}", ${description} (timeout: ${timeout}ms, showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
+      `Running "${command}", ${description} (timeout: ${timeout}ms, showStdIn: ${showStdIn}, showStdout: ${showStdout}${stdinContent ? ', with stdin content' : ''})`,
     );
   },
   logReturns: (output, { logger }) => {

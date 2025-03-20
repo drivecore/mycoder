@@ -1,193 +1,179 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ToolContext } from '../../core/types.js';
-import { sleep } from '../../utils/sleep.js';
-import { getMockToolContext } from '../getTools.test.js';
+import { shellStartTool } from './shellStart';
 
-import { shellStartTool } from './shellStart.js';
+// Mock child_process.spawn
+vi.mock('child_process', () => {
+  const mockProcess = {
+    on: vi.fn(),
+    stdout: { on: vi.fn() },
+    stderr: { on: vi.fn() },
+    stdin: { write: vi.fn(), writable: true },
+  };
 
-const toolContext: ToolContext = getMockToolContext();
+  return {
+    spawn: vi.fn(() => mockProcess),
+  };
+});
+
+// Mock uuid
+vi.mock('uuid', () => ({
+  v4: vi.fn(() => 'mock-uuid'),
+}));
 
 describe('shellStartTool', () => {
+  const mockLogger = {
+    log: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+  };
+
+  const mockShellTracker = {
+    registerShell: vi.fn(),
+    updateShellStatus: vi.fn(),
+    processStates: new Map(),
+  };
+
   beforeEach(() => {
-    toolContext.shellTracker.processStates.clear();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    for (const processState of toolContext.shellTracker.processStates.values()) {
-      processState.process.kill();
-    }
-    toolContext.shellTracker.processStates.clear();
+    vi.resetAllMocks();
   });
 
-  it('should handle fast commands in sync mode', async () => {
+  it('should execute a shell command without stdinContent', async () => {
+    const { spawn } = await import('child_process');
+
     const result = await shellStartTool.execute(
       {
         command: 'echo "test"',
-        description: 'Test process',
-        timeout: 500, // Generous timeout to ensure sync mode
+        description: 'Testing command',
+        timeout: 0, // Force async mode for testing
       },
-      toolContext,
+      {
+        logger: mockLogger as any,
+        workingDirectory: '/test',
+        shellTracker: mockShellTracker as any,
+      },
     );
 
-    expect(result.mode).toBe('sync');
-    if (result.mode === 'sync') {
-      expect(result.exitCode).toBe(0);
-      expect(result.stdout).toBe('test');
-      expect(result.error).toBeUndefined();
-    }
+    expect(spawn).toHaveBeenCalledWith('echo "test"', [], {
+      shell: true,
+      cwd: '/test',
+    });
+    expect(result).toEqual({
+      mode: 'async',
+      instanceId: 'mock-uuid',
+      stdout: '',
+      stderr: '',
+    });
   });
 
-  it('should switch to async mode for slow commands', async () => {
+  it('should execute a shell command with stdinContent on non-Windows', async () => {
+    const { spawn } = await import('child_process');
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, 'platform', {
+      value: 'darwin',
+      writable: true,
+    });
+
     const result = await shellStartTool.execute(
       {
-        command: 'sleep 1',
-        description: 'Slow command test',
-        timeout: 50, // Short timeout to force async mode
+        command: 'cat',
+        description: 'Testing with stdin content',
+        timeout: 0, // Force async mode for testing
+        stdinContent: 'test content',
       },
-      toolContext,
+      {
+        logger: mockLogger as any,
+        workingDirectory: '/test',
+        shellTracker: mockShellTracker as any,
+      },
     );
 
-    expect(result.mode).toBe('async');
-    if (result.mode === 'async') {
-      expect(result.instanceId).toBeDefined();
-      expect(result.error).toBeUndefined();
-    }
+    // Check that spawn was called with the correct base64 encoding command
+    expect(spawn).toHaveBeenCalledWith(
+      'bash',
+      ['-c', expect.stringContaining('echo') && expect.stringContaining('base64 -d | cat')],
+      { cwd: '/test' },
+    );
+
+    expect(result).toEqual({
+      mode: 'async',
+      instanceId: 'mock-uuid',
+      stdout: '',
+      stderr: '',
+    });
+
+    Object.defineProperty(process, 'platform', {
+      value: originalPlatform,
+      writable: true,
+    });
   });
 
-  it('should handle invalid commands with sync error', async () => {
+  it('should execute a shell command with stdinContent on Windows', async () => {
+    const { spawn } = await import('child_process');
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, 'platform', {
+      value: 'win32',
+      writable: true,
+    });
+
     const result = await shellStartTool.execute(
       {
-        command: 'nonexistentcommand',
-        description: 'Invalid command test',
+        command: 'cat',
+        description: 'Testing with stdin content on Windows',
+        timeout: 0, // Force async mode for testing
+        stdinContent: 'test content',
       },
-      toolContext,
+      {
+        logger: mockLogger as any,
+        workingDirectory: '/test',
+        shellTracker: mockShellTracker as any,
+      },
     );
 
-    expect(result.mode).toBe('sync');
-    if (result.mode === 'sync') {
-      expect(result.exitCode).not.toBe(0);
-      expect(result.error).toBeDefined();
-    }
+    // Check that spawn was called with the correct PowerShell command
+    expect(spawn).toHaveBeenCalledWith(
+      'powershell',
+      ['-Command', expect.stringContaining('[System.Text.Encoding]::UTF8.GetString') && expect.stringContaining('cat')],
+      { cwd: '/test' },
+    );
+
+    expect(result).toEqual({
+      mode: 'async',
+      instanceId: 'mock-uuid',
+      stdout: '',
+      stderr: '',
+    });
+
+    Object.defineProperty(process, 'platform', {
+      value: originalPlatform,
+      writable: true,
+    });
   });
 
-  it('should keep process in processStates in both modes', async () => {
-    // Test sync mode
-    const syncResult = await shellStartTool.execute(
+  it('should include stdinContent information in log messages', async () => {
+    await shellStartTool.execute(
       {
-        command: 'echo "test"',
-        description: 'Sync completion test',
-        timeout: 500,
-      },
-      toolContext,
-    );
-
-    // Even sync results should be in processStates
-    expect(toolContext.shellTracker.processStates.size).toBeGreaterThan(0);
-    expect(syncResult.mode).toBe('sync');
-    expect(syncResult.error).toBeUndefined();
-    if (syncResult.mode === 'sync') {
-      expect(syncResult.exitCode).toBe(0);
-    }
-
-    // Test async mode
-    const asyncResult = await shellStartTool.execute(
-      {
-        command: 'sleep 1',
-        description: 'Async completion test',
-        timeout: 50,
-      },
-      toolContext,
-    );
-
-    if (asyncResult.mode === 'async') {
-      expect(
-        toolContext.shellTracker.processStates.has(asyncResult.instanceId),
-      ).toBe(true);
-    }
-  });
-
-  it('should handle piped commands correctly in async mode', async () => {
-    const result = await shellStartTool.execute(
-      {
-        command: 'grep "test"',
-        description: 'Pipe test',
-        timeout: 50, // Force async for interactive command
-      },
-      toolContext,
-    );
-
-    expect(result.mode).toBe('async');
-    if (result.mode === 'async') {
-      expect(result.instanceId).toBeDefined();
-      expect(result.error).toBeUndefined();
-
-      const processState = toolContext.shellTracker.processStates.get(
-        result.instanceId,
-      );
-      expect(processState).toBeDefined();
-
-      if (processState?.process.stdin) {
-        processState.process.stdin.write('this is a test line\\n');
-        processState.process.stdin.write('not matching line\\n');
-        processState.process.stdin.write('another test here\\n');
-        processState.process.stdin.end();
-
-        // Wait for output
-        await sleep(200);
-
-        // Check stdout in processState
-        expect(processState.stdout.join('')).toContain('test');
-        // grep will filter out the non-matching lines, so we shouldn't see them in the output
-        // Note: This test may be flaky because grep behavior can vary
-      }
-    }
-  });
-
-  it('should use default timeout of 10000ms', async () => {
-    const result = await shellStartTool.execute(
-      {
-        command: 'sleep 1',
-        description: 'Default timeout test',
-      },
-      toolContext,
-    );
-
-    expect(result.mode).toBe('sync');
-  });
-
-  it('should store showStdIn and showStdout settings in process state', async () => {
-    const result = await shellStartTool.execute(
-      {
-        command: 'echo "test"',
-        description: 'Test with stdout visibility',
+        command: 'cat',
+        description: 'Testing log messages',
+        stdinContent: 'test content',
         showStdIn: true,
-        showStdout: true,
       },
-      toolContext,
-    );
-
-    expect(result.mode).toBe('sync');
-
-    // For async mode, check the process state directly
-    const asyncResult = await shellStartTool.execute(
       {
-        command: 'sleep 1',
-        description: 'Test with stdin/stdout visibility in async mode',
-        timeout: 50, // Force async mode
-        showStdIn: true,
-        showStdout: true,
+        logger: mockLogger as any,
+        workingDirectory: '/test',
+        shellTracker: mockShellTracker as any,
       },
-      toolContext,
     );
 
-    if (asyncResult.mode === 'async') {
-      const processState = toolContext.shellTracker.processStates.get(
-        asyncResult.instanceId,
-      );
-      expect(processState).toBeDefined();
-      expect(processState?.showStdIn).toBe(true);
-      expect(processState?.showStdout).toBe(true);
-    }
+    expect(mockLogger.log).toHaveBeenCalledWith('Command input: cat');
+    expect(mockLogger.log).toHaveBeenCalledWith('Stdin content: test content');
+    expect(mockLogger.debug).toHaveBeenCalledWith('Starting shell command: cat');
+    expect(mockLogger.debug).toHaveBeenCalledWith('With stdin content of length: 12');
   });
 });

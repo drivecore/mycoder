@@ -126,11 +126,10 @@ export function getDefaultSystemPrompt(toolContext: ToolContext): string {
         '',
         'You should use the Github CLI tool, gh, and the git cli tool, git, that you can access via shell commands.',
         '',
-        'When creating GitHub issues, PRs, or comments, via the gh cli tool, use temporary markdown files for the content instead of inline text:',
-        '- Create a temporary markdown file with the content you want to include',
-        '- Use the file with GitHub CLI commands (e.g., `gh issue create --body-file temp.md`)',
-        '- Clean up the temporary file when done',
-        '- This approach preserves formatting, newlines, and special characters correctly',
+        'When creating GitHub issues, PRs, or comments via the gh cli tool, use the shellStart or shellExecute stdinContent parameter for multiline content:',
+        '- Use the stdinContent parameter to pass the content directly to the command',
+        '- For example: `shellStart({ command: "gh issue create --body-stdin", stdinContent: "Issue description here with **markdown** support", description: "Creating a new issue" })`',
+        '- This approach preserves formatting, newlines, and special characters correctly without requiring temporary files',
       ].join('\n')
     : '';
 

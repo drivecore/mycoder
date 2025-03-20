@@ -20,6 +20,12 @@ const parameterSchema = z.object({
     .number()
     .optional()
     .describe('Timeout in milliseconds (optional, default 30000)'),
+  stdinContent: z
+    .string()
+    .optional()
+    .describe(
+      'Content to pipe into the shell command as stdin (useful for passing multiline content to commands)',
+    ),
 });
 
 const returnSchema = z
@@ -53,18 +59,46 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { command, timeout = 30000 },
+    { command, timeout = 30000, stdinContent },
     { logger },
   ): Promise<ReturnType> => {
     logger.debug(
       `Executing shell command with ${timeout}ms timeout: ${command}`,
     );
+    if (stdinContent) {
+      logger.debug(`With stdin content of length: ${stdinContent.length}`);
+    }
 
     try {
-      const { stdout, stderr } = await execAsync(command, {
-        timeout,
-        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-      });
+      let stdout, stderr;
+      
+      // If stdinContent is provided, use platform-specific approach to pipe content
+      if (stdinContent && stdinContent.length > 0) {
+        const isWindows = process.platform === 'win32';
+        const encodedContent = Buffer.from(stdinContent).toString('base64');
+        
+        if (isWindows) {
+          // Windows approach using PowerShell
+          const powershellCommand = `[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${encodedContent}')) | ${command}`;
+          ({ stdout, stderr } = await execAsync(`powershell -Command "${powershellCommand}"`, {
+            timeout,
+            maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+          }));
+        } else {
+          // POSIX approach (Linux/macOS)
+          const bashCommand = `echo "${encodedContent}" | base64 -d | ${command}`;
+          ({ stdout, stderr } = await execAsync(bashCommand, {
+            timeout,
+            maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+          }));
+        }
+      } else {
+        // No stdin content, use normal approach
+        ({ stdout, stderr } = await execAsync(command, {
+          timeout,
+          maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+        }));
+      }
 
       logger.debug('Command executed successfully');
       logger.debug(`stdout: ${stdout.trim()}`);
@@ -109,7 +143,7 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
     }
   },
   logParameters: (input, { logger }) => {
-    logger.log(`Running "${input.command}", ${input.description}`);
+    logger.log(`Running "${input.command}", ${input.description}${input.stdinContent ? ' (with stdin content)' : ''}`);
   },
   logReturns: () => {},
 };
