@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import chalk from 'chalk';
 
 import {
   getDefaultSystemPrompt,
@@ -14,6 +15,23 @@ import { AgentStatus, AgentState } from './AgentTracker.js';
 
 // For backward compatibility
 export const agentStates = new Map<string, AgentState>();
+
+// Generate a random color for an agent
+// Avoid colors that are too light or too similar to error/warning colors
+const getRandomAgentColor = () => {
+  // List of bright chalk colors that are visually distinct
+  const colors = [
+    chalk.cyan,
+    chalk.green,
+    chalk.blue,
+    chalk.magenta,
+    chalk.blueBright,
+    chalk.greenBright,
+    chalk.cyanBright,
+    chalk.magentaBright
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+};
 
 const parameterSchema = z.object({
   description: z
@@ -155,9 +173,13 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
     // This is wrapped in a try-catch to maintain backward compatibility with tests
     let subAgentLogger = context.logger;
     try {
+      // Generate a random color for this agent
+      const agentColor = getRandomAgentColor();
+      
       subAgentLogger = new Logger({
         name: 'agent',
         parent: context.logger,
+        color: agentColor, // Assign the random color to the agent
       });
       // Add the listener to the sub-agent logger as well
       subAgentLogger.listeners.push(logCaptureListener);
