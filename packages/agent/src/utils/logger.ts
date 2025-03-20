@@ -13,6 +13,7 @@ export type LoggerProps = {
   logLevel?: LogLevel;
   parent?: Logger;
   customPrefix?: string;
+  color?: ChalkInstance;
 };
 
 export type LoggerListener = (
@@ -29,6 +30,7 @@ export class Logger {
   public readonly name: string;
   public readonly nesting: number;
   public readonly customPrefix?: string;
+  public readonly color?: ChalkInstance;
 
   readonly listeners: LoggerListener[] = [];
 
@@ -37,12 +39,15 @@ export class Logger {
     parent = undefined,
     logLevel = parent?.logLevel ?? LogLevel.info,
     customPrefix,
+    color,
   }: LoggerProps) {
     this.customPrefix = customPrefix;
     this.name = name;
     this.parent = parent;
     this.logLevel = logLevel;
     this.logLevelIndex = logLevel;
+    // Inherit color from parent if not provided and parent has a color
+    this.color = color ?? parent?.color;
 
     // Calculate indent level and offset based on parent chain
     this.nesting = 0;
@@ -108,16 +113,26 @@ export const consoleOutputLogger: LoggerListener = (
   lines: string[],
 ) => {
   const getColor = (level: LogLevel, _nesting: number = 0): ChalkInstance => {
+    // Always use red for errors and yellow for warnings regardless of agent color
+    if (level === LogLevel.error) {
+      return chalk.red;
+    }
+    if (level === LogLevel.warn) {
+      return chalk.yellow;
+    }
+
+    // Use logger's color if available for log level
+    if (level === LogLevel.log && logger.color) {
+      return logger.color;
+    }
+
+    // Default colors for different log levels
     switch (level) {
       case LogLevel.debug:
       case LogLevel.info:
         return chalk.white.dim;
       case LogLevel.log:
         return chalk.white;
-      case LogLevel.warn:
-        return chalk.yellow;
-      case LogLevel.error:
-        return chalk.red;
       default:
         throw new Error(`Unknown log level: ${level}`);
     }

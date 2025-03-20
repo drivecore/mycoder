@@ -118,9 +118,11 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
         if (output !== 'No output yet' || agentState.capturedLogs.length > 0) {
           const logContent = agentState.capturedLogs.join('\n');
           output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
-          
+
           // Log that we're returning captured logs
-          logger.debug(`Returning ${agentState.capturedLogs.length} captured log messages for agent ${instanceId}`);
+          logger.debug(
+            `Returning ${agentState.capturedLogs.length} captured log messages for agent ${instanceId}`,
+          );
         }
         // Clear the captured logs after retrieving them
         agentState.capturedLogs = [];

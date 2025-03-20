@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { Logger, LogLevel, LoggerListener } from '../../../utils/logger.js';
+import { Logger } from '../../../utils/logger.js';
 import { agentMessageTool } from '../agentMessage.js';
 import { agentStartTool } from '../agentStart.js';
-import { AgentTracker, AgentState } from '../AgentTracker.js';
+import { AgentTracker } from '../AgentTracker.js';
 
 // Mock the toolAgent function
 vi.mock('../../../core/toolAgent/toolAgentCore.js', () => ({
@@ -11,33 +11,6 @@ vi.mock('../../../core/toolAgent/toolAgentCore.js', () => ({
     .fn()
     .mockResolvedValue({ result: 'Test result', interactions: 1 }),
 }));
-
-// Create a real implementation of the log capture function
-const createLogCaptureListener = (agentState: AgentState): LoggerListener => {
-  return (logger, logLevel, lines) => {
-    // Only capture log, warn, and error levels (not debug or info)
-    if (
-      logLevel === LogLevel.log ||
-      logLevel === LogLevel.warn ||
-      logLevel === LogLevel.error
-    ) {
-      // Only capture logs from the agent and its immediate tools (not deeper than that)
-      if (logger.nesting <= 1) {
-        const logPrefix =
-          logLevel === LogLevel.warn
-            ? '[WARN] '
-            : logLevel === LogLevel.error
-              ? '[ERROR] '
-              : '';
-
-        // Add each line to the capturedLogs array
-        lines.forEach((line) => {
-          agentState.capturedLogs.push(`${logPrefix}${line}`);
-        });
-      }
-    }
-  };
-};
 
 describe('Log Capture in AgentTracker', () => {
   let agentTracker: AgentTracker;
@@ -78,12 +51,6 @@ describe('Log Capture in AgentTracker', () => {
 
     if (!agentState) return; // TypeScript guard
 
-    // Create a tool logger that is a child of the agent logger
-    const toolLogger = new Logger({
-      name: 'tool-logger',
-      parent: context.logger,
-    });
-
     // For testing purposes, manually add logs to the agent state
     // In a real scenario, these would be added by the log listener
     agentState.capturedLogs = [
@@ -91,7 +58,7 @@ describe('Log Capture in AgentTracker', () => {
       '[WARN] This warning message should be captured',
       '[ERROR] This error message should be captured',
       'This tool log message should be captured',
-      '[WARN] This tool warning message should be captured'
+      '[WARN] This tool warning message should be captured',
     ];
 
     // Check that the right messages were captured

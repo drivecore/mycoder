@@ -109,7 +109,7 @@ export async function executePrompt(
 
   // Initialize interactive input if enabled
   let cleanupInteractiveInput: (() => void) | undefined;
-  
+
   try {
     // Early API key check based on model provider
     const providerSettings =
@@ -168,10 +168,14 @@ export async function executePrompt(
       );
       process.exit(0);
     });
-    
+
     // Initialize interactive input if enabled
     if (config.interactive) {
-      logger.info(chalk.green('Interactive correction mode enabled. Press Ctrl+M to send a correction to the agent.'));
+      logger.info(
+        chalk.green(
+          'Interactive correction mode enabled. Press Ctrl+M to send a correction to the agent.',
+        ),
+      );
       cleanupInteractiveInput = initInteractiveInput();
     }
 

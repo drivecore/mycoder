@@ -129,6 +129,7 @@ MyCoder supports sending corrections to the main agent while it's running. This 
 ### Usage
 
 1. Start MyCoder with the `--interactive` flag:
+
    ```bash
    mycoder --interactive "Implement a React component"
    ```
