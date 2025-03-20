@@ -36,14 +36,18 @@ This content includes special characters like:
 console.log('=== Testing GitHub CLI with stdinContent ===');
 
 // Helper function to wait for all tests to complete
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper function to execute a command with encoded content
-const execWithEncodedContent = async (command, content, isWindows = process.platform === 'win32') => {
+const execWithEncodedContent = async (
+  command,
+  content,
+  isWindows = process.platform === 'win32',
+) => {
   return new Promise((resolve, reject) => {
     const encodedContent = Buffer.from(content).toString('base64');
     let cmd;
-    
+
     if (isWindows) {
       // Windows approach using PowerShell
       cmd = `powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${encodedContent}')) | ${command}"`;
@@ -51,9 +55,9 @@ const execWithEncodedContent = async (command, content, isWindows = process.plat
       // POSIX approach (Linux/macOS)
       cmd = `echo "${encodedContent}" | base64 -d | ${command}`;
     }
-    
+
     console.log(`Executing command: ${cmd}`);
-    
+
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
         reject(error);
@@ -69,14 +73,22 @@ console.log('\n=== Testing with temporary file approach ===');
 const tempFile = path.join(os.tmpdir(), `test-gh-content-${Date.now()}.md`);
 fs.writeFileSync(tempFile, issueContent);
 console.log(`Created temporary file: ${tempFile}`);
-console.log(`Command would be: gh issue create --title "Test Issue" --body-file "${tempFile}"`);
-console.log('(Not executing actual GitHub command to avoid creating real issues)');
+console.log(
+  `Command would be: gh issue create --title "Test Issue" --body-file "${tempFile}"`,
+);
+console.log(
+  '(Not executing actual GitHub command to avoid creating real issues)',
+);
 
 // Test with stdinContent approach (new method)
 console.log('\n=== Testing with stdinContent approach ===');
-console.log('Command would be: gh issue create --title "Test Issue" --body-stdin');
+console.log(
+  'Command would be: gh issue create --title "Test Issue" --body-stdin',
+);
 console.log('With stdinContent parameter containing the issue content');
-console.log('(Not executing actual GitHub command to avoid creating real issues)');
+console.log(
+  '(Not executing actual GitHub command to avoid creating real issues)',
+);
 
 // Simulate the execution with a simple echo command
 console.log('\n=== Simulating execution with echo command ===');
@@ -96,5 +108,9 @@ fs.unlinkSync(tempFile);
 console.log('Temporary file removed');
 
 console.log('\n=== Test completed ===');
-console.log('The stdinContent approach successfully preserves all formatting and special characters');
-console.log('This can be used with GitHub CLI commands that accept stdin input (--body-stdin flag)');
+console.log(
+  'The stdinContent approach successfully preserves all formatting and special characters',
+);
+console.log(
+  'This can be used with GitHub CLI commands that accept stdin input (--body-stdin flag)',
+);
