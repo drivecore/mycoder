@@ -9,6 +9,10 @@ import { AgentConfig } from './config.js';
 import { logTokenUsage } from './tokenTracking.js';
 import { executeTools } from './toolExecutor.js';
 import { ToolAgentResult } from './types.js';
+import { generateStatusUpdate } from './statusUpdates.js';
+
+// Import the utility tools including compactHistory
+import { utilityTools } from '../../tools/utility/index.js';
 
 // Import from our new LLM abstraction instead of Vercel AI SDK
 
@@ -51,6 +55,13 @@ export const toolAgent = async (
     baseUrl: context.baseUrl,
     apiKey: context.apiKey,
   });
+  
+  // Add the utility tools to the tools array
+  const allTools = [...tools, ...utilityTools];
+  
+  // Variables for status updates
+  let statusUpdateCounter = 0;
+  const STATUS_UPDATE_FREQUENCY = 5; // Send status every 5 iterations
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.debug(
@@ -116,7 +127,7 @@ export const toolAgent = async (
     }
 
     // Convert tools to function definitions
-    const functionDefinitions = tools.map((tool) => ({
+    const functionDefinitions = allTools.map((tool) => ({
       name: tool.name,
       description: tool.description,
       parameters: tool.parametersJsonSchema || zodToJsonSchema(tool.parameters),
@@ -139,12 +150,32 @@ export const toolAgent = async (
       maxTokens: localContext.maxTokens,
     };
 
-    const { text, toolCalls, tokenUsage } = await generateText(
+    const { text, toolCalls, tokenUsage, totalTokens, maxTokens } = await generateText(
       provider,
       generateOptions,
     );
 
     tokenTracker.tokenUsage.add(tokenUsage);
+    
+    // Store token information for status updates
+    lastResponseTotalTokens = totalTokens;
+    lastResponseMaxTokens = maxTokens;
+    
+    // Send periodic status updates
+    statusUpdateCounter++;
+    if (statusUpdateCounter >= STATUS_UPDATE_FREQUENCY && totalTokens && maxTokens) {
+      statusUpdateCounter = 0;
+      
+      const statusMessage = generateStatusUpdate(
+        totalTokens,
+        maxTokens,
+        tokenTracker,
+        localContext
+      );
+      
+      messages.push(statusMessage);
+      logger.debug('Sent status update to agent');
+    }
 
     if (!text.length && toolCalls.length === 0) {
       // Only consider it empty if there's no text AND no tool calls
@@ -185,7 +216,7 @@ export const toolAgent = async (
       // Execute the tools and get results
       const { agentDoned, completionResult } = await executeTools(
         toolCalls,
-        tools,
+        allTools,
         messages,
         localContext,
       );

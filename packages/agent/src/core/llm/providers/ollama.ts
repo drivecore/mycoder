@@ -13,6 +13,22 @@ import {
 
 import { TokenUsage } from '../../tokens.js';
 import { ToolCall } from '../../types.js';
+// Define model context window sizes for Ollama models
+// These are approximate and may vary based on specific model configurations
+const OLLAMA_MODEL_LIMITS: Record<string, number> = {
+  'llama2': 4096,
+  'llama2-uncensored': 4096,
+  'llama2:13b': 4096,
+  'llama2:70b': 4096,
+  'mistral': 8192,
+  'mistral:7b': 8192,
+  'mixtral': 32768,
+  'codellama': 16384,
+  'phi': 2048,
+  'phi2': 2048,
+  'openchat': 8192,
+  // Add other models as needed
+};
 import { LLMProvider } from '../provider.js';
 import {
   GenerateOptions,
@@ -114,11 +130,22 @@ export class OllamaProvider implements LLMProvider {
     const tokenUsage = new TokenUsage();
     tokenUsage.output = response.eval_count || 0;
     tokenUsage.input = response.prompt_eval_count || 0;
+    
+    // Calculate total tokens and get max tokens for the model
+    const totalTokens = tokenUsage.input + tokenUsage.output;
+    
+    // Extract the base model name without specific parameters
+    const baseModelName = this.model.split(':')[0];
+    const maxTokens = OLLAMA_MODEL_LIMITS[this.model] || 
+                     OLLAMA_MODEL_LIMITS[baseModelName] || 
+                     4096; // Default fallback
 
     return {
       text: content,
       toolCalls: toolCalls,
       tokenUsage: tokenUsage,
+      totalTokens,
+      maxTokens,
     };
   }
 
