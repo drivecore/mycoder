@@ -1,4 +1,3 @@
-import { chromium } from '@playwright/test';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
@@ -6,8 +5,10 @@ import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
+import { BrowserDetector } from './lib/BrowserDetector.js';
 import { filterPageContent } from './lib/filterPageContent.js';
-import { browserSessions } from './lib/types.js';
+import { SessionManager } from './lib/SessionManager.js';
+import { browserSessions, BrowserConfig } from './lib/types.js';
 import { SessionStatus } from './SessionTracker.js';
 
 const parameterSchema = z.object({
@@ -48,9 +49,11 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       userSession,
       pageFilter,
       browserTracker,
-      ..._ // Unused parameters
+      ...context // Other parameters
     },
   ): Promise<ReturnType> => {
+    // Get config from context if available
+    const config = (context as any).config || {};
     logger.debug(`Starting browser session${url ? ` at ${url}` : ''}`);
     logger.debug(`User session mode: ${userSession ? 'enabled' : 'disabled'}`);
     logger.debug(`Webpage processing mode: ${pageFilter}`);
@@ -59,40 +62,54 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       // Register this browser session with the tracker
       const instanceId = browserTracker.registerBrowser(url);
 
-      // Launch browser
-      const launchOptions = {
+      // Get browser configuration from config
+      const browserConfig = config.browser || {};
+
+      // Create browser configuration
+      const sessionConfig: BrowserConfig = {
         headless,
+        defaultTimeout: timeout,
+        useSystemBrowsers: browserConfig.useSystemBrowsers !== false,
+        preferredType: browserConfig.preferredType || 'chromium',
+        executablePath: browserConfig.executablePath,
       };
 
-      // Use system Chrome installation if userSession is true
+      // If userSession is true, use system Chrome
       if (userSession) {
-        logger.debug('Using system Chrome installation');
-        // For Chrome, we use the channel option to specify Chrome
-        launchOptions['channel'] = 'chrome';
+        logger.debug('User session mode enabled, forcing system Chrome');
+        sessionConfig.useSystemBrowsers = true;
+        sessionConfig.preferredType = 'chromium';
+
+        // Try to detect Chrome browser
+        const browsers = await BrowserDetector.detectBrowsers();
+        const chrome = browsers.find((b) =>
+          b.name.toLowerCase().includes('chrome'),
+        );
+        if (chrome) {
+          logger.debug(`Found system Chrome at ${chrome.path}`);
+          sessionConfig.executablePath = chrome.path;
+        }
       }
 
-      const browser = await chromium.launch(launchOptions);
+      logger.debug(`Browser config: ${JSON.stringify(sessionConfig)}`);
 
-      // Create new context with default settings
-      const context = await browser.newContext({
-        viewport: null,
-        userAgent:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        serviceWorkers: 'block', // Block service workers which can cause continuous network activity
-      });
+      // Create a session manager and launch browser
+      const sessionManager = new SessionManager();
+      const session = await sessionManager.createSession(sessionConfig);
 
-      // Create new page
-      const page = await context.newPage();
-      page.setDefaultTimeout(timeout);
+      // Set the default timeout
+      session.page.setDefaultTimeout(timeout);
 
-      // Initialize browser session
-      const session = {
+      // Get references to the browser and page
+      const browser = session.browser;
+      const page = session.page;
+
+      // Store the session in the browserSessions map for compatibility
+      browserSessions.set(instanceId, {
         browser,
         page,
         id: instanceId,
-      };
-
-      browserSessions.set(instanceId, session);
+      });
 
       // Setup cleanup handlers
       browser.on('disconnected', () => {

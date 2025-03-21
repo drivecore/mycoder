@@ -1,25 +1,23 @@
 # [mycoder-agent-v1.5.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.2...mycoder-agent-v1.5.0) (2025-03-20)
 
-
 ### Bug Fixes
 
-* improve resource trackers and fix tests ([c31546e](https://github.com/drivecore/mycoder/commit/c31546ea0375ce7fa477d7e0e4f11ea1e2b6d65e))
-* properly format agentDone tool completion message ([8d19c41](https://github.com/drivecore/mycoder/commit/8d19c410db52190cc871c201b133bee127757599))
-* resolve build and test issues ([549f0c7](https://github.com/drivecore/mycoder/commit/549f0c7184e48d2bd3221bf063f74255799da275))
-* resolve TypeError in interactive mode ([6e5e191](https://github.com/drivecore/mycoder/commit/6e5e1912d69906674f5c7fec9b79495de79b63c6))
-* restore visibility of tool execution output ([0809694](https://github.com/drivecore/mycoder/commit/0809694538d8bc7d808de4f1b9b97cd3a718941c)), closes [#328](https://github.com/drivecore/mycoder/issues/328)
-* shell message should reset output on each read ([670a10b](https://github.com/drivecore/mycoder/commit/670a10bd841307750c95796d621b7d099d0e83c1))
-* update CLI cleanup to use ShellTracker instead of processStates ([3dca767](https://github.com/drivecore/mycoder/commit/3dca7670bed4884650b43d431c09a14d2673eb58))
-
+- improve resource trackers and fix tests ([c31546e](https://github.com/drivecore/mycoder/commit/c31546ea0375ce7fa477d7e0e4f11ea1e2b6d65e))
+- properly format agentDone tool completion message ([8d19c41](https://github.com/drivecore/mycoder/commit/8d19c410db52190cc871c201b133bee127757599))
+- resolve build and test issues ([549f0c7](https://github.com/drivecore/mycoder/commit/549f0c7184e48d2bd3221bf063f74255799da275))
+- resolve TypeError in interactive mode ([6e5e191](https://github.com/drivecore/mycoder/commit/6e5e1912d69906674f5c7fec9b79495de79b63c6))
+- restore visibility of tool execution output ([0809694](https://github.com/drivecore/mycoder/commit/0809694538d8bc7d808de4f1b9b97cd3a718941c)), closes [#328](https://github.com/drivecore/mycoder/issues/328)
+- shell message should reset output on each read ([670a10b](https://github.com/drivecore/mycoder/commit/670a10bd841307750c95796d621b7d099d0e83c1))
+- update CLI cleanup to use ShellTracker instead of processStates ([3dca767](https://github.com/drivecore/mycoder/commit/3dca7670bed4884650b43d431c09a14d2673eb58))
 
 ### Features
 
-* add colored console output for agent logs ([5f38b2d](https://github.com/drivecore/mycoder/commit/5f38b2dc4a7f952f3c484367ef5576172f1ae321))
-* Add interactive correction feature to CLI mode ([de2861f](https://github.com/drivecore/mycoder/commit/de2861f436d35db44653dc5a0c449f4f4068ca13)), closes [#326](https://github.com/drivecore/mycoder/issues/326)
-* add parent-to-subagent communication in agentMessage tool ([3b11db1](https://github.com/drivecore/mycoder/commit/3b11db1063496d9fe1f8efc362257d9ea8287603))
-* add stdinContent parameter to shell commands ([5342a0f](https://github.com/drivecore/mycoder/commit/5342a0fa98424282c75ca50c93b380c85ea58a20)), closes [#301](https://github.com/drivecore/mycoder/issues/301)
-* implement ShellTracker to decouple from backgroundTools ([65378e3](https://github.com/drivecore/mycoder/commit/65378e34b035699f61b701679742ba9a7e667215))
-* remove respawn capability, it wasn't being used anyhow. ([8e086b4](https://github.com/drivecore/mycoder/commit/8e086b46bd0836dfce39331aa8e6b0d5de81b275))
+- add colored console output for agent logs ([5f38b2d](https://github.com/drivecore/mycoder/commit/5f38b2dc4a7f952f3c484367ef5576172f1ae321))
+- Add interactive correction feature to CLI mode ([de2861f](https://github.com/drivecore/mycoder/commit/de2861f436d35db44653dc5a0c449f4f4068ca13)), closes [#326](https://github.com/drivecore/mycoder/issues/326)
+- add parent-to-subagent communication in agentMessage tool ([3b11db1](https://github.com/drivecore/mycoder/commit/3b11db1063496d9fe1f8efc362257d9ea8287603))
+- add stdinContent parameter to shell commands ([5342a0f](https://github.com/drivecore/mycoder/commit/5342a0fa98424282c75ca50c93b380c85ea58a20)), closes [#301](https://github.com/drivecore/mycoder/issues/301)
+- implement ShellTracker to decouple from backgroundTools ([65378e3](https://github.com/drivecore/mycoder/commit/65378e34b035699f61b701679742ba9a7e667215))
+- remove respawn capability, it wasn't being used anyhow. ([8e086b4](https://github.com/drivecore/mycoder/commit/8e086b46bd0836dfce39331aa8e6b0d5de81b275))
 
 # [mycoder-agent-v1.4.2](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.1...mycoder-agent-v1.4.2) (2025-03-14)
 
