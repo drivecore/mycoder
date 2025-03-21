@@ -12,6 +12,7 @@ Command-line interface for AI-powered coding tasks. Full details available on th
 - 👤 **Human Compatible**: Uses README.md, project files and shell commands to build its own context
 - 🌐 **GitHub Integration**: GitHub mode for working with issues and PRs as part of workflow
 - 📄 **Model Context Protocol**: Support for MCP to access external context sources
+- 🧠 **Message Compaction**: Automatic management of context window for long-running agents
 
 Please join the MyCoder.ai discord for support: https://discord.gg/5K6TYrHGHt
 

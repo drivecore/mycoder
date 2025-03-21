@@ -81,13 +81,33 @@ function addCacheControlToMessages(
   });
 }
 
-function tokenUsageFromMessage(message: Anthropic.Message) {
+// Define model context window sizes for Anthropic models
+const ANTHROPIC_MODEL_LIMITS: Record<string, number> = {
+  'claude-3-opus-20240229': 200000,
+  'claude-3-sonnet-20240229': 200000,
+  'claude-3-haiku-20240307': 200000,
+  'claude-3-7-sonnet-20250219': 200000,
+  'claude-2.1': 100000,
+  'claude-2.0': 100000,
+  'claude-instant-1.2': 100000,
+  // Add other models as needed
+};
+
+function tokenUsageFromMessage(message: Anthropic.Message, model: string) {
   const usage = new TokenUsage();
   usage.input = message.usage.input_tokens;
   usage.cacheWrites = message.usage.cache_creation_input_tokens ?? 0;
   usage.cacheReads = message.usage.cache_read_input_tokens ?? 0;
   usage.output = message.usage.output_tokens;
-  return usage;
+  
+  const totalTokens = usage.input + usage.output;
+  const maxTokens = ANTHROPIC_MODEL_LIMITS[model] || 100000; // Default fallback
+  
+  return {
+    usage,
+    totalTokens,
+    maxTokens,
+  };
 }
 
 /**
@@ -175,10 +195,14 @@ export class AnthropicProvider implements LLMProvider {
           };
         });
 
+      const tokenInfo = tokenUsageFromMessage(response, this.model);
+      
       return {
         text: content,
         toolCalls: toolCalls,
-        tokenUsage: tokenUsageFromMessage(response),
+        tokenUsage: tokenInfo.usage,
+        totalTokens: tokenInfo.totalTokens,
+        maxTokens: tokenInfo.maxTokens,
       };
     } catch (error) {
       throw new Error(

@@ -113,6 +113,21 @@ export class AgentTracker {
       (agent) => agent.status === status,
     );
   }
+  
+  /**
+   * Get list of active agents with their descriptions
+   */
+  public getActiveAgents(): Array<{
+    id: string;
+    description: string;
+    status: AgentStatus;
+  }> {
+    return this.getAgents(AgentStatus.RUNNING).map(agent => ({
+      id: agent.id,
+      description: agent.goal,
+      status: agent.status
+    }));
+  }
 
   // Cleanup and terminate agents
   public async cleanup(): Promise<void> {
