@@ -1,3 +1,16 @@
+# [mycoder-agent-v1.7.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.6.0...mycoder-agent-v1.7.0) (2025-03-21)
+
+
+### Bug Fixes
+
+* Fix TypeScript errors and tests for message compaction feature ([d4f1fb5](https://github.com/drivecore/mycoder/commit/d4f1fb5d197e623bf98f2221352f9132dcb3e5de))
+
+
+### Features
+
+* Add automatic compaction of historical messages for agents ([a5caf46](https://github.com/drivecore/mycoder/commit/a5caf464a0a8dca925c7b46023ebde4727e211f8)), closes [#338](https://github.com/drivecore/mycoder/issues/338)
+* Improve message compaction with proactive suggestions ([6276bc0](https://github.com/drivecore/mycoder/commit/6276bc0bc5fa27c4f1e9be61ff4375690ad04c62))
+
 # [mycoder-agent-v1.6.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.5.0...mycoder-agent-v1.6.0) (2025-03-21)
 
 
