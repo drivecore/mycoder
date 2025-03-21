@@ -41,6 +41,8 @@ describe('Status Updates', () => {
     expect(statusMessage.content).toContain('Active Shell Processes: 0');
     expect(statusMessage.content).toContain('Active Browser Sessions: 0');
     expect(statusMessage.content).toContain('compactHistory tool');
+    expect(statusMessage.content).toContain('If token usage gets high (>50%)');
+    expect(statusMessage.content).not.toContain('Your token usage is high');  // Not high enough
   });
   
   it('should include active agents, shells, and sessions', () => {
@@ -82,6 +84,8 @@ describe('Status Updates', () => {
     
     // Verify
     expect(statusMessage.content).toContain('Token Usage: 70,000/100,000 (70%)');
+    expect(statusMessage.content).toContain('Your token usage is high (70%)');
+    expect(statusMessage.content).toContain('recommended to use');
     expect(statusMessage.content).toContain('Active Sub-Agents: 2');
     expect(statusMessage.content).toContain('- agent1: Task 1');
     expect(statusMessage.content).toContain('- agent2: Task 2');

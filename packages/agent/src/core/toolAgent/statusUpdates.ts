@@ -51,7 +51,9 @@ export function generateStatusUpdate(
     `Active Browser Sessions: ${activeSessions.length}`,
     ...activeSessions.map(s => `- ${s.id}: ${s.description}`),
     ``,
-    `If token usage is high (>70%), consider using the 'compactHistory' tool to reduce context size.`,
+    usagePercentage >= 50 
+      ? `Your token usage is high (${usagePercentage}%). It is recommended to use the 'compactHistory' tool now to reduce context size.`
+      : `If token usage gets high (>50%), consider using the 'compactHistory' tool to reduce context size.`,
     `--- END STATUS ---`,
   ].join('\n');
   

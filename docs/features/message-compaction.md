@@ -14,12 +14,16 @@ This information is used to monitor context window usage and trigger appropriate
 
 ### 2. Status Updates
 
-Agents receive periodic status updates (every 5 interactions) with information about:
+Agents receive status updates with information about:
 - Current token usage and percentage of the maximum
 - Cost so far
 - Active sub-agents and their status
 - Active shell processes and their status
 - Active browser sessions and their status
+
+Status updates are sent:
+1. Every 5 agent interactions (periodic updates)
+2. Whenever token usage exceeds 50% of the maximum (threshold-based updates)
 
 Example status update:
 ```
@@ -54,7 +58,7 @@ The `compactHistory` tool allows agents to compact their message history by summ
 
 ## Usage
 
-Agents are instructed to monitor their token usage through status updates and use the `compactHistory` tool when token usage approaches 70% of the maximum:
+Agents are instructed to monitor their token usage through status updates and use the `compactHistory` tool when token usage approaches 50% of the maximum:
 
 ```javascript
 // Example of agent using the compactHistory tool

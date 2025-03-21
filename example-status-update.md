@@ -19,13 +19,13 @@ Active Shell Processes: 3
 Active Browser Sessions: 1
 - bs_12345: https://www.typescriptlang.org/docs/handbook/utility-types.html
 
-If token usage is high (>70%), consider using the 'compactHistory' tool to reduce context size.
+Your token usage is high (45%). It is recommended to use the 'compactHistory' tool now to reduce context size.
 --- END STATUS ---
 ```
 
 ## About Status Updates
 
-Status updates are sent periodically to the agent (every 5 interactions) to provide awareness of:
+Status updates are sent to the agent (every 5 interactions and whenever token usage exceeds 50%) to provide awareness of:
 
 1. **Token Usage**: Current usage and percentage of maximum context window
 2. **Cost**: Estimated cost of the session so far

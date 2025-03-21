@@ -61,7 +61,8 @@ export const toolAgent = async (
   
   // Variables for status updates
   let statusUpdateCounter = 0;
-  const STATUS_UPDATE_FREQUENCY = 5; // Send status every 5 iterations
+  const STATUS_UPDATE_FREQUENCY = 5; // Send status every 5 iterations by default
+  const TOKEN_USAGE_THRESHOLD = 50; // Send status update when usage is above 50%
 
   for (let i = 0; i < config.maxIterations; i++) {
     logger.debug(
@@ -157,24 +158,27 @@ export const toolAgent = async (
 
     tokenTracker.tokenUsage.add(tokenUsage);
     
-    // Store token information for status updates
-    lastResponseTotalTokens = totalTokens;
-    lastResponseMaxTokens = maxTokens;
-    
-    // Send periodic status updates
+    // Send status updates based on frequency and token usage threshold
     statusUpdateCounter++;
-    if (statusUpdateCounter >= STATUS_UPDATE_FREQUENCY && totalTokens && maxTokens) {
-      statusUpdateCounter = 0;
+    if (totalTokens && maxTokens) {
+      const usagePercentage = Math.round((totalTokens / maxTokens) * 100);
+      const shouldSendByFrequency = statusUpdateCounter >= STATUS_UPDATE_FREQUENCY;
+      const shouldSendByUsage = usagePercentage >= TOKEN_USAGE_THRESHOLD;
       
-      const statusMessage = generateStatusUpdate(
-        totalTokens,
-        maxTokens,
-        tokenTracker,
-        localContext
-      );
-      
-      messages.push(statusMessage);
-      logger.debug('Sent status update to agent');
+      // Send status update if either condition is met
+      if (shouldSendByFrequency || shouldSendByUsage) {
+        statusUpdateCounter = 0;
+        
+        const statusMessage = generateStatusUpdate(
+          totalTokens,
+          maxTokens,
+          tokenTracker,
+          localContext
+        );
+        
+        messages.push(statusMessage);
+        logger.debug(`Sent status update to agent (token usage: ${usagePercentage}%)`);
+      }
     }
 
     if (!text.length && toolCalls.length === 0) {
