@@ -136,7 +136,7 @@ npx mycoder "Your prompt here"
 
 MyCoder can use a browser for research. On Linux:
 
-1. **Chromium/Chrome/Firefox**: MyCoder works with these browsers automatically
+1. **System Browser Detection**: MyCoder automatically detects and uses your installed browsers (Chrome, Chromium, Firefox)
 2. **Dependencies**: You may need to install additional dependencies for browser automation:
    ```bash
    # Ubuntu/Debian
@@ -146,6 +146,18 @@ MyCoder can use a browser for research. On Linux:
        libgtk-3-0 libgbm1
    ```
 3. **Headless Mode**: By default, browser windows are hidden (use `--headless false` to show them)
+4. **Browser Preferences**: You can configure which browser MyCoder should use in your configuration file:
+   ```javascript
+   // mycoder.config.js
+   export default {
+     browser: {
+       useSystemBrowsers: true,
+       preferredType: 'chromium', // or 'firefox'
+     }
+   };
+   ```
+
+For more details on browser detection and configuration, see [System Browser Detection](../usage/browser-detection.md).
 
 ## Troubleshooting
 

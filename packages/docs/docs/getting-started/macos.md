@@ -152,9 +152,21 @@ npx mycoder "Your prompt here"
 
 MyCoder can use a browser for research. On macOS:
 
-1. **Chrome/Safari**: MyCoder works with both browsers automatically
+1. **System Browser Detection**: MyCoder automatically detects and uses your installed browsers (Chrome, Chrome Canary, Edge, Firefox, Firefox Developer Edition, Firefox Nightly)
 2. **First Run**: You may see a browser window open briefly when MyCoder is first run
 3. **Headless Mode**: By default, browser windows are hidden (use `--headless false` to show them)
+4. **Browser Preferences**: You can configure which browser MyCoder should use in your configuration file:
+   ```javascript
+   // mycoder.config.js
+   export default {
+     browser: {
+       useSystemBrowsers: true,
+       preferredType: 'chromium', // or 'firefox'
+     }
+   };
+   ```
+
+For more details on browser detection and configuration, see [System Browser Detection](../usage/browser-detection.md).
 
 ## Troubleshooting
 
