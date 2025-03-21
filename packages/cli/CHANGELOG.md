@@ -1,3 +1,16 @@
+# [mycoder-v1.5.0](https://github.com/drivecore/mycoder/compare/mycoder-v1.4.1...mycoder-v1.5.0) (2025-03-20)
+
+### Bug Fixes
+
+- list default model correctly in logging ([5b67b58](https://github.com/drivecore/mycoder/commit/5b67b581cb6a7259bf1718098ed57ad2bf96f947))
+- restore visibility of tool execution output ([0809694](https://github.com/drivecore/mycoder/commit/0809694538d8bc7d808de4f1b9b97cd3a718941c)), closes [#328](https://github.com/drivecore/mycoder/issues/328)
+- update CLI cleanup to use ShellTracker instead of processStates ([3dca767](https://github.com/drivecore/mycoder/commit/3dca7670bed4884650b43d431c09a14d2673eb58))
+
+### Features
+
+- Add interactive correction feature to CLI mode ([de2861f](https://github.com/drivecore/mycoder/commit/de2861f436d35db44653dc5a0c449f4f4068ca13)), closes [#326](https://github.com/drivecore/mycoder/issues/326)
+- add stdinContent parameter to shell commands ([5342a0f](https://github.com/drivecore/mycoder/commit/5342a0fa98424282c75ca50c93b380c85ea58a20)), closes [#301](https://github.com/drivecore/mycoder/issues/301)
+
 # [mycoder-v1.4.1](https://github.com/drivecore/mycoder/compare/mycoder-v1.4.0...mycoder-v1.4.1) (2025-03-14)
 
 ### Bug Fixes

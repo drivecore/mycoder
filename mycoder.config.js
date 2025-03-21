@@ -8,6 +8,18 @@ export default {
   userSession: false,
   pageFilter: 'none', // 'simple', 'none', or 'readability'
 
+  // System browser detection settings
+  browser: {
+    // Whether to use system browsers or Playwright's bundled browsers
+    useSystemBrowsers: true,
+
+    // Preferred browser type (chromium, firefox, webkit)
+    preferredType: 'chromium',
+
+    // Custom browser executable path (overrides automatic detection)
+    // executablePath: null, // e.g., '/path/to/chrome'
+  },
+
   // Model settings
   //provider: 'anthropic',
   //model: 'claude-3-7-sonnet-20250219',

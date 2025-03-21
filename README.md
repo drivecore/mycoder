@@ -81,6 +81,18 @@ export default {
   userSession: false,
   pageFilter: 'none', // 'simple', 'none', or 'readability'
 
+  // System browser detection settings
+  browser: {
+    // Whether to use system browsers or Playwright's bundled browsers
+    useSystemBrowsers: true,
+
+    // Preferred browser type (chromium, firefox, webkit)
+    preferredType: 'chromium',
+
+    // Custom browser executable path (overrides automatic detection)
+    // executablePath: null, // e.g., '/path/to/chrome'
+  },
+
   // Model settings
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
@@ -208,6 +220,43 @@ MyCoder follows the [Conventional Commits](https://www.conventionalcommits.org/)
    - Publish to NPM
 
 For more details, see the [Contributing Guide](CONTRIBUTING.md).
+
+## Browser Automation
+
+MyCoder uses Playwright for browser automation, which is used by the `sessionStart` and `sessionMessage` tools. By default, Playwright requires browsers to be installed separately via `npx playwright install`.
+
+### System Browser Detection
+
+MyCoder now includes a system browser detection feature that allows it to use your existing installed browsers instead of requiring separate Playwright browser installations. This is particularly useful when MyCoder is installed globally.
+
+The system browser detection:
+
+1. Automatically detects installed browsers on Windows, macOS, and Linux
+2. Supports Chrome, Edge, Firefox, and other browsers
+3. Maintains headless mode and clean session capabilities
+4. Falls back to Playwright's bundled browsers if no system browser is found
+
+### Configuration
+
+You can configure the browser detection in your `mycoder.config.js`:
+
+```js
+export default {
+  // Other configuration...
+
+  // System browser detection settings
+  browser: {
+    // Whether to use system browsers or Playwright's bundled browsers
+    useSystemBrowsers: true,
+
+    // Preferred browser type (chromium, firefox, webkit)
+    preferredType: 'chromium',
+
+    // Custom browser executable path (overrides automatic detection)
+    // executablePath: null, // e.g., '/path/to/chrome'
+  },
+};
+```
 
 ## Contributing
 

@@ -4,6 +4,12 @@ import type { Browser, Page } from '@playwright/test';
 export interface BrowserConfig {
   headless?: boolean;
   defaultTimeout?: number;
+  // Custom browser executable path (overrides automatic detection)
+  executablePath?: string;
+  // Preferred browser type (chromium, firefox, webkit)
+  preferredType?: 'chromium' | 'firefox' | 'webkit';
+  // Whether to use system browsers or Playwright's bundled browsers
+  useSystemBrowsers?: boolean;
 }
 
 // Browser session
