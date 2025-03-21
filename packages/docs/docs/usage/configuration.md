@@ -87,6 +87,16 @@ export default {
 | `userSession` | Use existing browser session      | `true`, `false`                 | `false`  |
 | `pageFilter`  | Method to process webpage content | `simple`, `none`, `readability` | `simple` |
 
+#### System Browser Detection
+
+MyCoder can detect and use your system-installed browsers instead of requiring Playwright's bundled browsers. This is especially useful when MyCoder is installed globally via npm.
+
+| Option                    | Description                                      | Possible Values                | Default    |
+| ------------------------- | ------------------------------------------------ | ------------------------------ | ---------- |
+| `browser.useSystemBrowsers` | Use system-installed browsers if available       | `true`, `false`                | `true`     |
+| `browser.preferredType`     | Preferred browser engine type                    | `chromium`, `firefox`, `webkit` | `chromium` |
+| `browser.executablePath`    | Custom browser executable path (optional)        | String path to browser executable | `null`     |
+
 Example:
 
 ```javascript
@@ -95,6 +105,14 @@ export default {
   // Show browser windows and use readability for better web content parsing
   headless: false,
   pageFilter: 'readability',
+  
+  // System browser detection settings
+  browser: {
+    useSystemBrowsers: true,
+    preferredType: 'firefox',
+    // Optionally specify a custom browser path
+    // executablePath: '/path/to/chrome',
+  },
 };
 ```
 
@@ -174,6 +192,13 @@ export default {
   headless: false,
   userSession: true,
   pageFilter: 'readability',
+  
+  // System browser detection settings
+  browser: {
+    useSystemBrowsers: true,
+    preferredType: 'chromium',
+    // executablePath: '/path/to/custom/browser',
+  },
 
   // GitHub integration
   githubMode: true,
