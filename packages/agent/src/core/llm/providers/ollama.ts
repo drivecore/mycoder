@@ -72,7 +72,7 @@ export class OllamaProvider implements LLMProvider {
       messages,
       functions,
       temperature = 0.7,
-      maxTokens,
+      maxTokens: requestMaxTokens,
       topP,
       frequencyPenalty,
       presencePenalty,
@@ -102,10 +102,10 @@ export class OllamaProvider implements LLMProvider {
     };
 
     // Add max_tokens if provided
-    if (maxTokens !== undefined) {
+    if (requestMaxTokens !== undefined) {
       requestOptions.options = {
         ...requestOptions.options,
-        num_predict: maxTokens,
+        num_predict: requestMaxTokens,
       };
     }
 
@@ -136,16 +136,17 @@ export class OllamaProvider implements LLMProvider {
     
     // Extract the base model name without specific parameters
     const baseModelName = this.model.split(':')[0];
-    const maxTokens = OLLAMA_MODEL_LIMITS[this.model] || 
-                     OLLAMA_MODEL_LIMITS[baseModelName] || 
-                     4096; // Default fallback
+    // Check if model exists in limits, otherwise use base model or default
+    const modelMaxTokens = OLLAMA_MODEL_LIMITS[this.model] || 
+                          (baseModelName ? OLLAMA_MODEL_LIMITS[baseModelName] : undefined) || 
+                          4096; // Default fallback
 
     return {
       text: content,
       toolCalls: toolCalls,
       tokenUsage: tokenUsage,
       totalTokens,
-      maxTokens,
+      maxTokens: modelMaxTokens,
     };
   }
 

@@ -4,20 +4,7 @@
 import OpenAI from 'openai';
 
 import { TokenUsage } from '../../tokens.js';
-import { ToolCall } from '../../types';
-
-// Define model context window sizes for OpenAI models
-const OPENAI_MODEL_LIMITS: Record<string, number> = {
-  'gpt-4o': 128000,
-  'gpt-4-turbo': 128000,
-  'gpt-4-0125-preview': 128000,
-  'gpt-4-1106-preview': 128000,
-  'gpt-4': 8192,
-  'gpt-4-32k': 32768,
-  'gpt-3.5-turbo': 16385,
-  'gpt-3.5-turbo-16k': 16385,
-  // Add other models as needed
-};
+import { ToolCall } from '../../types.js';
 import { LLMProvider } from '../provider.js';
 import {
   GenerateOptions,
@@ -31,6 +18,19 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources/chat';
+
+// Define model context window sizes for OpenAI models
+const OPENAI_MODEL_LIMITS: Record<string, number> = {
+  'gpt-4o': 128000,
+  'gpt-4-turbo': 128000,
+  'gpt-4-0125-preview': 128000,
+  'gpt-4-1106-preview': 128000,
+  'gpt-4': 8192,
+  'gpt-4-32k': 32768,
+  'gpt-3.5-turbo': 16385,
+  'gpt-3.5-turbo-16k': 16385,
+  // Add other models as needed
+};
 
 /**
  * OpenAI-specific options
@@ -73,7 +73,7 @@ export class OpenAIProvider implements LLMProvider {
       messages,
       functions,
       temperature = 0.7,
-      maxTokens,
+      maxTokens: requestMaxTokens,
       stopSequences,
       topP,
       presencePenalty,
@@ -92,7 +92,7 @@ export class OpenAIProvider implements LLMProvider {
         model: this.model,
         messages: formattedMessages,
         temperature,
-        max_tokens: maxTokens,
+        max_tokens: requestMaxTokens,
         stop: stopSequences,
         top_p: topP,
         presence_penalty: presencePenalty,
@@ -132,14 +132,14 @@ export class OpenAIProvider implements LLMProvider {
       
       // Calculate total tokens and get max tokens for the model
       const totalTokens = tokenUsage.input + tokenUsage.output;
-      const maxTokens = OPENAI_MODEL_LIMITS[this.model] || 8192; // Default fallback
+      const modelMaxTokens = OPENAI_MODEL_LIMITS[this.model] || 8192; // Default fallback
 
       return {
         text: content,
         toolCalls,
         tokenUsage,
         totalTokens,
-        maxTokens,
+        maxTokens: modelMaxTokens,
       };
     } catch (error) {
       throw new Error(`Error calling OpenAI API: ${(error as Error).message}`);

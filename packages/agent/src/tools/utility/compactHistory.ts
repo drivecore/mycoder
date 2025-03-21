@@ -37,7 +37,11 @@ export const compactHistory = async (
   context: ToolContext
 ): Promise<string> => {
   const { preserveRecentMessages, customPrompt } = params;
-  const { messages, provider, tokenTracker, logger } = context;
+  const { tokenTracker, logger } = context;
+  
+  // Access messages from the toolAgentCore.ts context
+  // Since messages are passed directly to the executeTools function
+  const messages = (context as any).messages;
   
   // Need at least preserveRecentMessages + 1 to do any compaction
   if (!messages || messages.length <= preserveRecentMessages) {
@@ -63,7 +67,14 @@ export const compactHistory = async (
   };
   
   // Generate the summary
-  const { text, tokenUsage } = await generateText(provider, {
+  // Create a provider from the model provider configuration
+  const { createProvider } = await import('../../core/llm/provider.js');
+  const llmProvider = createProvider(context.provider, context.model, {
+    baseUrl: context.baseUrl,
+    apiKey: context.apiKey,
+  });
+  
+  const { text, tokenUsage } = await generateText(llmProvider, {
     messages: [systemMessage, userMessage],
     temperature: 0.3, // Lower temperature for more consistent summaries
   });
@@ -97,5 +108,5 @@ export const CompactHistoryTool: Tool = {
   description: 'Compacts the message history by summarizing older messages to reduce token usage',
   parameters: CompactHistorySchema,
   returns: z.string(),
-  execute: compactHistory,
+  execute: compactHistory as unknown as (params: Record<string, any>, context: ToolContext) => Promise<string>,
 };

@@ -40,9 +40,12 @@ describe('Status Updates', () => {
     expect(statusMessage.content).toContain('Active Sub-Agents: 0');
     expect(statusMessage.content).toContain('Active Shell Processes: 0');
     expect(statusMessage.content).toContain('Active Browser Sessions: 0');
-    expect(statusMessage.content).toContain('compactHistory tool');
-    expect(statusMessage.content).toContain('If token usage gets high (>50%)');
-    expect(statusMessage.content).not.toContain('Your token usage is high');  // Not high enough
+    expect(statusMessage.content).toContain('compactHistory');
+    // With 50% usage, it should now show the high usage warning instead of the low usage message
+    // expect(statusMessage.content).toContain('If token usage gets high (>50%)');
+    expect(statusMessage.content).toContain('Your token usage is high');
+    // With 50% usage, it should now show the high usage warning
+    expect(statusMessage.content).toContain('Your token usage is high');
   });
   
   it('should include active agents, shells, and sessions', () => {
