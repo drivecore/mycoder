@@ -12,6 +12,7 @@ export type SharedOptions = {
   readonly profile?: boolean;
   readonly userPrompt?: boolean;
   readonly upgradeCheck?: boolean;
+  readonly subAgentMode?: 'disabled' | 'sync' | 'async';
 };
 
 export const sharedOptions = {
@@ -74,5 +75,11 @@ export const sharedOptions = {
   upgradeCheck: {
     type: 'boolean',
     description: 'Disable version upgrade check (for automated/remote usage)',
+  } as const,
+
+  subAgentMode: {
+    type: 'string',
+    description: 'Sub-agent workflow mode (disabled, sync, or async)',
+    choices: ['disabled', 'sync', 'async'],
   } as const,
 };

@@ -114,10 +114,11 @@ export default {
 
 ### Behavior Customization
 
-| Option         | Description                    | Possible Values | Default |
-| -------------- | ------------------------------ | --------------- | ------- |
-| `customPrompt` | Custom instructions for the AI | Any string      | `""`    |
-| `githubMode`   | Enable GitHub integration      | `true`, `false` | `false` |
+| Option         | Description                    | Possible Values                                                 | Default      |
+| -------------- | ------------------------------ | --------------------------------------------------------------- | ------------ |
+| `customPrompt` | Custom instructions for the AI | Any string                                                      | `""`         |
+| `githubMode`   | Enable GitHub integration      | `true`, `false`                                                 | `false`      |
+| `subAgentMode` | Sub-agent workflow mode        | `'disabled'`, `'sync'` (experimental), `'async'` (experimental) | `'disabled'` |
 
 Example:
 
@@ -200,5 +201,6 @@ export default {
     'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
   profile: true,
   tokenUsage: true,
+  subAgentMode: 'disabled', // Options: 'disabled', 'sync' (experimental), 'async' (experimental)
 };
 ```

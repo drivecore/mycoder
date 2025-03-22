@@ -18,6 +18,7 @@ export type Config = {
   upgradeCheck: boolean;
   tokenUsage: boolean;
   interactive: boolean;
+  subAgentMode?: 'disabled' | 'sync' | 'async';
 
   baseUrl?: string;
 
@@ -73,6 +74,7 @@ const defaultConfig: Config = {
   upgradeCheck: true,
   tokenUsage: false,
   interactive: false,
+  subAgentMode: 'disabled',
 
   // MCP configuration
   mcp: {
@@ -95,6 +97,7 @@ export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {
     upgradeCheck: argv.upgradeCheck,
     tokenUsage: argv.tokenUsage,
     interactive: argv.interactive,
+    subAgentMode: argv.subAgentMode,
   };
 };
 
