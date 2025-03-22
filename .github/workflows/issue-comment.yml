@@ -46,4 +46,4 @@ jobs:
       - run: |
           echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
           gh auth status
-      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "On issue #${{ github.event.issue.number }} in comment ${{ steps.extract-prompt.outputs.comment_url }} the user invoked the mycoder CLI via /mycoder.  Can you try to do what they requested or if it is unclear, respond with a comment to that affect to encourage them to be more clear."
+      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "On issue ${{ github.event.issue.number }} in comment ${{ steps.extract-prompt.outputs.comment_url }} the user invoked the mycoder CLI via /mycoder.  Can you try to do what they requested or if it is unclear, respond with a comment to that affect to encourage them to be more clear."
