@@ -1,7 +1,6 @@
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
 import { Page } from 'playwright';
-import { ToolContext } from '../../../core/types.js';
+
+import { ContentFilter, ToolContext } from '../../../core/types.js';
 
 const OUTPUT_LIMIT = 11 * 1024; // 10KB limit
 
@@ -16,11 +15,14 @@ async function getRawDOM(page: Page): Promise<string> {
 /**
  * Uses an LLM to extract the main content from a page and format it as markdown
  */
-async function getSmartMarkdownContent(page: Page, context: ToolContext): Promise<string> {
+async function getSmartMarkdownContent(
+  page: Page,
+  context: ToolContext,
+): Promise<string> {
   try {
     const html = await page.content();
     const url = page.url();
-    
+
     // Create a system prompt for the LLM
     const systemPrompt = `You are an expert at extracting the main content from web pages.
 Given the HTML content of a webpage, extract only the main informative content.
@@ -32,52 +34,61 @@ Just return the extracted content as markdown.`;
 
     // Use the configured LLM to extract the content
     const { provider, model, apiKey, baseUrl } = context;
-    
+
     if (!provider || !model) {
-      context.logger.warn('LLM provider or model not available, falling back to raw DOM');
+      context.logger.warn(
+        'LLM provider or model not available, falling back to raw DOM',
+      );
       return getRawDOM(page);
     }
 
     try {
       // Import the createProvider function from the provider module
       const { createProvider } = await import('../../../core/llm/provider.js');
-      
+
       // Create a provider instance using the provider abstraction
       const llmProvider = createProvider(provider, model, {
         apiKey,
-        baseUrl
+        baseUrl,
       });
-      
+
       // Generate text using the provider
       const response = await llmProvider.generateText({
         messages: [
           {
             role: 'system',
-            content: systemPrompt
+            content: systemPrompt,
           },
           {
             role: 'user',
-            content: `URL: ${url}\n\nHTML content:\n${html}`
-          }
+            content: `URL: ${url}\n\nHTML content:\n${html}`,
+          },
         ],
         temperature: 0.3,
-        maxTokens: 4000
+        maxTokens: 4000,
       });
-      
+
       // Extract the markdown content from the response
       const markdown = response.text;
-      
+
       if (!markdown) {
-        context.logger.warn('LLM returned empty content, falling back to raw DOM');
+        context.logger.warn(
+          'LLM returned empty content, falling back to raw DOM',
+        );
         return getRawDOM(page);
       }
-      
+
       // Log token usage for monitoring
-      context.logger.debug(`Token usage for content extraction: ${JSON.stringify(response.tokenUsage)}`);
-      
+      context.logger.debug(
+        `Token usage for content extraction: ${JSON.stringify(response.tokenUsage)}`,
+      );
+
       return markdown;
     } catch (llmError) {
-      context.logger.error('Error using LLM provider for content extraction:', llmError);
+      context.logger.error(
+        'Error using LLM provider for content extraction:',
+        llmError,
+      );
       return getRawDOM(page);
     }
   } catch (error) {
@@ -92,15 +103,17 @@ Just return the extracted content as markdown.`;
  */
 export async function filterPageContent(
   page: Page,
-  pageFilter: 'raw' | 'smartMarkdown',
-  context?: ToolContext
+  contentFilter: ContentFilter,
+  context?: ToolContext,
 ): Promise<string> {
   let result: string = '';
-  
-  switch (pageFilter) {
+
+  switch (contentFilter) {
     case 'smartMarkdown':
       if (!context) {
-        console.warn('ToolContext required for smartMarkdown filter but not provided, falling back to raw mode');
+        console.warn(
+          'ToolContext required for smartMarkdown filter but not provided, falling back to raw mode',
+        );
         result = await getRawDOM(page);
       } else {
         result = await getSmartMarkdownContent(page, context);

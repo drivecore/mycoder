@@ -43,7 +43,6 @@ mycoder --file=my-task-description.txt
 | `--tokenUsage`      | Output token usage at info log level                                              |
 | `--headless`        | Use browser in headless mode with no UI showing (default: true)                   |
 | `--userSession`     | Use user's existing browser session instead of sandboxed session (default: false) |
-| `--pageFilter`      | Method to process webpage content (simple, none, readability)                     |
 | `--profile`         | Enable performance profiling of CLI startup                                       |
 | `--provider`        | Specify the AI model provider to use (anthropic, openai, mistral, xai, ollama)    |
 | `--model`           | Specify the model name to use with the selected provider                          |
@@ -59,13 +58,9 @@ Configuration is managed through a `mycoder.config.js` file in your project root
 ```javascript
 // mycoder.config.js
 export default {
-  // GitHub integration
-  githubMode: true,
-
   // Browser settings
   headless: false,
   userSession: false,
-  pageFilter: 'readability',
 
   // Model settings
   provider: 'anthropic',
@@ -85,11 +80,9 @@ export default {
 | `tokenUsage`   | Show token usage by default                        | `tokenUsage: true`                      |
 | `headless`     | Use browser in headless mode                       | `headless: false`                       |
 | `userSession`  | Use existing browser session                       | `userSession: true`                     |
-| `pageFilter`   | Default webpage content processing method          | `pageFilter: 'readability'`             |
 | `provider`     | Default AI model provider                          | `provider: 'openai'`                    |
 | `model`        | Default model name                                 | `model: 'gpt-4o'`                       |
 | `customPrompt` | Custom instructions to append to the system prompt | `customPrompt: "Always use TypeScript"` |
-| `githubMode`   | Enable GitHub integration mode                     | `githubMode: true`                      |
 | `profile`      | Enable performance profiling                       | `profile: true`                         |
 
 ## Custom Prompt

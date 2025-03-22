@@ -26,7 +26,7 @@ describe('createProvider', () => {
 
   it('should return the correct model for ollama with custom base URL', () => {
     const model = createProvider('ollama', 'llama3', {
-      ollamaBaseUrl: 'http://custom-ollama:11434',
+      baseUrl: 'http://custom-ollama:11434',
     });
     expect(model).toBeDefined();
     expect(model.provider).toBe('ollama.chat');

@@ -44,7 +44,6 @@ describe('shellStartTool', () => {
     workingDirectory: '/test',
     headless: false,
     userSession: false,
-    pageFilter: 'none',
     tokenTracker: { trackTokens: vi.fn() } as any,
     githubMode: false,
     provider: 'anthropic',
