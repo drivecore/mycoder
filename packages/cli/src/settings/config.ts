@@ -8,14 +8,12 @@ export type Config = {
   githubMode: boolean;
   headless: boolean;
   userSession: boolean;
-  pageFilter: 'simple' | 'none' | 'readability';
   provider: string;
   model?: string;
   maxTokens: number;
   temperature: number;
   customPrompt: string | string[];
   profile: boolean;
-  tokenCache: boolean;
   userPrompt: boolean;
   upgradeCheck: boolean;
   tokenUsage: boolean;
@@ -63,7 +61,6 @@ const defaultConfig: Config = {
   // Browser settings
   headless: true,
   userSession: false,
-  pageFilter: 'none' as 'simple' | 'none' | 'readability',
 
   // Model settings
   provider: 'anthropic',
@@ -73,7 +70,6 @@ const defaultConfig: Config = {
   // Custom settings
   customPrompt: '',
   profile: false,
-  tokenCache: true,
   userPrompt: true,
   upgradeCheck: true,
   tokenUsage: false,
@@ -90,17 +86,13 @@ const defaultConfig: Config = {
 export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {
   return {
     logLevel: argv.logLevel,
-    tokenCache: argv.tokenCache,
     provider: argv.provider,
     model: argv.model,
     maxTokens: argv.maxTokens,
     temperature: argv.temperature,
     profile: argv.profile,
-    githubMode: argv.githubMode,
     userSession: argv.userSession,
-    pageFilter: argv.pageFilter,
     headless: argv.headless,
-    ollamaBaseUrl: argv.ollamaBaseUrl,
     userPrompt: argv.userPrompt,
     upgradeCheck: argv.upgradeCheck,
     tokenUsage: argv.tokenUsage,

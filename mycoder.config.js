@@ -6,7 +6,6 @@ export default {
   // Browser settings
   headless: true,
   userSession: false,
-  pageFilter: 'none', // 'simple', 'none', or 'readability'
 
   // System browser detection settings
   browser: {
@@ -49,7 +48,6 @@ export default {
   //   'Custom instruction line 3',
   // ],
   profile: false,
-  tokenCache: true,
 
   // Custom commands
   // Uncomment and modify to add your own commands

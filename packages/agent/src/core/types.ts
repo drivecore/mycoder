@@ -11,18 +11,16 @@ import { ModelProvider } from './toolAgent/config.js';
 
 export type TokenLevel = 'debug' | 'info' | 'log' | 'warn' | 'error';
 
-export type pageFilter = 'simple' | 'none' | 'readability';
+export type ContentFilter = 'raw' | 'smartMarkdown';
 
 export type ToolContext = {
   logger: Logger;
   workingDirectory: string;
   headless: boolean;
   userSession: boolean;
-  pageFilter: pageFilter;
   tokenTracker: TokenTracker;
   githubMode: boolean;
   customPrompt?: string | string[];
-  tokenCache?: boolean;
   userPrompt?: boolean;
   agentId?: string; // Unique identifier for the agent, used for background tool tracking
   agentName?: string; // Name of the agent, used for browser tracker

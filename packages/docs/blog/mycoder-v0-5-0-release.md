@@ -58,7 +58,6 @@ mycoder config set tokenUsage true
 
 # Configure browser behavior
 mycoder config set headless false
-mycoder config set pageFilter readability
 ```
 
 ## GitHub Integration Mode

@@ -34,6 +34,10 @@ const parameterSchema = z.object({
     .describe(
       'Text to type if "type" actionType, for other actionType, this is ignored',
     ),
+  contentFilter: z
+    .enum(['raw', 'smartMarkdown'])
+    .optional()
+    .describe('Content filter method to use when retrieving page content'),
   description: z
     .string()
     .describe('The reason for this browser action (max 80 chars)'),
@@ -71,11 +75,20 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { instanceId, actionType, url, selector, selectorType, text },
-    { logger, pageFilter, browserTracker, ..._ },
+    {
+      instanceId,
+      actionType,
+      url,
+      selector,
+      selectorType,
+      text,
+      contentFilter = 'raw',
+    },
+    context,
   ): Promise<ReturnType> => {
-    // Validate action format
+    const { logger, browserTracker } = context;
 
+    // Validate action format
     if (!actionType) {
       logger.error('Invalid action format: actionType is required');
       return {
@@ -85,7 +98,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     }
 
     logger.debug(`Executing browser action: ${actionType}`);
-    logger.debug(`Webpage processing mode: ${pageFilter}`);
+    logger.debug(`Webpage processing mode: ${contentFilter}`);
 
     try {
       const session = browserSessions.get(instanceId);
@@ -108,7 +121,11 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
             );
             await page.goto(url, { waitUntil: 'domcontentloaded' });
             await sleep(3000);
-            const content = await filterPageContent(page, pageFilter);
+            const content = await filterPageContent(
+              page,
+              contentFilter,
+              context,
+            );
             logger.debug(`Content: ${content}`);
             logger.debug('Navigation completed with domcontentloaded strategy');
             logger.debug(`Content length: ${content.length} characters`);
@@ -125,7 +142,11 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
             try {
               await page.goto(url);
               await sleep(3000);
-              const content = await filterPageContent(page, pageFilter);
+              const content = await filterPageContent(
+                page,
+                contentFilter,
+                context,
+              );
               logger.debug(`Content: ${content}`);
               logger.debug('Navigation completed with basic strategy');
               return { status: 'success', content };
@@ -145,7 +166,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
           const clickSelector = getSelector(selector, selectorType);
           await page.click(clickSelector);
           await sleep(1000); // Wait for any content changes after click
-          const content = await filterPageContent(page, pageFilter);
+          const content = await filterPageContent(page, contentFilter, context);
           logger.debug(`Click action completed on selector: ${clickSelector}`);
           return { status: 'success', content };
         }
@@ -171,7 +192,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
         }
 
         case 'content': {
-          const content = await filterPageContent(page, pageFilter);
+          const content = await filterPageContent(page, contentFilter, context);
           logger.debug('Page content retrieved successfully');
           logger.debug(`Content length: ${content.length} characters`);
           return { status: 'success', content };
@@ -215,12 +236,10 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     }
   },
 
-  logParameters: (
-    { actionType, description },
-    { logger, pageFilter = 'simple' },
-  ) => {
+  logParameters: ({ actionType, description, contentFilter }, { logger }) => {
+    const effectiveContentFilter = contentFilter || 'raw';
     logger.log(
-      `Performing browser action: ${actionType} with ${pageFilter} processing, ${description}`,
+      `Performing browser action: ${actionType} with ${effectiveContentFilter} processing, ${description}`,
     );
   },
 

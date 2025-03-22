@@ -25,7 +25,6 @@ const mockContext: ToolContext = {
   workingDirectory: '/test',
   headless: true,
   userSession: false,
-  pageFilter: 'none',
   githubMode: true,
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',

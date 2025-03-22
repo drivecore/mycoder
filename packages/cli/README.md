@@ -121,7 +121,6 @@ export default {
   // Browser settings
   headless: true,
   userSession: false,
-  pageFilter: 'none', // 'simple', 'none', or 'readability'
 
   // Model settings
   provider: 'anthropic',
@@ -139,7 +138,6 @@ export default {
   //   'Custom instruction line 3',
   // ],
   profile: false,
-  tokenCache: true,
 
   // Base URL configuration (for providers that need it)
   baseUrl: 'http://localhost:11434', // Example for Ollama
@@ -225,9 +223,7 @@ export default {
 - `githubMode`: Enable GitHub mode (requires "gh" cli to be installed) for working with issues and PRs (default: `true`)
 - `headless`: Run browser in headless mode with no UI showing (default: `true`)
 - `userSession`: Use user's existing browser session instead of sandboxed session (default: `false`)
-- `pageFilter`: Method to process webpage content: 'simple', 'none', or 'readability' (default: `none`)
 - `customPrompt`: Custom instructions to append to the system prompt for both main agent and sub-agents (default: `""`)
-- `tokenCache`: Enable token caching for LLM API calls (default: `true`)
 - `mcp`: Configuration for Model Context Protocol (MCP) integration (default: `{ servers: [], defaultResources: [] }`)
 - `commands`: Custom commands that can be executed via the CLI (default: `{}`)
 
@@ -294,7 +290,6 @@ mycoder --userSession true "Your prompt here"
 
 - `ANTHROPIC_API_KEY`: Your Anthropic API key (required when using Anthropic models)
 - `OPENAI_API_KEY`: Your OpenAI API key (required when using OpenAI models)
-- `SENTRY_DSN`: Optional Sentry DSN for error tracking
 
 Note: Ollama models do not require an API key as they run locally or on a specified server.
 

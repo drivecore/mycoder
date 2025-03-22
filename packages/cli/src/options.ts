@@ -5,18 +5,13 @@ export type SharedOptions = {
   readonly tokenUsage?: boolean;
   readonly headless?: boolean;
   readonly userSession?: boolean;
-  readonly pageFilter?: 'simple' | 'none' | 'readability';
-  readonly sentryDsn?: string;
   readonly provider?: string;
   readonly model?: string;
   readonly maxTokens?: number;
   readonly temperature?: number;
   readonly profile?: boolean;
-  readonly tokenCache?: boolean;
   readonly userPrompt?: boolean;
-  readonly githubMode?: boolean;
   readonly upgradeCheck?: boolean;
-  readonly ollamaBaseUrl?: string;
   readonly subAgentMode?: 'disabled' | 'sync' | 'async';
 };
 
@@ -25,7 +20,6 @@ export const sharedOptions = {
     type: 'string',
     alias: 'l',
     description: 'Set minimum logging level',
-
     choices: ['debug', 'verbose', 'info', 'warn', 'error'],
   } as const,
   profile: {
@@ -74,33 +68,15 @@ export const sharedOptions = {
     description:
       "Use user's existing browser session instead of sandboxed session",
   } as const,
-  pageFilter: {
-    type: 'string',
-    description: 'Method to process webpage content',
-    choices: ['simple', 'none', 'readability'],
-  } as const,
-  tokenCache: {
-    type: 'boolean',
-    description: 'Enable token caching for LLM API calls',
-  } as const,
   userPrompt: {
     type: 'boolean',
     description: 'Alias for userPrompt: enable or disable the userPrompt tool',
-  } as const,
-  githubMode: {
-    type: 'boolean',
-    description:
-      'Enable GitHub mode for working with issues and PRs (requires git and gh CLI tools)',
-    default: true,
   } as const,
   upgradeCheck: {
     type: 'boolean',
     description: 'Disable version upgrade check (for automated/remote usage)',
   } as const,
-  ollamaBaseUrl: {
-    type: 'string',
-    description: 'Base URL for Ollama API (default: http://localhost:11434)',
-  } as const,
+
   subAgentMode: {
     type: 'string',
     description: 'Sub-agent workflow mode (disabled, sync, or async)',

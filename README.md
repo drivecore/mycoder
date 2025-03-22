@@ -44,9 +44,6 @@ mycoder --userPrompt false "Generate a basic Express.js server"
 
 # Disable user consent warning and version upgrade check for automated environments
 mycoder --upgradeCheck false "Generate a basic Express.js server"
-
-# Enable GitHub mode via CLI option (overrides config file)
-mycoder --githubMode true "Work with GitHub issues and PRs"
 ```
 
 ## Configuration
@@ -80,7 +77,6 @@ export default {
   // Browser settings
   headless: true,
   userSession: false,
-  pageFilter: 'none', // 'simple', 'none', or 'readability'
 
   // System browser detection settings
   browser: {
@@ -110,7 +106,6 @@ export default {
   //   'Custom instruction line 3',
   // ],
   profile: false,
-  tokenCache: true,
 
   // Base URL configuration (for providers that need it)
   baseUrl: 'http://localhost:11434', // Example for Ollama

@@ -1,91 +1,101 @@
-import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
 import { Page } from 'playwright';
+
+import { ContentFilter, ToolContext } from '../../../core/types.js';
 
 const OUTPUT_LIMIT = 11 * 1024; // 10KB limit
 
 /**
  * Returns the raw HTML content of the page without any processing
  */
-async function getNoneProcessedDOM(page: Page): Promise<string> {
-  return await page.content();
+async function getRawDOM(page: Page): Promise<string> {
+  const content = await page.content();
+  return content;
 }
 
 /**
- * Processes the page using Mozilla's Readability to extract the main content
- * Falls back to simple processing if Readability fails
+ * Uses an LLM to extract the main content from a page and format it as markdown
  */
-async function getReadabilityProcessedDOM(page: Page): Promise<string> {
+async function getSmartMarkdownContent(
+  page: Page,
+  context: ToolContext,
+): Promise<string> {
   try {
     const html = await page.content();
     const url = page.url();
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
 
-    if (!article) {
-      console.warn(
-        'Readability could not parse the page, falling back to simple mode',
+    // Create a system prompt for the LLM
+    const systemPrompt = `You are an expert at extracting the main content from web pages.
+Given the HTML content of a webpage, extract only the main informative content.
+Format the extracted content as clean, well-structured markdown.
+Ignore headers, footers, navigation, sidebars, ads, and other non-content elements.
+Preserve the important headings, paragraphs, lists, and other content structures.
+Do not include any explanations or descriptions about what you're doing.
+Just return the extracted content as markdown.`;
+
+    // Use the configured LLM to extract the content
+    const { provider, model, apiKey, baseUrl } = context;
+
+    if (!provider || !model) {
+      context.logger.warn(
+        'LLM provider or model not available, falling back to raw DOM',
       );
-      return getSimpleProcessedDOM(page);
+      return getRawDOM(page);
     }
 
-    // Return a formatted version of the article
-    return JSON.stringify(
-      {
-        url: url,
-        title: article.title || '',
-        content: article.content || '',
-        textContent: article.textContent || '',
-        excerpt: article.excerpt || '',
-        byline: article.byline || '',
-        dir: article.dir || '',
-        siteName: article.siteName || '',
-        length: article.length || 0,
-      },
-      null,
-      2,
-    );
-  } catch (error) {
-    console.error('Error using Readability:', error);
-    // Fallback to simple mode if Readability fails
-    return getSimpleProcessedDOM(page);
-  }
-}
+    try {
+      // Import the createProvider function from the provider module
+      const { createProvider } = await import('../../../core/llm/provider.js');
 
-/**
- * Processes the page by removing invisible elements and non-visual tags
- */
-async function getSimpleProcessedDOM(page: Page): Promise<string> {
-  const domContent = await page.evaluate(() => {
-    const clone = document.documentElement;
+      // Create a provider instance using the provider abstraction
+      const llmProvider = createProvider(provider, model, {
+        apiKey,
+        baseUrl,
+      });
 
-    const elements = clone.querySelectorAll('*');
+      // Generate text using the provider
+      const response = await llmProvider.generateText({
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: `URL: ${url}\n\nHTML content:\n${html}`,
+          },
+        ],
+        temperature: 0.3,
+        maxTokens: 4000,
+      });
 
-    const elementsToRemove: Element[] = [];
-    elements.forEach((element) => {
-      const computedStyle = window.getComputedStyle(element);
-      const isVisible =
-        computedStyle.display !== 'none' &&
-        computedStyle.visibility !== 'hidden' &&
-        computedStyle.opacity !== '0';
+      // Extract the markdown content from the response
+      const markdown = response.text;
 
-      if (!isVisible) {
-        elementsToRemove.push(element);
+      if (!markdown) {
+        context.logger.warn(
+          'LLM returned empty content, falling back to raw DOM',
+        );
+        return getRawDOM(page);
       }
-    });
 
-    const nonVisualTags = clone.querySelectorAll(
-      'noscript, iframe, link[rel="stylesheet"], meta, svg, img, symbol, path, style, script',
-    );
-    nonVisualTags.forEach((element) => elementsToRemove.push(element));
+      // Log token usage for monitoring
+      context.logger.debug(
+        `Token usage for content extraction: ${JSON.stringify(response.tokenUsage)}`,
+      );
 
-    elementsToRemove.forEach((element) => element.remove());
-
-    return clone.outerHTML;
-  });
-
-  return domContent.replace(/\n/g, '').replace(/\s+/g, ' ');
+      return markdown;
+    } catch (llmError) {
+      context.logger.error(
+        'Error using LLM provider for content extraction:',
+        llmError,
+      );
+      return getRawDOM(page);
+    }
+  } catch (error) {
+    context.logger.error('Error using LLM for content extraction:', error);
+    // Fallback to raw mode if LLM processing fails
+    return getRawDOM(page);
+  }
 }
 
 /**
@@ -93,24 +103,32 @@ async function getSimpleProcessedDOM(page: Page): Promise<string> {
  */
 export async function filterPageContent(
   page: Page,
-  pageFilter: 'simple' | 'none' | 'readability',
+  contentFilter: ContentFilter,
+  context?: ToolContext,
 ): Promise<string> {
   let result: string = '';
-  switch (pageFilter) {
-    case 'none':
-      result = await getNoneProcessedDOM(page);
+
+  switch (contentFilter) {
+    case 'smartMarkdown':
+      if (!context) {
+        console.warn(
+          'ToolContext required for smartMarkdown filter but not provided, falling back to raw mode',
+        );
+        result = await getRawDOM(page);
+      } else {
+        result = await getSmartMarkdownContent(page, context);
+      }
       break;
-    case 'readability':
-      result = await getReadabilityProcessedDOM(page);
-      break;
-    case 'simple':
+    case 'raw':
     default:
-      result = await getSimpleProcessedDOM(page);
+      result = await getRawDOM(page);
       break;
   }
 
-  if (result.length > OUTPUT_LIMIT) {
-    return result.slice(0, OUTPUT_LIMIT) + '...(truncated)';
+  // Ensure result is a string before checking length
+  const resultString = result || '';
+  if (resultString.length > OUTPUT_LIMIT) {
+    return resultString.slice(0, OUTPUT_LIMIT) + '...(truncated)';
   }
-  return result;
+  return resultString;
 }

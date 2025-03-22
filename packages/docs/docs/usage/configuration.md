@@ -19,7 +19,6 @@ export default {
   // Browser settings
   headless: true,
   userSession: false,
-  pageFilter: 'none', // 'simple', 'none', or 'readability'
 
   // Model settings
   provider: 'anthropic',
@@ -30,13 +29,12 @@ export default {
   // Custom settings
   customPrompt: '',
   profile: false,
-  tokenCache: true,
 };
 ```
 
 MyCoder will search for configuration in the following places (in order of precedence):
 
-1. CLI options (e.g., `--githubMode true`)
+1. CLI options (e.g., `--userSession true`)
 2. Configuration file (`mycoder.config.js`)
 3. Default values
 
@@ -81,11 +79,10 @@ export default {
 
 ### Browser Integration
 
-| Option        | Description                       | Possible Values                 | Default  |
-| ------------- | --------------------------------- | ------------------------------- | -------- |
-| `headless`    | Run browser in headless mode      | `true`, `false`                 | `true`   |
-| `userSession` | Use existing browser session      | `true`, `false`                 | `false`  |
-| `pageFilter`  | Method to process webpage content | `simple`, `none`, `readability` | `simple` |
+| Option        | Description                  | Possible Values | Default |
+| ------------- | ---------------------------- | --------------- | ------- |
+| `headless`    | Run browser in headless mode | `true`, `false` | `true`  |
+| `userSession` | Use existing browser session | `true`, `false` | `false` |
 
 #### System Browser Detection
 
@@ -104,7 +101,6 @@ Example:
 export default {
   // Show browser windows and use readability for better web content parsing
   headless: false,
-  pageFilter: 'readability',
 
   // System browser detection settings
   browser: {
@@ -118,10 +114,10 @@ export default {
 
 ### Behavior Customization
 
-| Option         | Description                    | Possible Values                   | Default   |
-| -------------- | ------------------------------ | --------------------------------- | --------- |
-| `customPrompt` | Custom instructions for the AI | Any string                                          | `""`        |
-| `githubMode`   | Enable GitHub integration      | `true`, `false`                                 | `false`     |
+| Option         | Description                    | Possible Values                                                 | Default      |
+| -------------- | ------------------------------ | --------------------------------------------------------------- | ------------ |
+| `customPrompt` | Custom instructions for the AI | Any string                                                      | `""`         |
+| `githubMode`   | Enable GitHub integration      | `true`, `false`                                                 | `false`      |
 | `subAgentMode` | Sub-agent workflow mode        | `'disabled'`, `'sync'` (experimental), `'async'` (experimental) | `'disabled'` |
 
 Example:
@@ -192,7 +188,6 @@ export default {
   // Browser settings
   headless: false,
   userSession: true,
-  pageFilter: 'readability',
 
   // System browser detection settings
   browser: {
@@ -201,17 +196,11 @@ export default {
     // executablePath: '/path/to/custom/browser',
   },
 
-  // GitHub integration
-  githubMode: true,
-
   // Custom settings
   customPrompt:
     'Always prioritize readability and simplicity in your code. Prefer TypeScript over JavaScript when possible.',
   profile: true,
   tokenUsage: true,
-  tokenCache: true,
-
-  // Sub-agent workflow mode
   subAgentMode: 'disabled', // Options: 'disabled', 'sync' (experimental), 'async' (experimental)
 };
 ```

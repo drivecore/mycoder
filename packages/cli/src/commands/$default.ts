@@ -104,8 +104,6 @@ export async function executePrompt(
     undefined,
     config.tokenUsage ? LogLevel.info : LogLevel.debug,
   );
-  // Use command line option if provided, otherwise use config value
-  tokenTracker.tokenCache = config.tokenCache;
 
   // Initialize interactive input if enabled
   let cleanupInteractiveInput: (() => void) | undefined;
@@ -189,12 +187,10 @@ export async function executePrompt(
       logger,
       headless: config.headless,
       userSession: config.userSession,
-      pageFilter: config.pageFilter,
       workingDirectory: '.',
       tokenTracker,
       githubMode: config.githubMode,
       customPrompt: config.customPrompt,
-      tokenCache: config.tokenCache,
       userPrompt: config.userPrompt,
       provider: config.provider as ModelProvider,
       baseUrl: config.baseUrl,
