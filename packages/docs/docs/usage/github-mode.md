@@ -138,6 +138,38 @@ If your team uses a complex GitHub workflow (e.g., with code owners, required re
 - **Authentication Problems**: Ensure you've run `gh auth login` successfully
 - **Permission Issues**: Verify you have write access to the repository
 - **Branch Protection**: Some repositories have branch protection rules that may prevent direct pushes
+- **SSH Passphrase Prompts**: If you use SSH keys with passphrases, automated workflows may be interrupted by passphrase prompts
+
+### SSH Passphrase Best Practices
+
+When using GitHub mode with SSH authentication, it's important to properly manage SSH key passphrases to ensure automation works smoothly:
+
+1. **Use SSH Agent**: Configure ssh-agent to remember your passphrase, so you don't need to enter it repeatedly:
+
+   ```bash
+   # Start the ssh-agent in the background
+   eval "$(ssh-agent -s)"
+   
+   # Add your SSH private key to the ssh-agent
+   ssh-add ~/.ssh/id_ed25519  # Replace with your key path
+   ```
+
+2. **Configure SSH Agent to Persist**:
+   - On macOS, you can use the keychain to remember your passphrase:
+     ```bash
+     ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+     ```
+   - On other systems, consider using tools like `keychain` or configuring your desktop environment to start ssh-agent automatically
+
+3. **Create Config File** (optional): Create or edit `~/.ssh/config` to use the ssh-agent:
+   ```
+   Host github.com
+     AddKeysToAgent yes
+     UseKeychain yes  # macOS only
+     IdentityFile ~/.ssh/id_ed25519
+   ```
+
+Without proper SSH agent configuration, MyCoder may be interrupted by passphrase prompts during Git operations, which can cause timeouts in automated environments.
 
 If you encounter any issues with GitHub mode, you can check the GitHub CLI status with:
 
