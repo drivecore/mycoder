@@ -158,6 +158,7 @@ export async function executePrompt(
     const tools = getTools({
       userPrompt: config.userPrompt,
       mcpConfig: config.mcp,
+      subAgentMode: config.subAgentMode,
     });
 
     // Error handling

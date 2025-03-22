@@ -20,6 +20,9 @@ export default {
     // executablePath: null, // e.g., '/path/to/chrome'
   },
 
+  // Sub-agent workflow mode: 'disabled' (default), 'sync' (experimental), or 'async' (experimental)
+  subAgentMode: 'disabled',
+
   // Model settings
   //provider: 'anthropic',
   //model: 'claude-3-7-sonnet-20250219',
