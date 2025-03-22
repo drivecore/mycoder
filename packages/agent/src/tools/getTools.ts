@@ -19,6 +19,7 @@ import { shellMessageTool } from './shell/shellMessage.js';
 import { shellStartTool } from './shell/shellStart.js';
 import { waitTool } from './sleep/wait.js';
 import { textEditorTool } from './textEditor/textEditor.js';
+import { thinkTool } from './think/think.js';
 
 // Import these separately to avoid circular dependencies
 
@@ -52,6 +53,7 @@ export function getTools(options?: GetToolsOptions): Tool[] {
     sessionMessageTool as unknown as Tool,
     listSessionsTool as unknown as Tool,
     waitTool as unknown as Tool,
+    thinkTool as unknown as Tool,
   ];
 
   // Add agent tools based on the configured mode
