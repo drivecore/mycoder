@@ -1,6 +1,6 @@
 {
   "name": "mycoder-agent",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Agent module for mycoder - an AI-powered software development assistant",
   "type": "module",
   "main": "dist/index.js",
