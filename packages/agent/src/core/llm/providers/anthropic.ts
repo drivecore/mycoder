@@ -87,7 +87,7 @@ function addCacheControlToMessages(
 function tokenUsageFromMessage(
   message: Anthropic.Message,
   model: string,
-  contextWindow?: number,
+  contextWindow: number,
 ) {
   const usage = new TokenUsage();
   usage.input = message.usage.input_tokens;
@@ -97,19 +97,10 @@ function tokenUsageFromMessage(
 
   const totalTokens = usage.input + usage.output;
 
-  // Use provided context window or fallback to cached value
-  const maxTokens = contextWindow || modelContextWindowCache[model];
-
-  if (!maxTokens) {
-    throw new Error(
-      `Context window size not available for model: ${model}. Make sure to initialize the model properly.`,
-    );
-  }
-
   return {
     usage,
     totalTokens,
-    maxTokens,
+    maxTokens: contextWindow,
   };
 }
 
@@ -123,7 +114,6 @@ export class AnthropicProvider implements LLMProvider {
   private client: Anthropic;
   private apiKey: string;
   private baseUrl?: string;
-  private modelContextWindow?: number;
 
   constructor(model: string, options: AnthropicOptions = {}) {
     this.model = model;
@@ -139,15 +129,6 @@ export class AnthropicProvider implements LLMProvider {
       apiKey: this.apiKey,
       ...(this.baseUrl && { baseURL: this.baseUrl }),
     });
-
-    // Initialize model context window detection
-    // This is async but we don't need to await it here
-    // If it fails, an error will be thrown when the model is used
-    this.initializeModelContextWindow().catch((error) => {
-      console.error(
-        `Failed to initialize model context window: ${error.message}. The model will not work until context window information is available.`,
-      );
-    });
   }
 
   /**
@@ -156,54 +137,49 @@ export class AnthropicProvider implements LLMProvider {
    * @returns The context window size
    * @throws Error if the context window size cannot be determined
    */
-  private async initializeModelContextWindow(): Promise<number> {
-    try {
-      const response = await this.client.models.list();
+  private async getModelContextWindow(): Promise<number> {
+    const cachedContextWindow = modelContextWindowCache[this.model];
+    if (cachedContextWindow !== undefined) {
+      return cachedContextWindow;
+    }
+    const response = await this.client.models.list();
 
-      if (!response?.data || !Array.isArray(response.data)) {
-        throw new Error(
-          `Invalid response from models.list() for ${this.model}`,
-        );
-      }
+    if (!response?.data || !Array.isArray(response.data)) {
+      throw new Error(`Invalid response from models.list() for ${this.model}`);
+    }
 
-      // Try to find the exact model
-      let model = response.data.find((m) => m.id === this.model);
+    // Try to find the exact model
+    let model = response.data.find((m) => m.id === this.model);
 
-      // If not found, try to find a model that starts with the same name
-      // This helps with model aliases like 'claude-3-sonnet-latest'
-      if (!model) {
-        // Split by '-latest' or '-20' to get the base model name
-        const parts = this.model.split('-latest');
-        const modelPrefix =
-          parts.length > 1 ? parts[0] : this.model.split('-20')[0];
+    // If not found, try to find a model that starts with the same name
+    // This helps with model aliases like 'claude-3-sonnet-latest'
+    if (!model) {
+      // Split by '-latest' or '-20' to get the base model name
+      const parts = this.model.split('-latest');
+      const modelPrefix =
+        parts.length > 1 ? parts[0] : this.model.split('-20')[0];
 
-        if (modelPrefix) {
-          model = response.data.find((m) => m.id.startsWith(modelPrefix));
+      if (modelPrefix) {
+        model = response.data.find((m) => m.id.startsWith(modelPrefix));
 
-          if (model) {
-            console.info(
-              `Model ${this.model} not found, using ${model.id} for context window size`,
-            );
-          }
+        if (model) {
+          console.info(
+            `Model ${this.model} not found, using ${model.id} for context window size`,
+          );
         }
       }
+    }
 
-      // Using type assertion to access context_window property
-      // The Anthropic API returns context_window but it may not be in the TypeScript definitions
-      if (model && 'context_window' in model) {
-        const contextWindow = (model as any).context_window;
-        this.modelContextWindow = contextWindow;
-        // Cache the result for future use
-        modelContextWindowCache[this.model] = contextWindow;
-        return contextWindow;
-      } else {
-        throw new Error(
-          `No context window information found for model: ${this.model}`,
-        );
-      }
-    } catch (error) {
+    // Using type assertion to access context_window property
+    // The Anthropic API returns context_window but it may not be in the TypeScript definitions
+    if (model && 'context_window' in model) {
+      const contextWindow = (model as any).context_window;
+      // Cache the result for future use
+      modelContextWindowCache[this.model] = contextWindow;
+      return contextWindow;
+    } else {
       throw new Error(
-        `Failed to determine context window size for model ${this.model}: ${(error as Error).message}`,
+        `No context window information found for model: ${this.model}`,
       );
     }
   }
@@ -212,6 +188,7 @@ export class AnthropicProvider implements LLMProvider {
    * Generate text using Anthropic API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
+    const modelContextWindow = await this.getModelContextWindow();
     const { messages, functions, temperature = 0.7, maxTokens, topP } = options;
 
     // Extract system message
@@ -227,63 +204,56 @@ export class AnthropicProvider implements LLMProvider {
       })),
     );
 
-    try {
-      const requestOptions: Anthropic.MessageCreateParams = {
-        model: this.model,
-        messages: addCacheControlToMessages(formattedMessages),
-        temperature,
-        max_tokens: maxTokens || 1024,
-        system: systemMessage?.content
-          ? [
-              {
-                type: 'text',
-                text: systemMessage?.content,
-                cache_control: { type: 'ephemeral' },
-              },
-            ]
-          : undefined,
-        top_p: topP,
-        tools,
-        stream: false,
-      };
+    const requestOptions: Anthropic.MessageCreateParams = {
+      model: this.model,
+      messages: addCacheControlToMessages(formattedMessages),
+      temperature,
+      max_tokens: maxTokens || 1024,
+      system: systemMessage?.content
+        ? [
+            {
+              type: 'text',
+              text: systemMessage?.content,
+              cache_control: { type: 'ephemeral' },
+            },
+          ]
+        : undefined,
+      top_p: topP,
+      tools,
+      stream: false,
+    };
 
-      const response = await this.client.messages.create(requestOptions);
+    const response = await this.client.messages.create(requestOptions);
 
-      // Extract content and tool calls
-      const content =
-        response.content.find((c) => c.type === 'text')?.text || '';
-      const toolCalls = response.content
-        .filter((c) => {
-          const contentType = c.type;
-          return contentType === 'tool_use';
-        })
-        .map((c) => {
-          const toolUse = c as Anthropic.Messages.ToolUseBlock;
-          return {
-            id: toolUse.id,
-            name: toolUse.name,
-            content: JSON.stringify(toolUse.input),
-          };
-        });
+    // Extract content and tool calls
+    const content = response.content.find((c) => c.type === 'text')?.text || '';
+    const toolCalls = response.content
+      .filter((c) => {
+        const contentType = c.type;
+        return contentType === 'tool_use';
+      })
+      .map((c) => {
+        const toolUse = c as Anthropic.Messages.ToolUseBlock;
+        return {
+          id: toolUse.id,
+          name: toolUse.name,
+          content: JSON.stringify(toolUse.input),
+        };
+      });
 
-      const tokenInfo = tokenUsageFromMessage(
-        response,
-        this.model,
-        this.modelContextWindow,
-      );
+    const tokenInfo = tokenUsageFromMessage(
+      response,
+      this.model,
+      modelContextWindow,
+    );
 
-      return {
-        text: content,
-        toolCalls: toolCalls,
-        tokenUsage: tokenInfo.usage,
-        totalTokens: tokenInfo.totalTokens,
-        maxTokens: tokenInfo.maxTokens,
-      };
-    } catch (error) {
-      throw new Error(
-        `Error calling Anthropic API: ${(error as Error).message}`,
-      );
-    }
+    return {
+      text: content,
+      toolCalls: toolCalls,
+      tokenUsage: tokenInfo.usage,
+      totalTokens: tokenInfo.totalTokens,
+      maxTokens: tokenInfo.maxTokens,
+    };
   }
 
   /**
