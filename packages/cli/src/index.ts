@@ -7,7 +7,6 @@ import { hideBin } from 'yargs/helpers';
 
 import { command as defaultCommand } from './commands/$default.js';
 import { getCustomCommands } from './commands/custom.js';
-import { command as testProfileCommand } from './commands/test-profile.js';
 import { command as testSentryCommand } from './commands/test-sentry.js';
 import { command as toolsCommand } from './commands/tools.js';
 import { SharedOptions, sharedOptions } from './options.js';
@@ -61,7 +60,6 @@ const main = async () => {
     .command([
       defaultCommand,
       testSentryCommand,
-      testProfileCommand,
       toolsCommand,
       ...customCommands, // Add custom commands
     ] as CommandModule[])
