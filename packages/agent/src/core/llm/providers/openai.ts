@@ -21,6 +21,11 @@ import type {
 
 // Define model context window sizes for OpenAI models
 const OPENAI_MODEL_LIMITS: Record<string, number> = {
+  default: 128000,
+  'o3-mini': 200000,
+  'o1-pro': 200000,
+  o1: 200000,
+  'o1-mini': 128000,
   'gpt-4o': 128000,
   'gpt-4-turbo': 128000,
   'gpt-4-0125-preview': 128000,
@@ -29,7 +34,6 @@ const OPENAI_MODEL_LIMITS: Record<string, number> = {
   'gpt-4-32k': 32768,
   'gpt-3.5-turbo': 16385,
   'gpt-3.5-turbo-16k': 16385,
-  // Add other models as needed
 };
 
 /**
@@ -129,7 +133,7 @@ export class OpenAIProvider implements LLMProvider {
       const tokenUsage = new TokenUsage();
       tokenUsage.input = response.usage?.prompt_tokens || 0;
       tokenUsage.output = response.usage?.completion_tokens || 0;
-      
+
       // Calculate total tokens and get max tokens for the model
       const totalTokens = tokenUsage.input + tokenUsage.output;
       const modelMaxTokens = OPENAI_MODEL_LIMITS[this.model] || 8192; // Default fallback

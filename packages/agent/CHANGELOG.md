@@ -1,9 +1,8 @@
 # [mycoder-agent-v1.6.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.5.0...mycoder-agent-v1.6.0) (2025-03-21)
 
-
 ### Features
 
-* **browser:** add system browser detection for Playwright ([00bd879](https://github.com/drivecore/mycoder/commit/00bd879443c9de51c6ee5e227d4838905506382a)), closes [#333](https://github.com/drivecore/mycoder/issues/333)
+- **browser:** add system browser detection for Playwright ([00bd879](https://github.com/drivecore/mycoder/commit/00bd879443c9de51c6ee5e227d4838905506382a)), closes [#333](https://github.com/drivecore/mycoder/issues/333)
 
 # [mycoder-agent-v1.5.0](https://github.com/drivecore/mycoder/compare/mycoder-agent-v1.4.2...mycoder-agent-v1.5.0) (2025-03-20)
 

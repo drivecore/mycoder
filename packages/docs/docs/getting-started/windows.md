@@ -139,7 +139,7 @@ MyCoder can use a browser for research. On Windows:
      browser: {
        useSystemBrowsers: true,
        preferredType: 'chromium', // or 'firefox'
-     }
+     },
    };
    ```
 

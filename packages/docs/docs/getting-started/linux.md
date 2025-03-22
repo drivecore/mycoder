@@ -153,7 +153,7 @@ MyCoder can use a browser for research. On Linux:
      browser: {
        useSystemBrowsers: true,
        preferredType: 'chromium', // or 'firefox'
-     }
+     },
    };
    ```
 

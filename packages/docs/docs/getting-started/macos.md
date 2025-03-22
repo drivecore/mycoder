@@ -162,7 +162,7 @@ MyCoder can use a browser for research. On macOS:
      browser: {
        useSystemBrowsers: true,
        preferredType: 'chromium', // or 'firefox'
-     }
+     },
    };
    ```
 

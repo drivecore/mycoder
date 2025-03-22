@@ -22,11 +22,13 @@ This process happens automatically and is designed to be seamless for the user.
 MyCoder can detect and use the following browsers:
 
 ### Windows
+
 - Google Chrome
 - Microsoft Edge
 - Mozilla Firefox
 
 ### macOS
+
 - Google Chrome
 - Google Chrome Canary
 - Microsoft Edge
@@ -35,6 +37,7 @@ MyCoder can detect and use the following browsers:
 - Firefox Nightly
 
 ### Linux
+
 - Google Chrome
 - Chromium
 - Mozilla Firefox
@@ -47,7 +50,7 @@ You can customize the browser detection behavior in your `mycoder.config.js` fil
 // mycoder.config.js
 export default {
   // Other settings...
-  
+
   // System browser detection settings
   browser: {
     // Whether to use system browsers or Playwright's bundled browsers
@@ -64,11 +67,11 @@ export default {
 
 ### Configuration Options Explained
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `useSystemBrowsers` | Whether to use system-installed browsers if available | `true` |
-| `preferredType` | Preferred browser engine type (`chromium`, `firefox`, `webkit`) | `chromium` |
-| `executablePath` | Custom browser executable path (overrides automatic detection) | `null` |
+| Option              | Description                                                     | Default    |
+| ------------------- | --------------------------------------------------------------- | ---------- |
+| `useSystemBrowsers` | Whether to use system-installed browsers if available           | `true`     |
+| `preferredType`     | Preferred browser engine type (`chromium`, `firefox`, `webkit`) | `chromium` |
+| `executablePath`    | Custom browser executable path (overrides automatic detection)  | `null`     |
 
 ## Browser Selection Priority
 
@@ -124,7 +127,8 @@ export default {
 export default {
   browser: {
     useSystemBrowsers: true,
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Windows example
+    executablePath:
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Windows example
     // executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS example
     // executablePath: '/usr/bin/google-chrome', // Linux example
   },

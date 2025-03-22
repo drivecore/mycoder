@@ -3,11 +3,11 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 
+import { AgentStatus } from '../../../tools/agent/AgentTracker.js';
+import { SessionStatus } from '../../../tools/session/SessionTracker.js';
+import { ShellStatus } from '../../../tools/shell/ShellTracker.js';
 import { TokenTracker } from '../../tokens.js';
 import { ToolContext } from '../../types.js';
-import { AgentStatus } from '../../../tools/agent/AgentTracker.js';
-import { ShellStatus } from '../../../tools/shell/ShellTracker.js';
-import { SessionStatus } from '../../../tools/session/SessionTracker.js';
 import { generateStatusUpdate } from '../statusUpdates.js';
 
 describe('Status Updates', () => {
@@ -16,7 +16,7 @@ describe('Status Updates', () => {
     const totalTokens = 50000;
     const maxTokens = 100000;
     const tokenTracker = new TokenTracker('test');
-    
+
     // Mock the context
     const context = {
       agentTracker: {
@@ -29,14 +29,21 @@ describe('Status Updates', () => {
         getSessionsByStatus: vi.fn().mockReturnValue([]),
       },
     } as unknown as ToolContext;
-    
+
     // Execute
-    const statusMessage = generateStatusUpdate(totalTokens, maxTokens, tokenTracker, context);
-    
+    const statusMessage = generateStatusUpdate(
+      totalTokens,
+      maxTokens,
+      tokenTracker,
+      context,
+    );
+
     // Verify
     expect(statusMessage.role).toBe('system');
     expect(statusMessage.content).toContain('--- STATUS UPDATE ---');
-    expect(statusMessage.content).toContain('Token Usage: 50,000/100,000 (50%)');
+    expect(statusMessage.content).toContain(
+      'Token Usage: 50,000/100,000 (50%)',
+    );
     expect(statusMessage.content).toContain('Active Sub-Agents: 0');
     expect(statusMessage.content).toContain('Active Shell Processes: 0');
     expect(statusMessage.content).toContain('Active Browser Sessions: 0');
@@ -47,13 +54,13 @@ describe('Status Updates', () => {
     // With 50% usage, it should now show the high usage warning
     expect(statusMessage.content).toContain('Your token usage is high');
   });
-  
+
   it('should include active agents, shells, and sessions', () => {
     // Setup
     const totalTokens = 70000;
     const maxTokens = 100000;
     const tokenTracker = new TokenTracker('test');
-    
+
     // Mock the context with active agents, shells, and sessions
     const context = {
       agentTracker: {
@@ -64,29 +71,36 @@ describe('Status Updates', () => {
       },
       shellTracker: {
         getShells: vi.fn().mockReturnValue([
-          { 
-            id: 'shell1', 
-            status: ShellStatus.RUNNING, 
-            metadata: { command: 'npm test' } 
+          {
+            id: 'shell1',
+            status: ShellStatus.RUNNING,
+            metadata: { command: 'npm test' },
           },
         ]),
       },
       browserTracker: {
         getSessionsByStatus: vi.fn().mockReturnValue([
-          { 
-            id: 'session1', 
-            status: SessionStatus.RUNNING, 
-            metadata: { url: 'https://example.com' } 
+          {
+            id: 'session1',
+            status: SessionStatus.RUNNING,
+            metadata: { url: 'https://example.com' },
           },
         ]),
       },
     } as unknown as ToolContext;
-    
+
     // Execute
-    const statusMessage = generateStatusUpdate(totalTokens, maxTokens, tokenTracker, context);
-    
+    const statusMessage = generateStatusUpdate(
+      totalTokens,
+      maxTokens,
+      tokenTracker,
+      context,
+    );
+
     // Verify
-    expect(statusMessage.content).toContain('Token Usage: 70,000/100,000 (70%)');
+    expect(statusMessage.content).toContain(
+      'Token Usage: 70,000/100,000 (70%)',
+    );
     expect(statusMessage.content).toContain('Your token usage is high (70%)');
     expect(statusMessage.content).toContain('recommended to use');
     expect(statusMessage.content).toContain('Active Sub-Agents: 2');
