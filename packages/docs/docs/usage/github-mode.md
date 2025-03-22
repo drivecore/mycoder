@@ -142,6 +142,10 @@ If your team uses a complex GitHub workflow (e.g., with code owners, required re
 
 ### SSH Passphrase Best Practices
 
+MyCoder recommends using SSH authentication over HTTPS whenever possible, as SSH provides better security and doesn't require entering username/password credentials for each operation. However, if you use SSH keys with passphrases, proper configuration is necessary to prevent interruptions during automated operations.
+
+For detailed instructions, see [GitHub's official documentation on connecting with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
+
 When using GitHub mode with SSH authentication, it's important to properly manage SSH key passphrases to ensure automation works smoothly:
 
 1. **Use SSH Agent**: Configure ssh-agent to remember your passphrase, so you don't need to enter it repeatedly:

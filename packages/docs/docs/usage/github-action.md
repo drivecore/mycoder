@@ -160,6 +160,8 @@ This clearly identifies commits made automatically by MyCoder.
 
 ### SSH Authentication
 
+While SSH authentication is generally recommended over HTTPS for most Git operations due to its security benefits, in automated environments like GitHub Actions, special considerations apply:
+
 When using GitHub Actions with SSH authentication:
 
 1. **Avoid SSH Keys with Passphrases**: For automated environments like GitHub Actions, use SSH keys without passphrases or use alternative authentication methods.
