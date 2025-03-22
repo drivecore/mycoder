@@ -154,29 +154,69 @@ export class AnthropicProvider implements LLMProvider {
     });
 
     // Initialize model context window detection
-    this.initializeModelContextWindow();
+    // This is async but we don't need to await it here
+    // If it fails, we'll fall back to hardcoded limits
+    this.initializeModelContextWindow().catch((error) => {
+      console.warn(
+        `Failed to initialize model context window: ${error.message}`,
+      );
+    });
   }
 
   /**
    * Fetches the model context window size from the Anthropic API
+   *
+   * @returns The context window size if successfully fetched, otherwise undefined
    */
-  private async initializeModelContextWindow(): Promise<void> {
+  private async initializeModelContextWindow(): Promise<number | undefined> {
     try {
       const response = await this.client.models.list();
-      const model = response.data.find((m) => m.id === this.model);
+
+      if (!response?.data || !Array.isArray(response.data)) {
+        console.warn(`Invalid response from models.list() for ${this.model}`);
+        return undefined;
+      }
+
+      // Try to find the exact model
+      let model = response.data.find((m) => m.id === this.model);
+
+      // If not found, try to find a model that starts with the same name
+      // This helps with model aliases like 'claude-3-sonnet-latest'
+      if (!model) {
+        // Split by '-latest' or '-20' to get the base model name
+        const parts = this.model.split('-latest');
+        const modelPrefix =
+          parts.length > 1 ? parts[0] : this.model.split('-20')[0];
+
+        if (modelPrefix) {
+          model = response.data.find((m) => m.id.startsWith(modelPrefix));
+
+          if (model) {
+            console.info(
+              `Model ${this.model} not found, using ${model.id} for context window size`,
+            );
+          }
+        }
+      }
 
       // Using type assertion to access context_window property
       // The Anthropic API returns context_window but it may not be in the TypeScript definitions
       if (model && 'context_window' in model) {
-        this.modelContextWindow = (model as any).context_window;
+        const contextWindow = (model as any).context_window;
+        this.modelContextWindow = contextWindow;
         // Cache the result for future use
-        modelContextWindowCache[this.model] = (model as any).context_window;
+        modelContextWindowCache[this.model] = contextWindow;
+        return contextWindow;
+      } else {
+        console.warn(`No context window information found for ${this.model}`);
+        return undefined;
       }
     } catch (error) {
       console.warn(
         `Failed to fetch model context window for ${this.model}: ${(error as Error).message}`,
       );
       // Will fall back to hardcoded limits
+      return undefined;
     }
   }
 
