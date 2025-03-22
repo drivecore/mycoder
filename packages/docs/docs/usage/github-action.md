@@ -158,6 +158,18 @@ Configure Git with appropriate user information for commits made by MyCoder:
 
 This clearly identifies commits made automatically by MyCoder.
 
+### SSH Authentication
+
+When using GitHub Actions with SSH authentication:
+
+1. **Avoid SSH Keys with Passphrases**: For automated environments like GitHub Actions, use SSH keys without passphrases or use alternative authentication methods.
+
+2. **Use HTTPS with PAT**: Consider using HTTPS authentication with a Personal Access Token (PAT) for GitHub Actions to avoid SSH passphrase prompts.
+
+3. **If SSH is Required**: If you must use SSH authentication in GitHub Actions, ensure your workflow doesn't require interactive passphrase entry by:
+   - Using SSH keys without passphrases for automation purposes only
+   - Configuring the SSH agent properly in your workflow
+
 ## Usage Examples
 
 ### Trigger MyCoder on an Issue
