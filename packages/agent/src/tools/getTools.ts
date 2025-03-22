@@ -39,7 +39,7 @@ interface GetToolsOptions {
 export function getTools(options?: GetToolsOptions): Tool[] {
   const userPrompt = options?.userPrompt !== false; // Default to true if not specified
   const mcpConfig = options?.mcpConfig || { servers: [], defaultResources: [] };
-  const subAgentMode = options?.subAgentMode || 'async'; // Default to async mode
+  const subAgentMode = options?.subAgentMode || 'disabled'; // Default to disabled mode
 
   // Force cast to Tool type to avoid TypeScript issues
   const tools: Tool[] = [

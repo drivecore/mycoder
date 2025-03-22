@@ -78,7 +78,7 @@ const defaultConfig: Config = {
   upgradeCheck: true,
   tokenUsage: false,
   interactive: false,
-  subAgentMode: 'async',
+  subAgentMode: 'disabled',
 
   // MCP configuration
   mcp: {

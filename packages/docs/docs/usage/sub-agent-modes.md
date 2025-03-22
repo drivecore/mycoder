@@ -10,7 +10,7 @@ MyCoder supports different modes for working with sub-agents, giving you flexibi
 
 MyCoder supports three distinct sub-agent workflow modes:
 
-### 1. Disabled Mode
+### 1. Disabled Mode (Default)
 
 In this mode, sub-agent functionality is completely disabled:
 
@@ -19,7 +19,7 @@ In this mode, sub-agent functionality is completely disabled:
 - Useful for simpler tasks or when resource constraints are a concern
 - Reduces memory usage and API costs for straightforward tasks
 
-### 2. Synchronous Mode ("sync")
+### 2. Synchronous Mode ("sync") - Experimental
 
 In synchronous mode, the parent agent waits for sub-agents to complete before continuing:
 
@@ -29,7 +29,7 @@ In synchronous mode, the parent agent waits for sub-agents to complete before co
 - Simpler to reason about as there's no parallel execution
 - Good for tasks where later steps depend on the results of earlier steps
 
-### 3. Asynchronous Mode ("async") - Default
+### 3. Asynchronous Mode ("async") - Experimental
 
 In asynchronous mode, sub-agents run in parallel with the parent agent:
 
@@ -47,9 +47,9 @@ You can set the sub-agent workflow mode in your `mycoder.config.js` file:
 ```javascript
 // mycoder.config.js
 export default {
-  // Sub-agent workflow mode: 'disabled', 'sync', or 'async'
-  subAgentMode: 'async', // Default value
-  
+  // Sub-agent workflow mode: 'disabled', 'sync' (experimental), or 'async' (experimental)
+  subAgentMode: 'disabled', // Default value
+
   // Other configuration options...
 };
 ```
@@ -105,7 +105,7 @@ Ideal for complex projects with independent components:
 ```javascript
 // mycoder.config.js
 export default {
-  subAgentMode: 'async', // This is the default
+  subAgentMode: 'async', // Experimental
   // Other settings...
 };
 ```

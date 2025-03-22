@@ -118,11 +118,11 @@ export default {
 
 ### Behavior Customization
 
-| Option         | Description                    | Possible Values                 | Default  |
-| -------------- | ------------------------------ | ------------------------------- | -------- |
-| `customPrompt` | Custom instructions for the AI | Any string                      | `""`     |
-| `githubMode`   | Enable GitHub integration      | `true`, `false`                 | `false`  |
-| `subAgentMode` | Sub-agent workflow mode        | `'disabled'`, `'sync'`, `'async'` | `'async'` |
+| Option         | Description                    | Possible Values                   | Default   |
+| -------------- | ------------------------------ | --------------------------------- | --------- |
+| `customPrompt` | Custom instructions for the AI | Any string                                          | `""`        |
+| `githubMode`   | Enable GitHub integration      | `true`, `false`                                 | `false`     |
+| `subAgentMode` | Sub-agent workflow mode        | `'disabled'`, `'sync'` (experimental), `'async'` (experimental) | `'disabled'` |
 
 Example:
 
@@ -210,8 +210,8 @@ export default {
   profile: true,
   tokenUsage: true,
   tokenCache: true,
-  
+
   // Sub-agent workflow mode
-  subAgentMode: 'async', // Options: 'disabled', 'sync', 'async'
+  subAgentMode: 'disabled', // Options: 'disabled', 'sync' (experimental), 'async' (experimental)
 };
 ```

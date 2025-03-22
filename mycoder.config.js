@@ -20,8 +20,8 @@ export default {
     // executablePath: null, // e.g., '/path/to/chrome'
   },
 
-  // Sub-agent workflow mode: 'disabled', 'sync', or 'async' (default)
-  subAgentMode: 'async',
+  // Sub-agent workflow mode: 'disabled' (default), 'sync' (experimental), or 'async' (experimental)
+  subAgentMode: 'disabled',
 
   // Model settings
   //provider: 'anthropic',
