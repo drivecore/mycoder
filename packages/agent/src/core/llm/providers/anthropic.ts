@@ -12,8 +12,9 @@ import {
   ProviderOptions,
 } from '../types.js';
 
-// Define model context window sizes for Anthropic models
-const ANTHROPIC_MODEL_LIMITS: Record<string, number> = {
+// Fallback model context window sizes for Anthropic models
+// Used only if models.list() call fails or returns incomplete data
+const ANTHROPIC_MODEL_LIMITS_FALLBACK: Record<string, number> = {
   default: 200000,
   'claude-3-7-sonnet-20250219': 200000,
   'claude-3-7-sonnet-latest': 200000,
@@ -96,7 +97,14 @@ function addCacheControlToMessages(
   });
 }
 
-function tokenUsageFromMessage(message: Anthropic.Message, model: string) {
+// Cache for model context window sizes
+const modelContextWindowCache: Record<string, number> = {};
+
+function tokenUsageFromMessage(
+  message: Anthropic.Message,
+  model: string,
+  contextWindow?: number,
+) {
   const usage = new TokenUsage();
   usage.input = message.usage.input_tokens;
   usage.cacheWrites = message.usage.cache_creation_input_tokens ?? 0;
@@ -104,7 +112,12 @@ function tokenUsageFromMessage(message: Anthropic.Message, model: string) {
   usage.output = message.usage.output_tokens;
 
   const totalTokens = usage.input + usage.output;
-  const maxTokens = ANTHROPIC_MODEL_LIMITS[model] || 100000; // Default fallback
+  // Use provided context window, or fallback to cached value, or use hardcoded fallback
+  const maxTokens =
+    contextWindow ||
+    modelContextWindowCache[model] ||
+    ANTHROPIC_MODEL_LIMITS_FALLBACK[model] ||
+    ANTHROPIC_MODEL_LIMITS_FALLBACK.default;
 
   return {
     usage,
@@ -123,6 +136,7 @@ export class AnthropicProvider implements LLMProvider {
   private client: Anthropic;
   private apiKey: string;
   private baseUrl?: string;
+  private modelContextWindow?: number;
 
   constructor(model: string, options: AnthropicOptions = {}) {
     this.model = model;
@@ -138,6 +152,32 @@ export class AnthropicProvider implements LLMProvider {
       apiKey: this.apiKey,
       ...(this.baseUrl && { baseURL: this.baseUrl }),
     });
+
+    // Initialize model context window detection
+    this.initializeModelContextWindow();
+  }
+
+  /**
+   * Fetches the model context window size from the Anthropic API
+   */
+  private async initializeModelContextWindow(): Promise<void> {
+    try {
+      const response = await this.client.models.list();
+      const model = response.data.find((m) => m.id === this.model);
+
+      // Using type assertion to access context_window property
+      // The Anthropic API returns context_window but it may not be in the TypeScript definitions
+      if (model && 'context_window' in model) {
+        this.modelContextWindow = (model as any).context_window;
+        // Cache the result for future use
+        modelContextWindowCache[this.model] = (model as any).context_window;
+      }
+    } catch (error) {
+      console.warn(
+        `Failed to fetch model context window for ${this.model}: ${(error as Error).message}`,
+      );
+      // Will fall back to hardcoded limits
+    }
   }
 
   /**
@@ -198,7 +238,11 @@ export class AnthropicProvider implements LLMProvider {
           };
         });
 
-      const tokenInfo = tokenUsageFromMessage(response, this.model);
+      const tokenInfo = tokenUsageFromMessage(
+        response,
+        this.model,
+        this.modelContextWindow,
+      );
 
       return {
         text: content,
