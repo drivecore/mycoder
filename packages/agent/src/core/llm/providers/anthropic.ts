@@ -12,21 +12,8 @@ import {
   ProviderOptions,
 } from '../types.js';
 
-// Fallback model context window sizes for Anthropic models
-// Used only if models.list() call fails or returns incomplete data
-const ANTHROPIC_MODEL_LIMITS_FALLBACK: Record<string, number> = {
-  default: 200000,
-  'claude-3-7-sonnet-20250219': 200000,
-  'claude-3-7-sonnet-latest': 200000,
-  'claude-3-5-sonnet-20241022': 200000,
-  'claude-3-5-sonnet-latest': 200000,
-  'claude-3-haiku-20240307': 200000,
-  'claude-3-opus-20240229': 200000,
-  'claude-3-sonnet-20240229': 200000,
-  'claude-2.1': 100000,
-  'claude-2.0': 100000,
-  'claude-instant-1.2': 100000,
-};
+// Cache for model context window sizes
+const modelContextWindowCache: Record<string, number> = {};
 
 /**
  * Anthropic-specific options
@@ -97,9 +84,6 @@ function addCacheControlToMessages(
   });
 }
 
-// Cache for model context window sizes
-const modelContextWindowCache: Record<string, number> = {};
-
 function tokenUsageFromMessage(
   message: Anthropic.Message,
   model: string,
@@ -112,12 +96,15 @@ function tokenUsageFromMessage(
   usage.output = message.usage.output_tokens;
 
   const totalTokens = usage.input + usage.output;
-  // Use provided context window, or fallback to cached value, or use hardcoded fallback
-  const maxTokens =
-    contextWindow ||
-    modelContextWindowCache[model] ||
-    ANTHROPIC_MODEL_LIMITS_FALLBACK[model] ||
-    ANTHROPIC_MODEL_LIMITS_FALLBACK.default;
+
+  // Use provided context window or fallback to cached value
+  const maxTokens = contextWindow || modelContextWindowCache[model];
+
+  if (!maxTokens) {
+    throw new Error(
+      `Context window size not available for model: ${model}. Make sure to initialize the model properly.`,
+    );
+  }
 
   return {
     usage,
@@ -155,10 +142,10 @@ export class AnthropicProvider implements LLMProvider {
 
     // Initialize model context window detection
     // This is async but we don't need to await it here
-    // If it fails, we'll fall back to hardcoded limits
+    // If it fails, an error will be thrown when the model is used
     this.initializeModelContextWindow().catch((error) => {
-      console.warn(
-        `Failed to initialize model context window: ${error.message}`,
+      console.error(
+        `Failed to initialize model context window: ${error.message}. The model will not work until context window information is available.`,
       );
     });
   }
@@ -166,15 +153,17 @@ export class AnthropicProvider implements LLMProvider {
   /**
    * Fetches the model context window size from the Anthropic API
    *
-   * @returns The context window size if successfully fetched, otherwise undefined
+   * @returns The context window size
+   * @throws Error if the context window size cannot be determined
    */
-  private async initializeModelContextWindow(): Promise<number | undefined> {
+  private async initializeModelContextWindow(): Promise<number> {
     try {
       const response = await this.client.models.list();
 
       if (!response?.data || !Array.isArray(response.data)) {
-        console.warn(`Invalid response from models.list() for ${this.model}`);
-        return undefined;
+        throw new Error(
+          `Invalid response from models.list() for ${this.model}`,
+        );
       }
 
       // Try to find the exact model
@@ -208,15 +197,14 @@ export class AnthropicProvider implements LLMProvider {
         modelContextWindowCache[this.model] = contextWindow;
         return contextWindow;
       } else {
-        console.warn(`No context window information found for ${this.model}`);
-        return undefined;
+        throw new Error(
+          `No context window information found for model: ${this.model}`,
+        );
       }
     } catch (error) {
-      console.warn(
-        `Failed to fetch model context window for ${this.model}: ${(error as Error).message}`,
+      throw new Error(
+        `Failed to determine context window size for model ${this.model}: ${(error as Error).message}`,
       );
-      // Will fall back to hardcoded limits
-      return undefined;
     }
   }
 
