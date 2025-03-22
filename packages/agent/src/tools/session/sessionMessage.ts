@@ -37,7 +37,9 @@ const parameterSchema = z.object({
   contentFilter: z
     .enum(['raw', 'smartMarkdown'])
     .optional()
-    .describe('Content filter method to use when retrieving page content'),
+    .describe(
+      'Content filter method to use when retrieving page content, raw is the full dom (perfect for figuring out what to click or where to enter in text or what the page looks like), smartMarkdown is best for research, it extracts the text content as a markdown doc.',
+    ),
   description: z
     .string()
     .describe('The reason for this browser action (max 80 chars)'),
