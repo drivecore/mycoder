@@ -41,7 +41,7 @@ export const command: CommandModule<object, ToolsArgs> = {
   describe: 'List all available tools and their capabilities',
   handler: () => {
     try {
-      const tools = getTools();
+      const tools = getTools({ subAgentMode: 'async' });
 
       console.log('Available Tools:\n');
 

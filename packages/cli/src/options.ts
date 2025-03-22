@@ -17,6 +17,7 @@ export type SharedOptions = {
   readonly githubMode?: boolean;
   readonly upgradeCheck?: boolean;
   readonly ollamaBaseUrl?: string;
+  readonly subAgentMode?: 'disabled' | 'sync' | 'async';
 };
 
 export const sharedOptions = {
@@ -99,5 +100,10 @@ export const sharedOptions = {
   ollamaBaseUrl: {
     type: 'string',
     description: 'Base URL for Ollama API (default: http://localhost:11434)',
+  } as const,
+  subAgentMode: {
+    type: 'string',
+    description: 'Sub-agent workflow mode (disabled, sync, or async)',
+    choices: ['disabled', 'sync', 'async'],
   } as const,
 };
