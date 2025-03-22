@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { Tool } from '../../core/types.js';
+import { Tool, pageFilter } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
@@ -17,6 +17,10 @@ const parameterSchema = z.object({
     .number()
     .optional()
     .describe('Default timeout in milliseconds (default: 30000)'),
+  contentFilter: z
+    .enum(['raw', 'smartMarkdown'])
+    .optional()
+    .describe('Content filter method to use when retrieving page content'),
   description: z
     .string()
     .describe('The reason for starting this browser session (max 80 chars)'),
@@ -42,21 +46,25 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { url, timeout = 30000 },
-    {
+    { url, timeout = 30000, contentFilter },
+    context,
+  ): Promise<ReturnType> => {
+    const {
       logger,
       headless,
       userSession,
-      pageFilter,
+      pageFilter: defaultPageFilter,
       browserTracker,
-      ...context // Other parameters
-    },
-  ): Promise<ReturnType> => {
+      ...otherContext
+    } = context;
+    
+    // Use provided contentFilter or fall back to pageFilter from context
+    const effectiveContentFilter = contentFilter || defaultPageFilter;
     // Get config from context if available
-    const config = (context as any).config || {};
+    const config = (otherContext as any).config || {};
     logger.debug(`Starting browser session${url ? ` at ${url}` : ''}`);
     logger.debug(`User session mode: ${userSession ? 'enabled' : 'disabled'}`);
-    logger.debug(`Webpage processing mode: ${pageFilter}`);
+    logger.debug(`Webpage processing mode: ${effectiveContentFilter}`);
 
     try {
       // Register this browser session with the tracker
@@ -131,7 +139,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
           );
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
           await sleep(3000);
-          content = await filterPageContent(page, pageFilter);
+          content = await filterPageContent(page, effectiveContentFilter, context);
           logger.debug(`Content: ${content}`);
           logger.debug('Navigation completed with domcontentloaded strategy');
         } catch (error) {
@@ -146,7 +154,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
           try {
             await page.goto(url, { timeout });
             await sleep(3000);
-            content = await filterPageContent(page, pageFilter);
+            content = await filterPageContent(page, effectiveContentFilter, context);
             logger.debug(`Content: ${content}`);
             logger.debug('Navigation completed with basic strategy');
           } catch (innerError) {
@@ -186,9 +194,10 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
     }
   },
 
-  logParameters: ({ url, description }, { logger, pageFilter = 'simple' }) => {
+  logParameters: ({ url, description, contentFilter }, { logger, pageFilter = 'raw' }) => {
+    const effectiveContentFilter = contentFilter || pageFilter;
     logger.log(
-      `Starting browser session${url ? ` at ${url}` : ''} with ${pageFilter} processing, ${description}`,
+      `Starting browser session${url ? ` at ${url}` : ''} with ${effectiveContentFilter} processing, ${description}`,
     );
   },
 

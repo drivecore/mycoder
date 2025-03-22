@@ -11,7 +11,7 @@ import { ModelProvider } from './toolAgent/config.js';
 
 export type TokenLevel = 'debug' | 'info' | 'log' | 'warn' | 'error';
 
-export type pageFilter = 'simple' | 'none' | 'readability';
+export type pageFilter = 'raw' | 'smartMarkdown';
 
 export type ToolContext = {
   logger: Logger;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { Tool } from '../../core/types.js';
+import { Tool, pageFilter } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
@@ -34,6 +34,10 @@ const parameterSchema = z.object({
     .describe(
       'Text to type if "type" actionType, for other actionType, this is ignored',
     ),
+  contentFilter: z
+    .enum(['raw', 'smartMarkdown'])
+    .optional()
+    .describe('Content filter method to use when retrieving page content'),
   description: z
     .string()
     .describe('The reason for this browser action (max 80 chars)'),
@@ -71,11 +75,14 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { instanceId, actionType, url, selector, selectorType, text },
-    { logger, pageFilter, browserTracker, ..._ },
+    { instanceId, actionType, url, selector, selectorType, text, contentFilter },
+    context,
   ): Promise<ReturnType> => {
+    const { logger, pageFilter: defaultPageFilter, browserTracker } = context;
+    // Use provided contentFilter or fall back to pageFilter from context
+    const effectiveContentFilter = contentFilter || defaultPageFilter;
+    
     // Validate action format
-
     if (!actionType) {
       logger.error('Invalid action format: actionType is required');
       return {
@@ -85,7 +92,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     }
 
     logger.debug(`Executing browser action: ${actionType}`);
-    logger.debug(`Webpage processing mode: ${pageFilter}`);
+    logger.debug(`Webpage processing mode: ${effectiveContentFilter}`);
 
     try {
       const session = browserSessions.get(instanceId);
@@ -108,7 +115,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
             );
             await page.goto(url, { waitUntil: 'domcontentloaded' });
             await sleep(3000);
-            const content = await filterPageContent(page, pageFilter);
+            const content = await filterPageContent(page, effectiveContentFilter, context);
             logger.debug(`Content: ${content}`);
             logger.debug('Navigation completed with domcontentloaded strategy');
             logger.debug(`Content length: ${content.length} characters`);
@@ -125,7 +132,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
             try {
               await page.goto(url);
               await sleep(3000);
-              const content = await filterPageContent(page, pageFilter);
+              const content = await filterPageContent(page, effectiveContentFilter, context);
               logger.debug(`Content: ${content}`);
               logger.debug('Navigation completed with basic strategy');
               return { status: 'success', content };
@@ -145,7 +152,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
           const clickSelector = getSelector(selector, selectorType);
           await page.click(clickSelector);
           await sleep(1000); // Wait for any content changes after click
-          const content = await filterPageContent(page, pageFilter);
+          const content = await filterPageContent(page, effectiveContentFilter, context);
           logger.debug(`Click action completed on selector: ${clickSelector}`);
           return { status: 'success', content };
         }
@@ -171,7 +178,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
         }
 
         case 'content': {
-          const content = await filterPageContent(page, pageFilter);
+          const content = await filterPageContent(page, effectiveContentFilter, context);
           logger.debug('Page content retrieved successfully');
           logger.debug(`Content length: ${content.length} characters`);
           return { status: 'success', content };
@@ -216,11 +223,12 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (
-    { actionType, description },
-    { logger, pageFilter = 'simple' },
+    { actionType, description, contentFilter },
+    { logger, pageFilter = 'raw' },
   ) => {
+    const effectiveContentFilter = contentFilter || pageFilter;
     logger.log(
-      `Performing browser action: ${actionType} with ${pageFilter} processing, ${description}`,
+      `Performing browser action: ${actionType} with ${effectiveContentFilter} processing, ${description}`,
     );
   },
 
