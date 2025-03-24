@@ -1,0 +1,38 @@
+name: MyCoder Issue Triage
+
+# This workflow is triggered when new issues are created
+on:
+  issues:
+    types: [opened]
+
+# Top-level permissions apply to all jobs
+permissions:
+  contents: read # Required for checkout
+  issues: write # Required for issue comments and labels
+  pull-requests: read # For context if needed
+  discussions: read # Added for more context if needed
+
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+jobs:
+  triage-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ vars.PNPM_VERSION }}
+      - run: pnpm install
+      - run: cd packages/agent && pnpm exec playwright install --with-deps chromium
+      - run: |
+          git config --global user.name "Ben Houston (via MyCoder)"
+          git config --global user.email "neuralsoft@gmail.com"
+      - run: pnpm install -g mycoder
+      - run: |
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+          gh auth status
+      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "You are an issue triage assistant. Please analyze GitHub issue ${{ github.event.issue.number }} according to the guidelines in .mycoder/ISSUE_TRIAGE.md. Categorize the issue type (Bug, Feature, Request), suggest appropriate labels, check for duplicates, and provide a helpful initial assessment. If the issue is too vague, ask for more information. For bugs, try to identify potential causes. For feature requests, suggest implementation approaches. For questions, try to provide answers based on the codebase and documentation."

@@ -1,4 +1,4 @@
-name: MyCoder Issue Comment Action
+name: MyCoder Comment Action
 
 # This workflow is triggered on all issue comments, but only runs the job
 # if the comment contains '/mycoder' and is from the authorized user.

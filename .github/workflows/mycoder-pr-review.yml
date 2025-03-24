@@ -1,0 +1,48 @@
+name: MyCoder PR Review
+
+# This workflow is triggered when a PR is opened or updated with new commits
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+# Top-level permissions apply to all jobs
+permissions:
+  contents: read # Required for checkout
+  issues: read # Required for reading linked issues
+  pull-requests: write # Required for commenting on PRs
+  discussions: read # For reading discussions
+  statuses: write # For creating commit statuses
+  checks: write # For creating check runs
+  actions: read # For inspecting workflow runs
+
+env:
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+jobs:
+  review-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ vars.PNPM_VERSION }}
+      - run: pnpm install
+      - run: cd packages/agent && pnpm exec playwright install --with-deps chromium
+      - run: |
+          git config --global user.name "Ben Houston (via MyCoder)"
+          git config --global user.email "neuralsoft@gmail.com"
+      - run: pnpm install -g mycoder
+      - run: |
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+          gh auth status
+      - name: Get previous reviews
+        id: get-reviews
+        run: |
+          PR_REVIEWS=$(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews')
+          PR_COMMENTS=$(gh pr view ${{ github.event.pull_request.number }} --json comments --jq '.comments')
+          echo "reviews=$PR_REVIEWS" >> $GITHUB_OUTPUT
+          echo "comments=$PR_COMMENTS" >> $GITHUB_OUTPUT
+      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "Please review PR ${{ github.event.pull_request.number }} according to the guidelines in .mycoder/PR_REVIEW.md. This PR is related to issue ${{ github.event.pull_request.head.ref }} and has the title '${{ github.event.pull_request.title }}'. Review the PR changes, check if it addresses the requirements in the linked issue, and provide constructive feedback. Consider previous review comments and discussions to avoid repetition and help move towards resolution. Previous reviews and comments: ${{ steps.get-reviews.outputs.reviews }} ${{ steps.get-reviews.outputs.comments }}"
