@@ -52,7 +52,7 @@ export const sharedOptions = {
     type: 'boolean',
     alias: 'i',
     description:
-      'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections)',
+      'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections, Ctrl+X to cancel job)',
     default: false,
   } as const,
   file: {

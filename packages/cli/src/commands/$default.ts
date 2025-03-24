@@ -172,7 +172,7 @@ export async function executePrompt(
     if (config.interactive) {
       logger.info(
         chalk.green(
-          'Interactive correction mode enabled. Press Ctrl+M to send a correction to the agent.',
+          'Interactive mode enabled. Press Ctrl+M to send a correction to the agent, Ctrl+X to cancel job.',
         ),
       );
       cleanupInteractiveInput = initInteractiveInput();

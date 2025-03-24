@@ -6,6 +6,9 @@ import { Tool } from '../../core/types.js';
 // Track the messages sent to the main agent
 export const userMessages: string[] = [];
 
+// Flag to indicate if the job should be cancelled
+export const cancelJobFlag = { value: false };
+
 const parameterSchema = z.object({
   message: z
     .string()
