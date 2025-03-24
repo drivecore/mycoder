@@ -45,4 +45,5 @@ jobs:
           PR_COMMENTS=$(gh pr view ${{ github.event.pull_request.number }} --json comments --jq '.comments')
           echo "reviews=$PR_REVIEWS" >> $GITHUB_OUTPUT
           echo "comments=$PR_COMMENTS" >> $GITHUB_OUTPUT
-      - run: mycoder --upgradeCheck false --githubMode true --userPrompt false "Please review PR ${{ github.event.pull_request.number }} according to the guidelines in .mycoder/PR_REVIEW.md. This PR is related to issue ${{ github.event.pull_request.head.ref }} and has the title '${{ github.event.pull_request.title }}'. Review the PR changes, check if it addresses the requirements in the linked issue, and provide constructive feedback. Consider previous review comments and discussions to avoid repetition and help move towards resolution. Previous reviews and comments: ${{ steps.get-reviews.outputs.reviews }} ${{ steps.get-reviews.outputs.comments }}"
+      - run: |
+          mycoder --upgradeCheck false --githubMode true --userPrompt false "Please review PR ${{ github.event.pull_request.number }} according to the guidelines in .mycoder/PR_REVIEW.md. Previous reviews and comments: ${{ steps.get-reviews.outputs.reviews }} ${{ steps.get-reviews.outputs.comments }}"

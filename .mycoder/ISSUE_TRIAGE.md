@@ -5,11 +5,13 @@
 When triaging a new issue, categorize it by type and apply appropriate labels:
 
 ### Issue Types
+
 - **Bug**: An error, flaw, or unexpected behavior in the code
 - **Feature**: A request for new functionality or capability
 - **Request**: A general request that doesn't fit into bug or feature categories
 
 ### Issue Labels
+
 - **bug**: For issues reporting bugs or unexpected behavior
 - **documentation**: For issues related to documentation improvements
 - **question**: For issues asking questions about usage or implementation
@@ -20,16 +22,19 @@ When triaging a new issue, categorize it by type and apply appropriate labels:
 ## Triage Process
 
 ### Step 1: Initial Assessment
+
 1. Read the issue description thoroughly
 2. Determine if the issue provides sufficient information
    - If too vague, ask for more details (reproduction steps, expected vs. actual behavior)
    - Check for screenshots, error messages, or logs if applicable
 
 ### Step 2: Categorization
+
 1. Assign the appropriate issue type (Bug, Feature, Request)
 2. Apply relevant labels based on the issue content
 
 ### Step 3: Duplication Check
+
 1. Search for similar existing issues
 2. If a duplicate is found:
    - Apply the "duplicate" label
@@ -39,6 +44,7 @@ When triaging a new issue, categorize it by type and apply appropriate labels:
 ### Step 4: Issue Investigation
 
 #### For Bug Reports:
+
 1. Attempt to reproduce the issue if possible
 2. Investigate the codebase to identify potential causes
 3. Provide initial feedback on:
@@ -48,6 +54,7 @@ When triaging a new issue, categorize it by type and apply appropriate labels:
    - Estimation of complexity
 
 #### For Feature Requests:
+
 1. Evaluate if the request aligns with the project's goals
 2. Investigate feasibility and implementation approaches
 3. Provide feedback on:
@@ -57,11 +64,13 @@ When triaging a new issue, categorize it by type and apply appropriate labels:
    - Estimation of work required
 
 #### For Questions:
+
 1. Research the code and documentation to find answers
 2. Provide clear and helpful responses
 3. Suggest documentation improvements if the question reveals gaps
 
 ### Step 5: Follow-up
+
 1. Provide a constructive and helpful comment
 2. Ask clarifying questions if needed
 3. Suggest next steps or potential contributors
