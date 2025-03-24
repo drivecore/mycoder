@@ -74,6 +74,9 @@ export const shellExecuteTool: Tool<Parameters, ReturnType> = {
 
       // If stdinContent is provided, use platform-specific approach to pipe content
       if (stdinContent && stdinContent.length > 0) {
+        // Replace literal \n with actual newlines and \t with actual tabs
+        stdinContent = stdinContent.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+
         const isWindows = process.platform === 'win32';
         const encodedContent = Buffer.from(stdinContent).toString('base64');
 
