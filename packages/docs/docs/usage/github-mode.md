@@ -138,6 +138,7 @@ If your team uses a complex GitHub workflow (e.g., with code owners, required re
 - **Authentication Problems**: Ensure you've run `gh auth login` successfully
 - **Permission Issues**: Verify you have write access to the repository
 - **Branch Protection**: Some repositories have branch protection rules that may prevent direct pushes
+- **SSH Passphrase Prompts**: If you use `git` with SSH keys that have passphrases, please [setup ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) to avoid being prompted for the passphrase during agent execution.
 
 If you encounter any issues with GitHub mode, you can check the GitHub CLI status with:
 
