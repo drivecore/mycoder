@@ -117,6 +117,11 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         let childProcess;
 
         if (stdinContent && stdinContent.length > 0) {
+          // Replace literal \n with actual newlines and \t with actual tabs
+          stdinContent = stdinContent
+            .replace(/\\n/g, '\n')
+            .replace(/\\t/g, '\t');
+
           if (isWindows) {
             // Windows approach using PowerShell
             const encodedContent = Buffer.from(stdinContent).toString('base64');
