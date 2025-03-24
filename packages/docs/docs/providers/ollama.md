@@ -64,6 +64,11 @@ export default {
   // Optional: Custom base URL (defaults to http://localhost:11434)
   // baseUrl: 'http://localhost:11434',
 
+  // Manual override for context window size (in tokens)
+  // This is particularly useful for Ollama models since MyCoder may not know
+  // the context window size for all possible models
+  contextWindow: 32768, // Example for a 32k context window model
+
   // Other MyCoder settings
   maxTokens: 4096,
   temperature: 0.7,
@@ -80,6 +85,28 @@ Confirmed models with tool calling support:
 - `medragondot/Sky-T1-32B-Preview:latest` - Recommended for MyCoder
 
 If using other models, verify their tool calling capabilities before attempting to use them with MyCoder.
+
+## Context Window Configuration
+
+Ollama supports a wide variety of models, and MyCoder may not have pre-configured context window sizes for all of them. Since the context window size is used to:
+
+1. Track token usage percentage
+2. Determine when to trigger automatic history compaction
+
+It's recommended to manually set the `contextWindow` configuration option when using Ollama models. This ensures proper token tracking and timely history compaction to prevent context overflow.
+
+For example, if using a model with a 32k context window:
+
+```javascript
+export default {
+  provider: 'ollama',
+  model: 'your-model-name',
+  contextWindow: 32768, // 32k context window
+  // other settings...
+};
+```
+
+You can find the context window size for your specific model in the model's documentation or by checking the Ollama model card.
 
 ## Hardware Requirements
 

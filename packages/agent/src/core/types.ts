@@ -31,6 +31,7 @@ export type ToolContext = {
   apiKey?: string;
   maxTokens: number;
   temperature: number;
+  contextWindow?: number; // Manual override for context window size
   agentTracker: AgentTracker;
   shellTracker: ShellTracker;
   browserTracker: SessionTracker;

@@ -197,6 +197,7 @@ export async function executePrompt(
       model: config.model,
       maxTokens: config.maxTokens,
       temperature: config.temperature,
+      contextWindow: config.contextWindow,
       shellTracker: new ShellTracker('mainAgent'),
       agentTracker: new AgentTracker('mainAgent'),
       browserTracker: new SessionTracker('mainAgent'),

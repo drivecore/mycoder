@@ -14,12 +14,14 @@ import { ToolContext } from '../types.js';
  */
 export function generateStatusUpdate(
   totalTokens: number,
-  maxTokens: number,
+  contextWindow: number | undefined,
   tokenTracker: TokenTracker,
   context: ToolContext,
 ): Message {
   // Calculate token usage percentage
-  const usagePercentage = Math.round((totalTokens / maxTokens) * 100);
+  const usagePercentage = contextWindow
+    ? Math.round((totalTokens / contextWindow) * 100)
+    : undefined;
 
   // Get active sub-agents
   const activeAgents = context.agentTracker ? getActiveAgents(context) : [];
@@ -35,7 +37,9 @@ export function generateStatusUpdate(
   // Format the status message
   const statusContent = [
     `--- STATUS UPDATE ---`,
-    `Token Usage: ${formatNumber(totalTokens)}/${formatNumber(maxTokens)} (${usagePercentage}%)`,
+    contextWindow !== undefined
+      ? `Token Usage: ${formatNumber(totalTokens)}/${formatNumber(contextWindow)} (${usagePercentage}%)`
+      : '',
     `Cost So Far: ${tokenTracker.getTotalCost()}`,
     ``,
     `Active Sub-Agents: ${activeAgents.length}`,
@@ -47,9 +51,10 @@ export function generateStatusUpdate(
     `Active Browser Sessions: ${activeSessions.length}`,
     ...activeSessions.map((s) => `- ${s.id}: ${s.description}`),
     ``,
-    usagePercentage >= 50
-      ? `Your token usage is high (${usagePercentage}%). It is recommended to use the 'compactHistory' tool now to reduce context size.`
-      : `If token usage gets high (>50%), consider using the 'compactHistory' tool to reduce context size.`,
+    usagePercentage !== undefined &&
+      (usagePercentage >= 50
+        ? `Your token usage is high (${usagePercentage}%). It is recommended to use the 'compactHistory' tool now to reduce context size.`
+        : `If token usage gets high (>50%), consider using the 'compactHistory' tool to reduce context size.`),
     `--- END STATUS ---`,
   ].join('\n');
 

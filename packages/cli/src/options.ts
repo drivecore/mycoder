@@ -9,6 +9,7 @@ export type SharedOptions = {
   readonly model?: string;
   readonly maxTokens?: number;
   readonly temperature?: number;
+  readonly contextWindow?: number;
   readonly profile?: boolean;
   readonly userPrompt?: boolean;
   readonly upgradeCheck?: boolean;
@@ -42,6 +43,10 @@ export const sharedOptions = {
   temperature: {
     type: 'number',
     description: 'Temperature for text generation (0.0-1.0)',
+  } as const,
+  contextWindow: {
+    type: 'number',
+    description: 'Manual override for context window size in tokens',
   } as const,
   interactive: {
     type: 'boolean',

@@ -14,7 +14,7 @@ describe('Status Updates', () => {
   it('should generate a status update with correct token usage information', () => {
     // Setup
     const totalTokens = 50000;
-    const maxTokens = 100000;
+    const contextWindow = 100000;
     const tokenTracker = new TokenTracker('test');
 
     // Mock the context
@@ -33,7 +33,7 @@ describe('Status Updates', () => {
     // Execute
     const statusMessage = generateStatusUpdate(
       totalTokens,
-      maxTokens,
+      contextWindow,
       tokenTracker,
       context,
     );
@@ -58,7 +58,7 @@ describe('Status Updates', () => {
   it('should include active agents, shells, and sessions', () => {
     // Setup
     const totalTokens = 70000;
-    const maxTokens = 100000;
+    const contextWindow = 100000;
     const tokenTracker = new TokenTracker('test');
 
     // Mock the context with active agents, shells, and sessions
@@ -92,7 +92,7 @@ describe('Status Updates', () => {
     // Execute
     const statusMessage = generateStatusUpdate(
       totalTokens,
-      maxTokens,
+      contextWindow,
       tokenTracker,
       context,
     );

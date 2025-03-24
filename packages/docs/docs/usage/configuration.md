@@ -23,6 +23,8 @@ export default {
   // Model settings
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
+  // Manual override for context window size (in tokens)
+  // contextWindow: 16384,
   maxTokens: 4096,
   temperature: 0.7,
 
@@ -42,10 +44,11 @@ MyCoder will search for configuration in the following places (in order of prece
 
 ### AI Model Selection
 
-| Option     | Description               | Possible Values                                   | Default                      |
-| ---------- | ------------------------- | ------------------------------------------------- | ---------------------------- |
-| `provider` | The AI provider to use    | `anthropic`, `openai`, `mistral`, `xai`, `ollama` | `anthropic`                  |
-| `model`    | The specific model to use | Depends on provider                               | `claude-3-7-sonnet-20250219` |
+| Option          | Description                        | Possible Values                                   | Default                      |
+| --------------- | ---------------------------------- | ------------------------------------------------- | ---------------------------- |
+| `provider`      | The AI provider to use             | `anthropic`, `openai`, `mistral`, `xai`, `ollama` | `anthropic`                  |
+| `model`         | The specific model to use          | Depends on provider                               | `claude-3-7-sonnet-20250219` |
+| `contextWindow` | Manual override for context window | Any positive number                               | Model-specific               |
 
 Example:
 
@@ -55,6 +58,8 @@ export default {
   // Use OpenAI as the provider with GPT-4o model
   provider: 'openai',
   model: 'gpt-4o',
+  // Manually set context window size if needed (e.g., for custom or new models)
+  // contextWindow: 128000,
 };
 ```
 

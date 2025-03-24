@@ -20,8 +20,7 @@ import type {
 } from 'openai/resources/chat';
 
 // Define model context window sizes for OpenAI models
-const OPENAI_MODEL_LIMITS: Record<string, number> = {
-  default: 128000,
+const OPENA_CONTEXT_WINDOWS: Record<string, number> = {
   'o3-mini': 200000,
   'o1-pro': 200000,
   o1: 200000,
@@ -52,6 +51,7 @@ export class OpenAIProvider implements LLMProvider {
   name: string = 'openai';
   provider: string = 'openai.chat';
   model: string;
+  options: OpenAIOptions;
   private client: OpenAI;
   private apiKey: string;
   private baseUrl?: string;
@@ -59,6 +59,7 @@ export class OpenAIProvider implements LLMProvider {
 
   constructor(model: string, options: OpenAIOptions = {}) {
     this.model = model;
+    this.options = options;
     this.apiKey = options.apiKey ?? '';
     this.baseUrl = options.baseUrl;
 
@@ -136,14 +137,19 @@ export class OpenAIProvider implements LLMProvider {
 
       // Calculate total tokens and get max tokens for the model
       const totalTokens = tokenUsage.input + tokenUsage.output;
-      const modelMaxTokens = OPENAI_MODEL_LIMITS[this.model] || 8192; // Default fallback
+
+      // Use configuration contextWindow if provided, otherwise use model-specific value
+      let contextWindow = OPENA_CONTEXT_WINDOWS[this.model];
+      if (!contextWindow && this.options.contextWindow) {
+        contextWindow = this.options.contextWindow;
+      }
 
       return {
         text: content,
         toolCalls,
         tokenUsage,
         totalTokens,
-        maxTokens: modelMaxTokens,
+        contextWindow,
       };
     } catch (error) {
       throw new Error(`Error calling OpenAI API: ${(error as Error).message}`);

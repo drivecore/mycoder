@@ -82,7 +82,7 @@ export interface LLMResponse {
   tokenUsage: TokenUsage;
   // Add new fields for context window tracking
   totalTokens?: number; // Total tokens used in this request
-  maxTokens?: number; // Maximum allowed tokens for this model
+  contextWindow?: number; // Maximum allowed tokens for this model
 }
 
 /**
@@ -107,5 +107,6 @@ export interface ProviderOptions {
   apiKey?: string;
   baseUrl?: string;
   organization?: string;
+  contextWindow?: number; // Manual override for context window size
   [key: string]: any; // Allow for provider-specific options
 }
