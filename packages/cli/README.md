@@ -125,6 +125,9 @@ export default {
   // Model settings
   provider: 'anthropic',
   model: 'claude-3-7-sonnet-20250219',
+  // Manual override for context window size (in tokens)
+  // Useful for models that don't have a known context window size
+  // contextWindow: 16384,
   maxTokens: 4096,
   temperature: 0.7,
 

@@ -12,6 +12,7 @@ export type Config = {
   model?: string;
   maxTokens: number;
   temperature: number;
+  contextWindow?: number; // Manual override for context window size
   customPrompt: string | string[];
   profile: boolean;
   userPrompt: boolean;
@@ -90,6 +91,7 @@ export const getConfigFromArgv = (argv: ArgumentsCamelCase<SharedOptions>) => {
     model: argv.model,
     maxTokens: argv.maxTokens,
     temperature: argv.temperature,
+    contextWindow: argv.contextWindow,
     profile: argv.profile,
     userSession: argv.userSession,
     headless: argv.headless,
