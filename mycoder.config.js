@@ -35,6 +35,9 @@ export default {
   //provider: 'openai',
   //model: 'qwen2.5-coder:14b',
   //baseUrl: 'http://192.168.2.66:80/v1-openai',
+  // Manual override for context window size (in tokens)
+  // Useful for models that don't have a known context window size
+  // contextWindow: 16384,
   maxTokens: 4096,
   temperature: 0.7,
 

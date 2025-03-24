@@ -107,5 +107,6 @@ export interface ProviderOptions {
   apiKey?: string;
   baseUrl?: string;
   organization?: string;
+  contextWindow?: number; // Manual override for context window size
   [key: string]: any; // Allow for provider-specific options
 }

@@ -51,6 +51,7 @@ export class OpenAIProvider implements LLMProvider {
   name: string = 'openai';
   provider: string = 'openai.chat';
   model: string;
+  options: OpenAIOptions;
   private client: OpenAI;
   private apiKey: string;
   private baseUrl?: string;
@@ -58,6 +59,7 @@ export class OpenAIProvider implements LLMProvider {
 
   constructor(model: string, options: OpenAIOptions = {}) {
     this.model = model;
+    this.options = options;
     this.apiKey = options.apiKey ?? '';
     this.baseUrl = options.baseUrl;
 
@@ -135,7 +137,12 @@ export class OpenAIProvider implements LLMProvider {
 
       // Calculate total tokens and get max tokens for the model
       const totalTokens = tokenUsage.input + tokenUsage.output;
-      const contextWindow = OPENA_CONTEXT_WINDOWS[this.model];
+
+      // Use configuration contextWindow if provided, otherwise use model-specific value
+      let contextWindow = OPENA_CONTEXT_WINDOWS[this.model];
+      if (!contextWindow && this.options.contextWindow) {
+        contextWindow = this.options.contextWindow;
+      }
 
       return {
         text: content,

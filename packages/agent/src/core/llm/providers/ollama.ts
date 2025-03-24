@@ -52,10 +52,12 @@ export class OllamaProvider implements LLMProvider {
   name: string = 'ollama';
   provider: string = 'ollama.chat';
   model: string;
+  options: OllamaOptions;
   private client: Ollama;
 
   constructor(model: string, options: OllamaOptions = {}) {
     this.model = model;
+    this.options = options;
     const baseUrl =
       options.baseUrl ||
       process.env.OLLAMA_BASE_URL ||
@@ -141,6 +143,11 @@ export class OllamaProvider implements LLMProvider {
       const baseModelName = this.model.split(':')[0];
       if (baseModelName) {
         contextWindow = OLLAMA_CONTEXT_WINDOWS[baseModelName];
+      }
+
+      // If still no context window, use the one from configuration if available
+      if (!contextWindow && this.options.contextWindow) {
+        contextWindow = this.options.contextWindow;
       }
     }
 

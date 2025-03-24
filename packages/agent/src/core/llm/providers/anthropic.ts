@@ -121,12 +121,14 @@ export class AnthropicProvider implements LLMProvider {
   name: string = 'anthropic';
   provider: string = 'anthropic.messages';
   model: string;
+  options: AnthropicOptions;
   private client: Anthropic;
   private apiKey: string;
   private baseUrl?: string;
 
   constructor(model: string, options: AnthropicOptions = {}) {
     this.model = model;
+    this.options = options;
     this.apiKey = options.apiKey ?? '';
     this.baseUrl = options.baseUrl;
 
@@ -145,7 +147,11 @@ export class AnthropicProvider implements LLMProvider {
    * Generate text using Anthropic API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const modelContextWindow = ANTHROPIC_CONTEXT_WINDOWS[this.model];
+    // Use configuration contextWindow if provided, otherwise use model-specific value
+    let modelContextWindow = ANTHROPIC_CONTEXT_WINDOWS[this.model];
+    if (!modelContextWindow && this.options.contextWindow) {
+      modelContextWindow = this.options.contextWindow;
+    }
 
     const { messages, functions, temperature = 0.7, maxTokens, topP } = options;
 
