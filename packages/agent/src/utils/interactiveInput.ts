@@ -4,7 +4,10 @@ import { Writable } from 'stream';
 
 import chalk from 'chalk';
 
-import { userMessages } from '../tools/interaction/userMessage.js';
+import {
+  userMessages,
+  cancelJobFlag,
+} from '../tools/interaction/userMessage.js';
 
 // Custom output stream to intercept console output
 class OutputInterceptor extends Writable {
@@ -67,6 +70,75 @@ export const initInteractiveInput = () => {
     // Check for Ctrl+C to exit
     if (key.ctrl && key.name === 'c') {
       process.exit(0);
+    }
+
+    // Check for Ctrl+X to cancel job
+    if (key.ctrl && key.name === 'x') {
+      // Pause output
+      interceptor.pause();
+
+      // Create a readline interface for input
+      const inputRl = createInterface({
+        input: process.stdin,
+        output: originalStdout,
+      });
+
+      try {
+        // Reset cursor position and clear line
+        originalStdout.write('\r\n');
+        originalStdout.write(
+          chalk.yellow(
+            'Are you sure you want to cancel the current job? (y/n):\n',
+          ) + '> ',
+        );
+
+        // Get user confirmation
+        const confirmation = await inputRl.question('');
+
+        if (confirmation.trim().toLowerCase() === 'y') {
+          // Set cancel flag to true
+          cancelJobFlag.value = true;
+
+          // Create a readline interface for new instructions
+          originalStdout.write(
+            chalk.green('\nJob cancelled. Enter new instructions:\n') + '> ',
+          );
+
+          // Get new instructions
+          const newInstructions = await inputRl.question('');
+
+          // Add message to queue if not empty
+          if (newInstructions.trim()) {
+            userMessages.push(`[CANCEL JOB] ${newInstructions}`);
+            originalStdout.write(
+              chalk.green(
+                '\nNew instructions sent. Resuming with new task...\n\n',
+              ),
+            );
+          } else {
+            originalStdout.write(
+              chalk.yellow(
+                '\nNo new instructions provided. Job will still be cancelled...\n\n',
+              ),
+            );
+            userMessages.push(
+              '[CANCEL JOB] Please stop the current task and wait for new instructions.',
+            );
+          }
+        } else {
+          originalStdout.write(
+            chalk.green('\nCancellation aborted. Resuming output...\n\n'),
+          );
+        }
+      } catch (error) {
+        originalStdout.write(chalk.red(`\nError cancelling job: ${error}\n\n`));
+      } finally {
+        // Close input readline interface
+        inputRl.close();
+
+        // Resume output
+        interceptor.resume();
+      }
     }
 
     // Check for Ctrl+M to enter message mode

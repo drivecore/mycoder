@@ -105,9 +105,22 @@ export const toolAgent = async (
     // Import this at the top of the file
     try {
       // Dynamic import to avoid circular dependencies
-      const { userMessages } = await import(
+      const { userMessages, cancelJobFlag } = await import(
         '../../tools/interaction/userMessage.js'
       );
+
+      // Check if job cancellation was requested
+      if (cancelJobFlag.value) {
+        cancelJobFlag.value = false; // Reset the flag
+        logger.info('Job cancellation requested by user');
+
+        // If there are no new instructions in userMessages, we'll add a default message
+        if (userMessages.length === 0) {
+          userMessages.push(
+            '[CANCEL JOB] Please stop the current task and wait for new instructions.',
+          );
+        }
+      }
 
       if (userMessages && userMessages.length > 0) {
         // Get all user messages and clear the queue
@@ -116,11 +129,38 @@ export const toolAgent = async (
 
         // Add each message to the conversation
         for (const message of pendingUserMessages) {
-          logger.info(`Message from user: ${message}`);
-          messages.push({
-            role: 'user',
-            content: `[Correction from user]: ${message}`,
-          });
+          if (message.startsWith('[CANCEL JOB]')) {
+            // For cancel job messages, we'll clear the conversation history and start fresh
+            const newInstruction = message.replace('[CANCEL JOB]', '').trim();
+            logger.info(
+              `Job cancelled by user. New instruction: ${newInstruction}`,
+            );
+
+            // Clear the message history except for the system message
+            const systemMessage = messages.find((msg) => msg.role === 'system');
+            messages.length = 0;
+
+            // Add back the system message if it existed
+            if (systemMessage) {
+              messages.push(systemMessage);
+            }
+
+            // Add a message explaining what happened
+            messages.push({
+              role: 'user',
+              content: `The previous task was cancelled by the user. Please stop whatever you were doing before and focus on this new task: ${newInstruction}`,
+            });
+
+            // Reset interactions counter to avoid hitting limits
+            interactions = 0;
+          } else {
+            // Regular correction
+            logger.info(`Message from user: ${message}`);
+            messages.push({
+              role: 'user',
+              content: `[Correction from user]: ${message}`,
+            });
+          }
         }
       }
     } catch (error) {

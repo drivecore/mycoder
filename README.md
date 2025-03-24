@@ -142,7 +142,9 @@ MyCoder supports sending corrections to the main agent while it's running. This 
    mycoder --interactive "Implement a React component"
    ```
 
-2. While the agent is running, press `Ctrl+M` to enter correction mode
+2. While the agent is running, you can:
+   - Press `Ctrl+M` to enter correction mode and send additional context
+   - Press `Ctrl+X` to cancel the current job and provide new instructions
 3. Type your correction or additional context
 4. Press Enter to send the correction to the agent
 
