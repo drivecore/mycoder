@@ -192,4 +192,46 @@ describe('shellStartTool', () => {
       'With stdin content of length: 12',
     );
   });
+
+  it('should properly convert literal newlines in stdinContent', async () => {
+    await import('child_process');
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, 'platform', {
+      value: 'darwin',
+      writable: true,
+    });
+
+    const stdinWithLiteralNewlines = 'Line 1\\nLine 2\\nLine 3';
+    const expectedProcessedContent = 'Line 1\nLine 2\nLine 3';
+
+    // Capture the actual content being passed to Buffer.from
+    let capturedContent = '';
+    vi.spyOn(Buffer, 'from').mockImplementationOnce((content) => {
+      if (typeof content === 'string') {
+        capturedContent = content;
+      }
+      // Call the real implementation for encoding
+      return Buffer.from(content);
+    });
+
+    await shellStartTool.execute(
+      {
+        command: 'cat',
+        description: 'Testing literal newline conversion',
+        timeout: 0,
+        stdinContent: stdinWithLiteralNewlines,
+      },
+      mockToolContext,
+    );
+
+    // Verify that the literal newlines were converted to actual newlines
+    expect(capturedContent).toEqual(expectedProcessedContent);
+
+    // Reset mocks and platform
+    vi.spyOn(Buffer, 'from').mockRestore();
+    Object.defineProperty(process, 'platform', {
+      value: originalPlatform,
+      writable: true,
+    });
+  });
 });
