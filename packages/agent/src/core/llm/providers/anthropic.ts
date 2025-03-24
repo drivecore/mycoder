@@ -12,8 +12,18 @@ import {
   ProviderOptions,
 } from '../types.js';
 
-// Cache for model context window sizes
-const modelContextWindowCache: Record<string, number> = {};
+const ANTHROPIC_CONTEXT_WINDOWS: Record<string, number> = {
+  'claude-3-7-sonnet-20250219': 200000,
+  'claude-3-7-sonnet-latest': 200000,
+  'claude-3-5-sonnet-20241022': 200000,
+  'claude-3-5-sonnet-latest': 200000,
+  'claude-3-haiku-20240307': 200000,
+  'claude-3-opus-20240229': 200000,
+  'claude-3-sonnet-20240229': 200000,
+  'claude-2.1': 100000,
+  'claude-2.0': 100000,
+  'claude-instant-1.2': 100000,
+};
 
 /**
  * Anthropic-specific options
@@ -87,7 +97,7 @@ function addCacheControlToMessages(
 function tokenUsageFromMessage(
   message: Anthropic.Message,
   model: string,
-  contextWindow: number,
+  contextWindow: number | undefined,
 ) {
   const usage = new TokenUsage();
   usage.input = message.usage.input_tokens;
@@ -100,7 +110,7 @@ function tokenUsageFromMessage(
   return {
     usage,
     totalTokens,
-    maxTokens: contextWindow,
+    contextWindow,
   };
 }
 
@@ -132,63 +142,11 @@ export class AnthropicProvider implements LLMProvider {
   }
 
   /**
-   * Fetches the model context window size from the Anthropic API
-   *
-   * @returns The context window size
-   * @throws Error if the context window size cannot be determined
-   */
-  private async getModelContextWindow(): Promise<number> {
-    const cachedContextWindow = modelContextWindowCache[this.model];
-    if (cachedContextWindow !== undefined) {
-      return cachedContextWindow;
-    }
-    const response = await this.client.models.list();
-
-    if (!response?.data || !Array.isArray(response.data)) {
-      throw new Error(`Invalid response from models.list() for ${this.model}`);
-    }
-
-    // Try to find the exact model
-    let model = response.data.find((m) => m.id === this.model);
-
-    // If not found, try to find a model that starts with the same name
-    // This helps with model aliases like 'claude-3-sonnet-latest'
-    if (!model) {
-      // Split by '-latest' or '-20' to get the base model name
-      const parts = this.model.split('-latest');
-      const modelPrefix =
-        parts.length > 1 ? parts[0] : this.model.split('-20')[0];
-
-      if (modelPrefix) {
-        model = response.data.find((m) => m.id.startsWith(modelPrefix));
-
-        if (model) {
-          console.info(
-            `Model ${this.model} not found, using ${model.id} for context window size`,
-          );
-        }
-      }
-    }
-
-    // Using type assertion to access context_window property
-    // The Anthropic API returns context_window but it may not be in the TypeScript definitions
-    if (model && 'context_window' in model) {
-      const contextWindow = (model as any).context_window;
-      // Cache the result for future use
-      modelContextWindowCache[this.model] = contextWindow;
-      return contextWindow;
-    } else {
-      throw new Error(
-        `No context window information found for model: ${this.model}`,
-      );
-    }
-  }
-
-  /**
    * Generate text using Anthropic API
    */
   async generateText(options: GenerateOptions): Promise<LLMResponse> {
-    const modelContextWindow = await this.getModelContextWindow();
+    const modelContextWindow = ANTHROPIC_CONTEXT_WINDOWS[this.model];
+
     const { messages, functions, temperature = 0.7, maxTokens, topP } = options;
 
     // Extract system message
@@ -252,7 +210,7 @@ export class AnthropicProvider implements LLMProvider {
       toolCalls: toolCalls,
       tokenUsage: tokenInfo.usage,
       totalTokens: tokenInfo.totalTokens,
-      maxTokens: tokenInfo.maxTokens,
+      contextWindow: tokenInfo.contextWindow,
     };
   }
 

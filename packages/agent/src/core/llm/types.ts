@@ -82,7 +82,7 @@ export interface LLMResponse {
   tokenUsage: TokenUsage;
   // Add new fields for context window tracking
   totalTokens?: number; // Total tokens used in this request
-  maxTokens?: number; // Maximum allowed tokens for this model
+  contextWindow?: number; // Maximum allowed tokens for this model
 }
 
 /**

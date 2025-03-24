@@ -151,34 +151,35 @@ export const toolAgent = async (
       maxTokens: localContext.maxTokens,
     };
 
-    const { text, toolCalls, tokenUsage, totalTokens, maxTokens } =
+    const { text, toolCalls, tokenUsage, totalTokens, contextWindow } =
       await generateText(provider, generateOptions);
 
     tokenTracker.tokenUsage.add(tokenUsage);
 
     // Send status updates based on frequency and token usage threshold
     statusUpdateCounter++;
-    if (totalTokens && maxTokens) {
-      const usagePercentage = Math.round((totalTokens / maxTokens) * 100);
-      const shouldSendByFrequency =
-        statusUpdateCounter >= STATUS_UPDATE_FREQUENCY;
-      const shouldSendByUsage = usagePercentage >= TOKEN_USAGE_THRESHOLD;
+    if (totalTokens) {
+      let statusTriggered = false;
+      statusTriggered ||= statusUpdateCounter >= STATUS_UPDATE_FREQUENCY;
+
+      if (contextWindow) {
+        const usagePercentage = Math.round((totalTokens / contextWindow) * 100);
+        statusTriggered ||= usagePercentage >= TOKEN_USAGE_THRESHOLD;
+      }
 
       // Send status update if either condition is met
-      if (shouldSendByFrequency || shouldSendByUsage) {
+      if (statusTriggered) {
         statusUpdateCounter = 0;
 
         const statusMessage = generateStatusUpdate(
           totalTokens,
-          maxTokens,
+          contextWindow,
           tokenTracker,
           localContext,
         );
 
         messages.push(statusMessage);
-        logger.debug(
-          `Sent status update to agent (token usage: ${usagePercentage}%)`,
-        );
+        logger.debug(`Sent status update to agent`);
       }
     }
 

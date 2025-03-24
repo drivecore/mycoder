@@ -24,8 +24,7 @@ import {
 
 // Define model context window sizes for Ollama models
 // These are approximate and may vary based on specific model configurations
-const OLLAMA_MODEL_LIMITS: Record<string, number> = {
-  default: 4096,
+const OLLAMA_CONTEXT_WINDOWS: Record<string, number> = {
   llama2: 4096,
   'llama2-uncensored': 4096,
   'llama2:13b': 4096,
@@ -136,19 +135,21 @@ export class OllamaProvider implements LLMProvider {
     const totalTokens = tokenUsage.input + tokenUsage.output;
 
     // Extract the base model name without specific parameters
-    const baseModelName = this.model.split(':')[0];
     // Check if model exists in limits, otherwise use base model or default
-    const modelMaxTokens =
-      OLLAMA_MODEL_LIMITS[this.model] ||
-      (baseModelName ? OLLAMA_MODEL_LIMITS[baseModelName] : undefined) ||
-      4096; // Default fallback
+    let contextWindow = OLLAMA_CONTEXT_WINDOWS[this.model];
+    if (!contextWindow) {
+      const baseModelName = this.model.split(':')[0];
+      if (baseModelName) {
+        contextWindow = OLLAMA_CONTEXT_WINDOWS[baseModelName];
+      }
+    }
 
     return {
       text: content,
       toolCalls: toolCalls,
       tokenUsage: tokenUsage,
       totalTokens,
-      maxTokens: modelMaxTokens,
+      contextWindow,
     };
   }
 
