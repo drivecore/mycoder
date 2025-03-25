@@ -52,13 +52,14 @@ export const sharedOptions = {
     type: 'boolean',
     alias: 'i',
     description:
-      'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections)',
+      'Run in interactive mode, asking for prompts and enabling corrections during execution (use Ctrl+M to send corrections). Can be combined with -f/--file to append interactive input to file content.',
     default: false,
   } as const,
   file: {
     type: 'string',
     alias: 'f',
-    description: 'Read prompt from a file',
+    description:
+      'Read prompt from a file (can be combined with -i/--interactive)',
   } as const,
   tokenUsage: {
     type: 'boolean',

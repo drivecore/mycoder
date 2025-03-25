@@ -33,6 +33,9 @@ mycoder "Implement a React component that displays a list of items"
 # Run with a prompt from a file
 mycoder -f prompt.txt
 
+# Combine file input with interactive prompts
+mycoder -f prompt.txt -i
+
 # Disable user prompts for fully automated sessions
 mycoder --userPrompt false "Generate a basic Express.js server"
 
