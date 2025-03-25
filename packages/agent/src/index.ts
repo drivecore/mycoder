@@ -18,7 +18,7 @@ export * from './tools/session/sessionStart.js';
 export * from './tools/session/lib/PageController.js';
 export * from './tools/session/listSessions.js';
 export * from './tools/session/SessionTracker.js';
-// Export browser detector functions
+export * from './tools/session/lib/browserDetectors.js';
 
 export * from './tools/agent/AgentTracker.js';
 // Tools - Interaction

@@ -5,7 +5,7 @@ import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
-// Use detectBrowsers directly from SessionTracker since we've inlined browser detection
+import { detectBrowsers } from './lib/browserDetectors.js';
 import { filterPageContent } from './lib/filterPageContent.js';
 import { BrowserConfig } from './lib/types.js';
 import { SessionStatus } from './SessionTracker.js';
@@ -81,9 +81,15 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
         sessionConfig.useSystemBrowsers = true;
         sessionConfig.preferredType = 'chromium';
 
-        // Try to detect Chrome browser using browserTracker
-        // No need to detect browsers here, the SessionTracker will handle it
-        // Chrome detection is now handled by SessionTracker
+        // Try to detect Chrome browser
+        const browsers = await detectBrowsers();
+        const chrome = browsers.find((b) =>
+          b.name.toLowerCase().includes('chrome'),
+        );
+        if (chrome) {
+          logger.debug(`Found system Chrome at ${chrome.path}`);
+          sessionConfig.executablePath = chrome.path;
+        }
       }
 
       logger.debug(`Browser config: ${JSON.stringify(sessionConfig)}`);
