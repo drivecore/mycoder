@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Logger } from '../../utils/logger.js';
 
-import { detectBrowsers, BrowserInfo } from './lib/browserDetectors.js';
+import { BrowserInfo } from './lib/browserDetectors.js';
 import {
   BrowserConfig,
   Session,
@@ -62,48 +62,6 @@ export class SessionTracker {
 
     // Set up cleanup handlers for graceful shutdown
     this.setupGlobalCleanup();
-
-    // Start browser detection in the background if logger is provided
-    if (this.logger) {
-      this.browserDetectionPromise = this.detectBrowsers();
-    }
-  }
-
-  /**
-   * Detect available browsers on the system
-   */
-  private async detectBrowsers(): Promise<void> {
-    if (!this.logger) {
-      this.detectedBrowsers = [];
-      return;
-    }
-
-    try {
-      this.detectedBrowsers = await detectBrowsers();
-      if (this.logger) {
-        this.logger.info(
-          `Detected ${this.detectedBrowsers.length} browsers on the system`,
-        );
-      }
-      if (this.detectedBrowsers.length > 0 && this.logger) {
-        this.logger.info('Available browsers:');
-        this.detectedBrowsers.forEach((browser) => {
-          if (this.logger) {
-            this.logger.info(
-              `- ${browser.name} (${browser.type}) at ${browser.path}`,
-            );
-          }
-        });
-      }
-    } catch (error) {
-      if (this.logger) {
-        this.logger.error(
-          'Failed to detect system browsers, disabling browser session tools:',
-          error,
-        );
-      }
-      this.detectedBrowsers = [];
-    }
   }
 
   // Register a new browser session
@@ -324,6 +282,10 @@ export class SessionTracker {
   public getSession(sessionId: string): Session {
     const session = this.browserSessions.get(sessionId);
     if (!session) {
+      console.log(
+        'getting session, but here are the sessions',
+        this.browserSessions,
+      );
       throw new BrowserError(
         'Session not found',
         BrowserErrorCode.SESSION_ERROR,
@@ -338,6 +300,10 @@ export class SessionTracker {
   public async closeSession(sessionId: string): Promise<void> {
     const session = this.browserSessions.get(sessionId);
     if (!session) {
+      console.log(
+        'closing session, but here are the sessions',
+        this.browserSessions,
+      );
       throw new BrowserError(
         'Session not found',
         BrowserErrorCode.SESSION_ERROR,

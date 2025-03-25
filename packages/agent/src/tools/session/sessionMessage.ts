@@ -104,6 +104,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
       // Get the session info
       const sessionInfo = browserTracker.getSessionById(instanceId);
       if (!sessionInfo) {
+        console.log(browserTracker.getSessions());
         throw new Error(`Session ${instanceId} not found`);
       }
 

@@ -3,6 +3,8 @@ import fs from 'fs';
 import { homedir } from 'os';
 import path from 'path';
 
+import { Logger } from '../../../utils/logger.js';
+
 /**
  * Browser information interface
  */
@@ -231,7 +233,7 @@ export async function detectLinuxBrowsers(): Promise<BrowserInfo[]> {
  * Detect available browsers on the system
  * Returns an array of browser information objects sorted by preference
  */
-export async function detectBrowsers(): Promise<BrowserInfo[]> {
+export async function detectBrowsers(logger: Logger): Promise<BrowserInfo[]> {
   const platform = process.platform;
   let browsers: BrowserInfo[] = [];
 
@@ -246,7 +248,7 @@ export async function detectBrowsers(): Promise<BrowserInfo[]> {
       browsers = await detectLinuxBrowsers();
       break;
     default:
-      console.log(`Unsupported platform: ${platform}`);
+      logger.error(`Unsupported platform: ${platform}`);
       break;
   }
 

@@ -82,7 +82,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
         sessionConfig.preferredType = 'chromium';
 
         // Try to detect Chrome browser
-        const browsers = await detectBrowsers();
+        const browsers = await detectBrowsers(logger);
         const chrome = browsers.find((b) =>
           b.name.toLowerCase().includes('chrome'),
         );
