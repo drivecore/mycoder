@@ -3,10 +3,8 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
 
-import { agentStates } from './agentStart.js';
-
 const parameterSchema = z.object({
-  instanceId: z.string().describe('The ID returned by agentStart'),
+  agentId: z.string().describe('The ID returned by agentStart'),
   guidance: z
     .string()
     .optional()
@@ -57,23 +55,25 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { instanceId, guidance, terminate },
-    { logger, ..._ },
+    { agentId, guidance, terminate, description: _ },
+    { logger, agentTracker, ...__ },
   ): Promise<ReturnType> => {
     logger.debug(
-      `Interacting with sub-agent ${instanceId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
+      `Interacting with sub-agent ${agentId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
     );
 
     try {
-      const agentState = agentStates.get(instanceId);
-      if (!agentState) {
-        throw new Error(`No sub-agent found with ID ${instanceId}`);
+      // Get the agent from the tracker
+      const agent = agentTracker.getAgent(agentId);
+
+      if (!agent) {
+        throw new Error(`No sub-agent found with ID ${agentId}`);
       }
 
       // Check if the agent was already terminated
-      if (agentState.aborted) {
+      if (agent.aborted) {
         return {
-          output: agentState.output || 'Sub-agent was previously terminated',
+          output: agent.output || 'Sub-agent was previously terminated',
           completed: true,
           terminated: true,
           messageSent: false,
@@ -83,11 +83,11 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
       // Terminate the agent if requested
       if (terminate) {
-        agentState.aborted = true;
-        agentState.completed = true;
+        agent.aborted = true;
+        agent.completed = true;
 
         return {
-          output: agentState.output || 'Sub-agent terminated before completion',
+          output: agent.output || 'Sub-agent terminated before completion',
           completed: true,
           terminated: true,
           messageSent: false,
@@ -98,45 +98,43 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       // Add guidance to the agent state's parentMessages array
       // The sub-agent will check for these messages on each iteration
       if (guidance) {
-        logger.log(`Guidance provided to sub-agent ${instanceId}: ${guidance}`);
+        logger.log(`Guidance provided to sub-agent ${agentId}: ${guidance}`);
 
         // Add the guidance to the parentMessages array
-        agentState.parentMessages.push(guidance);
+        agent.parentMessages.push(guidance);
 
         logger.debug(
-          `Added message to sub-agent ${instanceId}'s parentMessages queue. Total messages: ${agentState.parentMessages.length}`,
+          `Added message to sub-agent ${agentId}'s parentMessages queue. Total messages: ${agent.parentMessages.length}`,
         );
       }
 
       // Get the current output and captured logs
-      let output =
-        agentState.result?.result || agentState.output || 'No output yet';
+      const resultOutput = agent.result_detailed?.result || '';
+      let output = resultOutput || agent.output || 'No output yet';
 
       // Append captured logs if there are any
-      if (agentState.capturedLogs && agentState.capturedLogs.length > 0) {
-        // Only append logs if there's actual output or if logs are the only content
-        if (output !== 'No output yet' || agentState.capturedLogs.length > 0) {
-          const logContent = agentState.capturedLogs.join('\n');
-          output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
+      if (agent.capturedLogs && agent.capturedLogs.length > 0) {
+        // Always append logs if there are any
+        const logContent = agent.capturedLogs.join('\n');
+        output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
 
-          // Log that we're returning captured logs
-          logger.debug(
-            `Returning ${agentState.capturedLogs.length} captured log messages for agent ${instanceId}`,
-          );
-        }
+        // Log that we're returning captured logs
+        logger.debug(
+          `Returning ${agent.capturedLogs.length} captured log messages for agent ${agentId}`,
+        );
         // Clear the captured logs after retrieving them
-        agentState.capturedLogs = [];
+        agent.capturedLogs = [];
       }
 
       // Reset the output to an empty string
-      agentState.output = '';
+      agent.output = '';
 
       return {
         output,
-        completed: agentState.completed,
-        ...(agentState.error && { error: agentState.error }),
+        completed: agent.completed,
+        ...(agent.error && { error: agent.error }),
         messageSent: guidance ? true : false,
-        messageCount: agentState.parentMessages.length,
+        messageCount: agent.parentMessages.length,
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -167,7 +165,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
   logParameters: (input, { logger }) => {
     logger.log(
-      `Interacting with sub-agent ${input.instanceId}, ${input.description}${input.terminate ? ' (terminating)' : ''}`,
+      `Interacting with sub-agent ${input.agentId}, ${input.description}${input.terminate ? ' (terminating)' : ''}`,
     );
   },
   logReturns: (output, { logger }) => {

@@ -21,7 +21,7 @@ const parameterSchema = z.object({
 const returnSchema = z.object({
   sessions: z.array(
     z.object({
-      id: z.string(),
+      sessionId: z.string(),
       status: z.string(),
       startTime: z.string(),
       endTime: z.string().optional(),
@@ -74,7 +74,7 @@ export const listSessionsTool: Tool<Parameters, ReturnType> = {
       const runtime = (endTime.getTime() - startTime.getTime()) / 1000; // in seconds
 
       return {
-        id: session.id,
+        sessionId: session.sessionId,
         status: session.status,
         startTime: startTime.toISOString(),
         ...(session.endTime && { endTime: session.endTime.toISOString() }),

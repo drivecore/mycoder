@@ -3,7 +3,7 @@ import { expect, test, describe } from 'vitest';
 import { ToolContext } from '../../core/types.js';
 import { LogLevel, Logger } from '../../utils/logger.js';
 
-import { AgentState } from './AgentTracker.js';
+import { AgentInfo } from './AgentTracker.js';
 
 // Helper function to directly invoke a listener with a log message
 function emitLog(logger: Logger, level: LogLevel, message: string) {
@@ -17,8 +17,10 @@ function emitLog(logger: Logger, level: LogLevel, message: string) {
 describe('Log capture functionality', () => {
   test('should capture log messages based on log level and nesting', () => {
     // Create a mock agent state
-    const agentState: AgentState = {
-      id: 'test-agent',
+    const agentState: AgentInfo = {
+      agentId: 'test-agent',
+      status: 'running' as any, // Cast to satisfy the type
+      startTime: new Date(),
       goal: 'Test log capturing',
       prompt: 'Test prompt',
       output: '',
@@ -144,8 +146,10 @@ describe('Log capture functionality', () => {
 
   test('should handle nested loggers correctly', () => {
     // Create a mock agent state
-    const agentState: AgentState = {
-      id: 'test-agent',
+    const agentState: AgentInfo = {
+      agentId: 'test-agent',
+      status: 'running' as any, // Cast to satisfy the type
+      startTime: new Date(),
       goal: 'Test log capturing',
       prompt: 'Test prompt',
       output: '',

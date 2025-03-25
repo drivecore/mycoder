@@ -27,7 +27,7 @@ export type ProcessState = {
 
 // Shell process specific data
 export interface ShellProcess {
-  id: string;
+  shellId: string;
   status: ShellStatus;
   startTime: Date;
   endTime?: Date;
@@ -51,26 +51,26 @@ export class ShellTracker {
 
   // Register a new shell process
   public registerShell(command: string): string {
-    const id = uuidv4();
+    const shellId = uuidv4();
     const shell: ShellProcess = {
-      id,
+      shellId,
       status: ShellStatus.RUNNING,
       startTime: new Date(),
       metadata: {
         command,
       },
     };
-    this.shells.set(id, shell);
-    return id;
+    this.shells.set(shellId, shell);
+    return shellId;
   }
 
   // Update the status of a shell process
   public updateShellStatus(
-    id: string,
+    shellId: string,
     status: ShellStatus,
     metadata?: Record<string, any>,
   ): boolean {
-    const shell = this.shells.get(id);
+    const shell = this.shells.get(shellId);
     if (!shell) {
       return false;
     }
@@ -104,22 +104,22 @@ export class ShellTracker {
   }
 
   // Get a specific shell process by ID
-  public getShellById(id: string): ShellProcess | undefined {
-    return this.shells.get(id);
+  public getShellById(shellId: string): ShellProcess | undefined {
+    return this.shells.get(shellId);
   }
 
   /**
    * Cleans up a shell process
-   * @param id The ID of the shell process to clean up
+   * @param shellId The ID of the shell process to clean up
    */
-  public async cleanupShellProcess(id: string): Promise<void> {
+  public async cleanupShellProcess(shellId: string): Promise<void> {
     try {
-      const shell = this.shells.get(id);
+      const shell = this.shells.get(shellId);
       if (!shell) {
         return;
       }
 
-      const processState = this.processStates.get(id);
+      const processState = this.processStates.get(shellId);
       if (processState && !processState.state.completed) {
         processState.process.kill('SIGTERM');
 
@@ -137,9 +137,9 @@ export class ShellTracker {
           }, 500);
         });
       }
-      this.updateShellStatus(id, ShellStatus.TERMINATED);
+      this.updateShellStatus(shellId, ShellStatus.TERMINATED);
     } catch (error) {
-      this.updateShellStatus(id, ShellStatus.ERROR, {
+      this.updateShellStatus(shellId, ShellStatus.ERROR, {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -151,7 +151,7 @@ export class ShellTracker {
   public async cleanup(): Promise<void> {
     const runningShells = this.getShells(ShellStatus.RUNNING);
     const cleanupPromises = runningShells.map((shell) =>
-      this.cleanupShellProcess(shell.id),
+      this.cleanupShellProcess(shell.shellId),
     );
     await Promise.all(cleanupPromises);
   }

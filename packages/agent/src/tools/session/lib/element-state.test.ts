@@ -8,20 +8,24 @@ import {
   vi,
 } from 'vitest';
 
-import { SessionManager } from './SessionManager.js';
-import { Session } from './types.js';
+import { MockLogger } from '../../../utils/mockLogger.js';
+import { SessionTracker } from '../SessionTracker.js';
+
+import type { Page } from '@playwright/test';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Element State Tests', () => {
-  let browserManager: SessionManager;
-  let session: Session;
+  let browserManager: SessionTracker;
+  let sessionId: string;
+  let page: Page;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
-    browserManager = new SessionManager();
-    session = await browserManager.createSession({ headless: true });
+    browserManager = new SessionTracker('test-agent', new MockLogger());
+    sessionId = await browserManager.createSession({ headless: true });
+    page = browserManager.getSessionPage(sessionId);
   });
 
   afterAll(async () => {
@@ -30,11 +34,11 @@ describe('Element State Tests', () => {
 
   describe('Checkbox Tests', () => {
     beforeEach(async () => {
-      await session.page.goto(`${baseUrl}/checkboxes`);
+      await page.goto(`${baseUrl}/checkboxes`);
     });
 
     it('should verify initial checkbox states', async () => {
-      const checkboxes = await session.page.$$('input[type="checkbox"]');
+      const checkboxes = await page.$$('input[type="checkbox"]');
       expect(checkboxes).toHaveLength(2);
 
       const initialStates: boolean[] = [];
@@ -50,7 +54,7 @@ describe('Element State Tests', () => {
     });
 
     it('should toggle checkbox states', async () => {
-      const checkboxes = await session.page.$$('input[type="checkbox"]');
+      const checkboxes = await page.$$('input[type="checkbox"]');
       if (!checkboxes[0] || !checkboxes[1])
         throw new Error('Checkboxes not found');
 
@@ -70,13 +74,13 @@ describe('Element State Tests', () => {
     });
 
     it('should maintain checkbox states after page refresh', async () => {
-      const checkboxes = await session.page.$$('input[type="checkbox"]');
+      const checkboxes = await page.$$('input[type="checkbox"]');
       if (!checkboxes[0]) throw new Error('First checkbox not found');
       await checkboxes[0].click(); // Toggle first checkbox
 
-      await session.page.reload();
+      await page.reload();
 
-      const newCheckboxes = await session.page.$$('input[type="checkbox"]');
+      const newCheckboxes = await page.$$('input[type="checkbox"]');
       const states: boolean[] = [];
       for (const checkbox of newCheckboxes) {
         const isChecked = await checkbox.evaluate(
@@ -93,24 +97,24 @@ describe('Element State Tests', () => {
 
   describe('Dynamic Controls Tests', () => {
     beforeEach(async () => {
-      await session.page.goto(`${baseUrl}/dynamic_controls`);
+      await page.goto(`${baseUrl}/dynamic_controls`);
     });
 
     it('should handle enabled/disabled element states', async () => {
       // Wait for the input to be present and verify initial disabled state
-      await session.page.waitForSelector('input[type="text"][disabled]');
+      await page.waitForSelector('input[type="text"][disabled]');
 
       // Click the enable button
-      await session.page.click('button:has-text("Enable")');
+      await page.click('button:has-text("Enable")');
 
       // Wait for the message indicating the input is enabled
-      await session.page.waitForSelector('#message', {
+      await page.waitForSelector('#message', {
         state: 'visible',
         timeout: 5000,
       });
 
       // Verify the input is now enabled
-      const input = await session.page.waitForSelector(
+      const input = await page.waitForSelector(
         'input[type="text"]:not([disabled])',
         {
           state: 'visible',

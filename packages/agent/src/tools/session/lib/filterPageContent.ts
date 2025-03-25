@@ -1,5 +1,6 @@
 import { Page } from 'playwright';
 
+import { createProvider } from '../../../core/llm/provider.js';
 import { ContentFilter, ToolContext } from '../../../core/types.js';
 
 const OUTPUT_LIMIT = 11 * 1024; // 10KB limit
@@ -43,9 +44,6 @@ Just return the extracted content as markdown.`;
     }
 
     try {
-      // Import the createProvider function from the provider module
-      const { createProvider } = await import('../../../core/llm/provider.js');
-
       // Create a provider instance using the provider abstraction
       const llmProvider = createProvider(provider, model, {
         apiKey,

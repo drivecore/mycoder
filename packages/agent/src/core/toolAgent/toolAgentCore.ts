@@ -1,5 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import { userMessages } from '../../tools/interaction/userMessage.js';
 import { utilityTools } from '../../tools/utility/index.js';
 import { generateText } from '../llm/core.js';
 import { createProvider } from '../llm/provider.js';
@@ -76,9 +77,7 @@ export const toolAgent = async (
     // Check for messages from parent agent
     // This assumes the context has an agentTracker and the current agent's ID
     if (context.agentTracker && context.currentAgentId) {
-      const agentState = context.agentTracker.getAgentState(
-        context.currentAgentId,
-      );
+      const agentState = context.agentTracker.getAgent(context.currentAgentId);
 
       // Process any new parent messages
       if (
@@ -104,11 +103,6 @@ export const toolAgent = async (
     // Check for messages from user (for main agent only)
     // Import this at the top of the file
     try {
-      // Dynamic import to avoid circular dependencies
-      const { userMessages } = await import(
-        '../../tools/interaction/userMessage.js'
-      );
-
       if (userMessages && userMessages.length > 0) {
         // Get all user messages and clear the queue
         const pendingUserMessages = [...userMessages];

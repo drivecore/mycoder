@@ -78,7 +78,7 @@ export const listAgentsTool: Tool<Parameters, ReturnType> = {
         result?: string;
         error?: string;
       } = {
-        id: agent.id,
+        id: agent.agentId,
         status: agent.status,
         goal: agent.goal,
         startTime: startTime.toISOString(),

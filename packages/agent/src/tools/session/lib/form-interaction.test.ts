@@ -8,20 +8,24 @@ import {
   vi,
 } from 'vitest';
 
-import { SessionManager } from './SessionManager.js';
-import { Session } from './types.js';
+import { MockLogger } from '../../../utils/mockLogger.js';
+import { SessionTracker } from '../SessionTracker.js';
+
+import type { Page } from '@playwright/test';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Form Interaction Tests', () => {
-  let browserManager: SessionManager;
-  let session: Session;
+  let browserManager: SessionTracker;
+  let sessionId: string;
+  let page: Page;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
-    browserManager = new SessionManager();
-    session = await browserManager.createSession({ headless: true });
+    browserManager = new SessionTracker('test-agent', new MockLogger());
+    sessionId = await browserManager.createSession({ headless: true });
+    page = browserManager.getSessionPage(sessionId);
   });
 
   afterAll(async () => {
@@ -29,39 +33,39 @@ describe('Form Interaction Tests', () => {
   });
 
   beforeEach(async () => {
-    await session.page.goto(`${baseUrl}/login`);
+    await page.goto(`${baseUrl}/login`);
   });
 
   it('should handle login form with invalid credentials', async () => {
-    await session.page.type('#username', 'invalid_user');
-    await session.page.type('#password', 'invalid_pass');
-    await session.page.click('button[type="submit"]');
+    await page.type('#username', 'invalid_user');
+    await page.type('#password', 'invalid_pass');
+    await page.click('button[type="submit"]');
 
-    const flashMessage = await session.page.waitForSelector('#flash');
+    const flashMessage = await page.waitForSelector('#flash');
     const messageText = await flashMessage?.evaluate((el) => el.textContent);
     expect(messageText).toContain('Your username is invalid!');
   });
 
   it('should clear form fields between attempts', async () => {
-    await session.page.type('#username', 'test_user');
-    await session.page.type('#password', 'test_pass');
+    await page.type('#username', 'test_user');
+    await page.type('#password', 'test_pass');
 
     // Clear fields
-    await session.page.$eval(
+    await page.$eval(
       '#username',
       (el) => ((el as HTMLInputElement).value = ''),
     );
-    await session.page.$eval(
+    await page.$eval(
       '#password',
       (el) => ((el as HTMLInputElement).value = ''),
     );
 
     // Verify fields are empty
-    const username = await session.page.$eval(
+    const username = await page.$eval(
       '#username',
       (el) => (el as HTMLInputElement).value,
     );
-    const password = await session.page.$eval(
+    const password = await page.$eval(
       '#password',
       (el) => (el as HTMLInputElement).value,
     );
@@ -71,11 +75,11 @@ describe('Form Interaction Tests', () => {
 
   it('should maintain form state after page refresh', async () => {
     const testUsername = 'persistence_test';
-    await session.page.type('#username', testUsername);
-    await session.page.reload();
+    await page.type('#username', testUsername);
+    await page.reload();
 
     // Form should be cleared after refresh
-    const username = await session.page.$eval(
+    const username = await page.$eval(
       '#username',
       (el) => (el as HTMLInputElement).value,
     );
@@ -84,13 +88,13 @@ describe('Form Interaction Tests', () => {
 
   describe('Content Extraction', () => {
     it('should extract form labels and placeholders', async () => {
-      const usernameLabel = await session.page.$eval(
+      const usernameLabel = await page.$eval(
         'label[for="username"]',
         (el) => el.textContent,
       );
       expect(usernameLabel).toBe('Username');
 
-      const passwordPlaceholder = await session.page.$eval(
+      const passwordPlaceholder = await page.$eval(
         '#password',
         (el) => (el as HTMLInputElement).placeholder,
       );

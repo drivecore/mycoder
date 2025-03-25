@@ -65,14 +65,14 @@ describe('Status Updates', () => {
     const context = {
       agentTracker: {
         getAgents: vi.fn().mockReturnValue([
-          { id: 'agent1', goal: 'Task 1', status: AgentStatus.RUNNING },
-          { id: 'agent2', goal: 'Task 2', status: AgentStatus.RUNNING },
+          { agentId: 'agent1', goal: 'Task 1', status: AgentStatus.RUNNING },
+          { agentId: 'agent2', goal: 'Task 2', status: AgentStatus.RUNNING },
         ]),
       },
       shellTracker: {
         getShells: vi.fn().mockReturnValue([
           {
-            id: 'shell1',
+            shellId: 'shell1',
             status: ShellStatus.RUNNING,
             metadata: { command: 'npm test' },
           },
@@ -81,7 +81,7 @@ describe('Status Updates', () => {
       browserTracker: {
         getSessionsByStatus: vi.fn().mockReturnValue([
           {
-            id: 'session1',
+            sessionId: 'session1',
             status: SessionStatus.RUNNING,
             metadata: { url: 'https://example.com' },
           },

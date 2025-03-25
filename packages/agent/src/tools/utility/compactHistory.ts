@@ -4,6 +4,7 @@
 import { z } from 'zod';
 
 import { generateText } from '../../core/llm/core.js';
+import { createProvider } from '../../core/llm/provider.js';
 import { Message } from '../../core/llm/types.js';
 import { Tool, ToolContext } from '../../core/types.js';
 
@@ -76,7 +77,6 @@ export const compactHistory = async (
 
   // Generate the summary
   // Create a provider from the model provider configuration
-  const { createProvider } = await import('../../core/llm/provider.js');
   const llmProvider = createProvider(context.provider, context.model, {
     baseUrl: context.baseUrl,
     apiKey: context.apiKey,

@@ -45,7 +45,7 @@ export enum NodeSignals {
 }
 
 const parameterSchema = z.object({
-  instanceId: z.string().describe('The ID returned by shellStart'),
+  shellId: z.string().describe('The ID returned by shellStart'),
   stdin: z.string().optional().describe('Input to send to process'),
   signal: z
     .nativeEnum(NodeSignals)
@@ -94,17 +94,17 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { instanceId, stdin, signal, showStdIn, showStdout },
+    { shellId, stdin, signal, showStdIn, showStdout },
     { logger, shellTracker },
   ): Promise<ReturnType> => {
     logger.debug(
-      `Interacting with shell process ${instanceId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
+      `Interacting with shell process ${shellId}${stdin ? ' with input' : ''}${signal ? ` with signal ${signal}` : ''}`,
     );
 
     try {
-      const processState = shellTracker.processStates.get(instanceId);
+      const processState = shellTracker.processStates.get(shellId);
       if (!processState) {
-        throw new Error(`No process found with ID ${instanceId}`);
+        throw new Error(`No process found with ID ${shellId}`);
       }
 
       // Send signal if provided
@@ -118,7 +118,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           processState.state.signaled = true;
 
           // Update shell tracker if signal failed
-          shellTracker.updateShellStatus(instanceId, ShellStatus.ERROR, {
+          shellTracker.updateShellStatus(shellId, ShellStatus.ERROR, {
             error: `Failed to send signal ${signal}: ${String(error)}`,
             signalAttempted: signal,
           });
@@ -134,12 +134,12 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
           signal === 'SIGKILL' ||
           signal === 'SIGINT'
         ) {
-          shellTracker.updateShellStatus(instanceId, ShellStatus.TERMINATED, {
+          shellTracker.updateShellStatus(shellId, ShellStatus.TERMINATED, {
             signal,
             terminatedByUser: true,
           });
         } else {
-          shellTracker.updateShellStatus(instanceId, ShellStatus.RUNNING, {
+          shellTracker.updateShellStatus(shellId, ShellStatus.RUNNING, {
             signal,
             signaled: true,
           });
@@ -156,7 +156,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
         const shouldShowStdIn =
           showStdIn !== undefined ? showStdIn : processState.showStdIn;
         if (shouldShowStdIn) {
-          logger.log(`[${instanceId}] stdin: ${stdin}`);
+          logger.log(`[${shellId}] stdin: ${stdin}`);
         }
 
         // No special handling for 'cat' command - let the actual process handle the echo
@@ -188,13 +188,13 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
       if (stdout) {
         logger.debug(`stdout: ${stdout.trim()}`);
         if (shouldShowStdout) {
-          logger.log(`[${instanceId}] stdout: ${stdout.trim()}`);
+          logger.log(`[${shellId}] stdout: ${stdout.trim()}`);
         }
       }
       if (stderr) {
         logger.debug(`stderr: ${stderr.trim()}`);
         if (shouldShowStdout) {
-          logger.log(`[${instanceId}] stderr: ${stderr.trim()}`);
+          logger.log(`[${shellId}] stderr: ${stderr.trim()}`);
         }
       }
 
@@ -228,7 +228,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (input, { logger, shellTracker }) => {
-    const processState = shellTracker.processStates.get(input.instanceId);
+    const processState = shellTracker.processStates.get(input.shellId);
     const showStdIn =
       input.showStdIn !== undefined
         ? input.showStdIn
@@ -239,7 +239,7 @@ export const shellMessageTool: Tool<Parameters, ReturnType> = {
         : processState?.showStdout || false;
 
     logger.log(
-      `Interacting with shell command "${processState ? processState.command : '<unknown instanceId>'}", ${input.description} (showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
+      `Interacting with shell command "${processState ? processState.command : '<unknown shellId>'}", ${input.description} (showStdIn: ${showStdIn}, showStdout: ${showStdout})`,
     );
   },
   logReturns: () => {},

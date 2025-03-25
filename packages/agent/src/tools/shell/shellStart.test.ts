@@ -80,7 +80,7 @@ describe('shellStartTool', () => {
     });
     expect(result).toEqual({
       mode: 'async',
-      instanceId: 'mock-uuid',
+      shellId: 'mock-uuid',
       stdout: '',
       stderr: '',
     });
@@ -117,7 +117,7 @@ describe('shellStartTool', () => {
 
     expect(result).toEqual({
       mode: 'async',
-      instanceId: 'mock-uuid',
+      shellId: 'mock-uuid',
       stdout: '',
       stderr: '',
     });
@@ -159,7 +159,7 @@ describe('shellStartTool', () => {
 
     expect(result).toEqual({
       mode: 'async',
-      instanceId: 'mock-uuid',
+      shellId: 'mock-uuid',
       stdout: '',
       stderr: '',
     });

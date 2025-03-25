@@ -7,7 +7,7 @@ import { SessionTracker } from '../session/SessionTracker.js';
 import { ShellTracker } from '../shell/ShellTracker.js';
 
 import { agentMessageTool } from './agentMessage.js';
-import { agentStartTool, agentStates } from './agentStart.js';
+import { agentStartTool } from './agentStart.js';
 import { AgentTracker } from './AgentTracker.js';
 
 // Mock the toolAgent function
@@ -47,18 +47,16 @@ describe('Agent Tools', () => {
         mockContext,
       );
 
-      expect(result).toHaveProperty('instanceId');
+      expect(result).toHaveProperty('agentId');
       expect(result).toHaveProperty('status');
       expect(result.status).toBe('Agent started successfully');
 
-      // Verify the agent state was created
-      expect(agentStates.has(result.instanceId)).toBe(true);
-
-      const state = agentStates.get(result.instanceId);
-      expect(state).toHaveProperty('goal', 'Test the agent tools');
-      expect(state).toHaveProperty('prompt');
-      expect(state).toHaveProperty('completed', false);
-      expect(state).toHaveProperty('aborted', false);
+      // Verify the agent was created in the tracker
+      const agent = mockContext.agentTracker.getAgent(result.agentId);
+      expect(agent).toBeDefined();
+      expect(agent).toHaveProperty('goal', 'Test the agent tools');
+      expect(agent).toHaveProperty('completed', false);
+      expect(agent).toHaveProperty('aborted', false);
     });
   });
 
@@ -77,7 +75,7 @@ describe('Agent Tools', () => {
       // Then get its state
       const messageResult = await agentMessageTool.execute(
         {
-          instanceId: startResult.instanceId,
+          agentId: startResult.agentId,
           description: 'Checking agent status',
         },
         mockContext,
@@ -90,7 +88,7 @@ describe('Agent Tools', () => {
     it('should handle non-existent agent IDs', async () => {
       const result = await agentMessageTool.execute(
         {
-          instanceId: 'non-existent-id',
+          agentId: 'non-existent-id',
           description: 'Checking non-existent agent',
         },
         mockContext,
@@ -114,7 +112,7 @@ describe('Agent Tools', () => {
       // Then terminate it
       const messageResult = await agentMessageTool.execute(
         {
-          instanceId: startResult.instanceId,
+          agentId: startResult.agentId,
           terminate: true,
           description: 'Terminating agent',
         },
@@ -124,10 +122,10 @@ describe('Agent Tools', () => {
       expect(messageResult).toHaveProperty('terminated', true);
       expect(messageResult).toHaveProperty('completed', true);
 
-      // Verify the agent state was updated
-      const state = agentStates.get(startResult.instanceId);
-      expect(state).toHaveProperty('aborted', true);
-      expect(state).toHaveProperty('completed', true);
+      // Verify the agent was updated
+      const agent = mockContext.agentTracker.getAgent(startResult.agentId);
+      expect(agent).toHaveProperty('aborted', true);
+      expect(agent).toHaveProperty('completed', true);
     });
   });
 });

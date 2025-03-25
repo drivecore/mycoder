@@ -6,12 +6,12 @@ import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
 import { filterPageContent } from './lib/filterPageContent.js';
-import { browserSessions, SelectorType } from './lib/types.js';
+import { SelectorType } from './lib/types.js';
 import { SessionStatus } from './SessionTracker.js';
 
 // Main parameter schema
 const parameterSchema = z.object({
-  instanceId: z.string().describe('The ID returned by sessionStart'),
+  sessionId: z.string().describe('The ID returned by sessionStart'),
   actionType: z
     .enum(['goto', 'click', 'type', 'wait', 'content', 'close'])
     .describe('Browser action to perform'),
@@ -62,8 +62,13 @@ const getSelector = (selector: string, type?: SelectorType): string => {
       return `xpath=${selector}`;
     case SelectorType.TEXT:
       return `text=${selector}`;
+    case SelectorType.ROLE:
+      return `role=${selector}`;
+    case SelectorType.TESTID:
+      return `data-testid=${selector}`;
+    case SelectorType.CSS:
     default:
-      return selector; // CSS selector is default
+      return selector;
   }
 };
 
@@ -78,158 +83,196 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     {
-      instanceId,
+      sessionId,
       actionType,
       url,
       selector,
-      selectorType,
+      selectorType = SelectorType.CSS,
       text,
-      contentFilter = 'raw',
+      contentFilter,
     },
     context,
   ): Promise<ReturnType> => {
     const { logger, browserTracker } = context;
+    const effectiveContentFilter = contentFilter || 'raw';
 
-    // Validate action format
-    if (!actionType) {
-      logger.error('Invalid action format: actionType is required');
-      return {
-        status: 'error',
-        error: 'Invalid action format: actionType is required',
-      };
-    }
-
-    logger.debug(`Executing browser action: ${actionType}`);
-    logger.debug(`Webpage processing mode: ${contentFilter}`);
+    logger.debug(
+      `Browser action: ${actionType} on session ${sessionId.slice(0, 8)}`,
+    );
 
     try {
-      const session = browserSessions.get(instanceId);
-      if (!session) {
-        throw new Error(`No browser session found with ID ${instanceId}`);
+      // Get the session info
+      const sessionInfo = browserTracker.getSessionById(sessionId);
+      if (!sessionInfo) {
+        console.log(browserTracker.getSessions());
+        throw new Error(`Session ${sessionId} not found`);
       }
 
-      const { page } = session;
+      // Get the browser page
+      const page = browserTracker.getSessionPage(sessionId);
 
+      // Update session metadata
+      browserTracker.updateSessionStatus(sessionId, SessionStatus.RUNNING, {
+        actionType,
+      });
+
+      // Execute the appropriate action based on actionType
       switch (actionType) {
         case 'goto': {
           if (!url) {
-            throw new Error('URL required for goto action');
+            throw new Error('URL is required for goto action');
           }
 
+          // Navigate to the URL
           try {
-            // Try with 'domcontentloaded' first which is more reliable than 'networkidle'
-            logger.debug(
-              `Navigating to ${url} with 'domcontentloaded' waitUntil`,
-            );
-            await page.goto(url, { waitUntil: 'domcontentloaded' });
-            await sleep(3000);
-            const content = await filterPageContent(
-              page,
-              contentFilter,
-              context,
-            );
-            logger.debug(`Content: ${content}`);
-            logger.debug('Navigation completed with domcontentloaded strategy');
-            logger.debug(`Content length: ${content.length} characters`);
-            return { status: 'success', content };
-          } catch (navError) {
-            // If that fails, try with no waitUntil option
+            await page.goto(url, {
+              waitUntil: 'domcontentloaded',
+              timeout: 30000,
+            });
+            await sleep(1000);
+          } catch (error) {
             logger.warn(
-              `Failed with domcontentloaded strategy: ${errorToString(navError)}`,
+              `Failed to navigate with domcontentloaded: ${errorToString(
+                error,
+              )}`,
             );
-            logger.debug(
-              `Retrying navigation to ${url} with no waitUntil option`,
-            );
-
-            try {
-              await page.goto(url);
-              await sleep(3000);
-              const content = await filterPageContent(
-                page,
-                contentFilter,
-                context,
-              );
-              logger.debug(`Content: ${content}`);
-              logger.debug('Navigation completed with basic strategy');
-              return { status: 'success', content };
-            } catch (innerError) {
-              logger.error(
-                `Failed with basic navigation strategy: ${errorToString(innerError)}`,
-              );
-              throw innerError; // Re-throw to be caught by outer catch block
-            }
+            // Try again with no waitUntil
+            await page.goto(url, { timeout: 30000 });
+            await sleep(1000);
           }
+
+          // Get content after navigation
+          const content = await filterPageContent(
+            page,
+            effectiveContentFilter,
+            context,
+          );
+
+          return {
+            status: 'success',
+            content,
+          };
         }
 
         case 'click': {
           if (!selector) {
-            throw new Error('Selector required for click action');
+            throw new Error('Selector is required for click action');
           }
-          const clickSelector = getSelector(selector, selectorType);
-          await page.click(clickSelector);
-          await sleep(1000); // Wait for any content changes after click
-          const content = await filterPageContent(page, contentFilter, context);
-          logger.debug(`Click action completed on selector: ${clickSelector}`);
-          return { status: 'success', content };
+
+          const fullSelector = getSelector(selector, selectorType);
+          logger.debug(`Clicking element with selector: ${fullSelector}`);
+
+          // Wait for the element to be visible
+          await page.waitForSelector(fullSelector, { state: 'visible' });
+          await page.click(fullSelector);
+          await sleep(1000);
+
+          // Get content after click
+          const content = await filterPageContent(
+            page,
+            effectiveContentFilter,
+            context,
+          );
+
+          return {
+            status: 'success',
+            content,
+          };
         }
 
         case 'type': {
-          if (!selector || !text) {
-            throw new Error('Selector and text required for type action');
+          if (!selector) {
+            throw new Error('Selector is required for type action');
           }
-          const typeSelector = getSelector(selector, selectorType);
-          await page.fill(typeSelector, text);
-          logger.debug(`Type action completed on selector: ${typeSelector}`);
-          return { status: 'success' };
+          if (!text) {
+            throw new Error('Text is required for type action');
+          }
+
+          const fullSelector = getSelector(selector, selectorType);
+          logger.debug(
+            `Typing "${text.substring(0, 20)}${
+              text.length > 20 ? '...' : ''
+            }" into element with selector: ${fullSelector}`,
+          );
+
+          // Wait for the element to be visible
+          await page.waitForSelector(fullSelector, { state: 'visible' });
+          await page.fill(fullSelector, text);
+          await sleep(500);
+
+          // Get content after typing
+          const content = await filterPageContent(
+            page,
+            effectiveContentFilter,
+            context,
+          );
+
+          return {
+            status: 'success',
+            content,
+          };
         }
 
         case 'wait': {
           if (!selector) {
-            throw new Error('Selector required for wait action');
+            throw new Error('Selector is required for wait action');
           }
-          const waitSelector = getSelector(selector, selectorType);
-          await page.waitForSelector(waitSelector);
-          logger.debug(`Wait action completed for selector: ${waitSelector}`);
-          return { status: 'success' };
+
+          const fullSelector = getSelector(selector, selectorType);
+          logger.debug(`Waiting for element with selector: ${fullSelector}`);
+
+          // Wait for the element to be visible
+          await page.waitForSelector(fullSelector, { state: 'visible' });
+          await sleep(500);
+
+          // Get content after waiting
+          const content = await filterPageContent(
+            page,
+            effectiveContentFilter,
+            context,
+          );
+
+          return {
+            status: 'success',
+            content,
+          };
         }
 
         case 'content': {
-          const content = await filterPageContent(page, contentFilter, context);
-          logger.debug('Page content retrieved successfully');
-          logger.debug(`Content length: ${content.length} characters`);
-          return { status: 'success', content };
+          // Just get the current page content
+          const content = await filterPageContent(
+            page,
+            effectiveContentFilter,
+            context,
+          );
+
+          return {
+            status: 'success',
+            content,
+          };
         }
 
         case 'close': {
-          await session.page.context().close();
-          await session.browser.close();
-          browserSessions.delete(instanceId);
+          // Close the browser session
+          await browserTracker.closeSession(sessionId);
 
-          // Update browser tracker when browser is explicitly closed
-          browserTracker.updateSessionStatus(
-            instanceId,
-            SessionStatus.COMPLETED,
-            {
-              closedExplicitly: true,
-            },
-          );
-
-          logger.debug('Browser session closed successfully');
-          return { status: 'closed' };
+          return {
+            status: 'closed',
+          };
         }
 
-        default: {
+        default:
           throw new Error(`Unsupported action type: ${actionType}`);
-        }
       }
     } catch (error) {
-      logger.error('Browser action failed:', { error });
+      logger.error(`Browser action failed: ${errorToString(error)}`);
 
-      // Update browser tracker with error status if action fails
-      browserTracker.updateSessionStatus(instanceId, SessionStatus.ERROR, {
-        error: errorToString(error),
-        actionType,
-      });
+      // Update session status if we have a valid sessionId
+      if (sessionId) {
+        browserTracker.updateSessionStatus(sessionId, SessionStatus.ERROR, {
+          error: errorToString(error),
+        });
+      }
 
       return {
         status: 'error',
@@ -238,18 +281,50 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     }
   },
 
-  logParameters: ({ actionType, description, contentFilter }, { logger }) => {
-    const effectiveContentFilter = contentFilter || 'raw';
-    logger.log(
-      `Performing browser action: ${actionType} with ${effectiveContentFilter} processing, ${description}`,
-    );
+  logParameters: (
+    { actionType, sessionId, url, selector, text: _text, description },
+    { logger },
+  ) => {
+    const shortId = sessionId.substring(0, 8);
+    switch (actionType) {
+      case 'goto':
+        logger.log(`Navigating browser ${shortId} to ${url}, ${description}`);
+        break;
+      case 'click':
+        logger.log(
+          `Clicking element "${selector}" in browser ${shortId}, ${description}`,
+        );
+        break;
+      case 'type':
+        logger.log(
+          `Typing into element "${selector}" in browser ${shortId}, ${description}`,
+        );
+        break;
+      case 'wait':
+        logger.log(
+          `Waiting for element "${selector}" in browser ${shortId}, ${description}`,
+        );
+        break;
+      case 'content':
+        logger.log(`Getting content from browser ${shortId}, ${description}`);
+        break;
+      case 'close':
+        logger.log(`Closing browser ${shortId}, ${description}`);
+        break;
+    }
   },
 
   logReturns: (output, { logger }) => {
     if (output.error) {
       logger.error(`Browser action failed: ${output.error}`);
     } else {
-      logger.log(`Browser action completed with status: ${output.status}`);
+      logger.log(
+        `Browser action completed with status: ${output.status}${
+          output.content
+            ? ` (content length: ${output.content.length} characters)`
+            : ''
+        }`,
+      );
     }
   },
 };
