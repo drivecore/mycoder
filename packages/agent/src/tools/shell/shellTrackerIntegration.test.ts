@@ -18,6 +18,7 @@ describe('ShellTracker integration', () => {
   let shellTracker: ShellTracker;
 
   // Store event handlers for each process
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const eventHandlers: Record<string, Function> = {};
 
   // Mock process

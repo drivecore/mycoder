@@ -6,6 +6,7 @@ import { ShellStatus, ShellTracker } from './ShellTracker';
 import type { ToolContext } from '../../core/types';
 
 // Track the process 'on' handlers
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 let processOnHandlers: Record<string, Function> = {};
 
 // Create a mock process

@@ -21,6 +21,7 @@ describe('shellStart ShellTracker integration', () => {
   };
 
   // Capture event handlers
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const eventHandlers: Record<string, Function> = {};
 
   // Set up mock for child_process.spawn
