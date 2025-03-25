@@ -1,5 +1,6 @@
 import { spawn } from 'child_process';
 
+import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
@@ -102,13 +103,13 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
     return new Promise((resolve) => {
       try {
-        // Register this shell process with the shell tracker and get the shellId
-        const shellId = shellTracker.registerShell(command);
+        // Generate a unique ID for this process
+        const shellId = uuidv4();
+
+        // Register this shell process with the shell tracker
+        shellTracker.registerShell(command);
 
         let hasResolved = false;
-
-        // Flag to track if we're in forced async mode (timeout=0)
-        const forceAsyncMode = timeout === 0;
 
         // Determine if we need to use a special approach for stdin content
         const isWindows =
@@ -118,8 +119,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         if (stdinContent && stdinContent.length > 0) {
           // Replace literal \\n with actual newlines and \\t with actual tabs
           stdinContent = stdinContent
-            .replace(/\\\\n/g, '\\n')
-            .replace(/\\\\t/g, '\\t');
+            .replace(/\\n/g, '\n')
+            .replace(/\\t/g, '\t');
 
           if (isWindows) {
             // Windows approach using PowerShell
@@ -222,41 +223,26 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             signaled: signal !== null,
           });
 
-          // If we're in forced async mode (timeout=0), always return async results
-          if (forceAsyncMode) {
-            if (!hasResolved) {
-              hasResolved = true;
-              resolve({
-                mode: 'async',
-                shellId,
-                stdout: processState.stdout.join('').trim(),
-                stderr: processState.stderr.join('').trim(),
-                ...(code !== 0 && {
-                  error: `Process exited with code ${code}${signal ? ` and signal ${signal}` : ''}`,
-                }),
-              });
-            }
-          } else {
-            // Normal behavior - return sync results if the process completes quickly
-            if (!hasResolved) {
-              hasResolved = true;
-              // If we haven't resolved yet, this happened within the timeout
-              // so return sync results
-              resolve({
-                mode: 'sync',
-                stdout: processState.stdout.join('').trim(),
-                stderr: processState.stderr.join('').trim(),
-                exitCode: code ?? 1,
-                ...(code !== 0 && {
-                  error: `Process exited with code ${code}${signal ? ` and signal ${signal}` : ''}`,
-                }),
-              });
-            }
+          // For test environment with timeout=0, we should still return sync results
+          // when the process completes quickly
+          if (!hasResolved) {
+            hasResolved = true;
+            // If we haven't resolved yet, this happened within the timeout
+            // so return sync results
+            resolve({
+              mode: 'sync',
+              stdout: processState.stdout.join('').trim(),
+              stderr: processState.stderr.join('').trim(),
+              exitCode: code ?? 1,
+              ...(code !== 0 && {
+                error: `Process exited with code ${code}${signal ? ` and signal ${signal}` : ''}`,
+              }),
+            });
           }
         });
 
         // For test environment, when timeout is explicitly set to 0, we want to force async mode
-        if (forceAsyncMode) {
+        if (timeout === 0) {
           // Force async mode immediately
           hasResolved = true;
           resolve({
@@ -303,21 +289,17 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
     },
     { logger },
   ) => {
-    logger.log(`Command: ${command}`);
-    logger.log(`Description: ${description}`);
-    if (timeout !== DEFAULT_TIMEOUT) {
-      logger.log(`Timeout: ${timeout}ms`);
-    }
-    if (showStdIn) {
-      logger.log(`Show stdin: ${showStdIn}`);
-    }
-    if (showStdout) {
-      logger.log(`Show stdout: ${showStdout}`);
-    }
-    if (stdinContent) {
-      logger.log(
-        `With stdin content: ${stdinContent.slice(0, 50)}${stdinContent.length > 50 ? '...' : ''}`,
-      );
+    logger.log(
+      `Running "${command}", ${description} (timeout: ${timeout}ms, showStdIn: ${showStdIn}, showStdout: ${showStdout}${stdinContent ? ', with stdin content' : ''})`,
+    );
+  },
+  logReturns: (output, { logger }) => {
+    if (output.mode === 'async') {
+      logger.log(`Process started with instance ID: ${output.shellId}`);
+    } else {
+      if (output.exitCode !== 0) {
+        logger.error(`Process quit with exit code: ${output.exitCode}`);
+      }
     }
   },
 };
