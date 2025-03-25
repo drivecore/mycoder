@@ -117,7 +117,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         let childProcess;
 
         if (stdinContent && stdinContent.length > 0) {
-          // Replace literal \n with actual newlines and \t with actual tabs
+          // Replace literal \\n with actual newlines and \\t with actual tabs
           stdinContent = stdinContent
             .replace(/\\n/g, '\n')
             .replace(/\\t/g, '\t');
