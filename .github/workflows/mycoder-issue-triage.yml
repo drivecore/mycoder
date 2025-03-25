@@ -33,7 +33,4 @@ jobs:
           git config --global user.email "neuralsoft@gmail.com"
       - run: pnpm install -g mycoder
       - run: |
-          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
-          gh auth status
-      - run: |
           mycoder --upgradeCheck false --githubMode true --userPrompt false "You are an issue triage assistant. Please analyze GitHub issue ${{ github.event.issue.number }} according to the guidelines in .mycoder/ISSUE_TRIAGE.md"
