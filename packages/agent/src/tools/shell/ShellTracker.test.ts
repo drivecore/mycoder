@@ -63,7 +63,7 @@ describe('ShellTracker', () => {
   it('should filter shells by status', () => {
     // Create shells with different statuses
     const shell1 = {
-      id: 'shell-1',
+      shellId: 'shell-1',
       status: ShellStatus.RUNNING,
       startTime: new Date(),
       metadata: {
@@ -72,7 +72,7 @@ describe('ShellTracker', () => {
     };
 
     const shell2 = {
-      id: 'shell-2',
+      shellId: 'shell-2',
       status: ShellStatus.COMPLETED,
       startTime: new Date(),
       endTime: new Date(),
@@ -83,7 +83,7 @@ describe('ShellTracker', () => {
     };
 
     const shell3 = {
-      id: 'shell-3',
+      shellId: 'shell-3',
       status: ShellStatus.ERROR,
       startTime: new Date(),
       endTime: new Date(),
@@ -107,18 +107,18 @@ describe('ShellTracker', () => {
     const runningShells = shellTracker.getShells(ShellStatus.RUNNING);
     expect(runningShells.length).toBe(1);
     expect(runningShells.length).toBe(1);
-    expect(runningShells[0]!.id).toBe('shell-1');
+    expect(runningShells[0]!.shellId).toBe('shell-1');
 
     // Get completed shells
     const completedShells = shellTracker.getShells(ShellStatus.COMPLETED);
     expect(completedShells.length).toBe(1);
     expect(completedShells.length).toBe(1);
-    expect(completedShells[0]!.id).toBe('shell-2');
+    expect(completedShells[0]!.shellId).toBe('shell-2');
 
     // Get error shells
     const errorShells = shellTracker.getShells(ShellStatus.ERROR);
     expect(errorShells.length).toBe(1);
     expect(errorShells.length).toBe(1);
-    expect(errorShells[0]!.id).toBe('shell-3');
+    expect(errorShells[0]!.shellId).toBe('shell-3');
   });
 });

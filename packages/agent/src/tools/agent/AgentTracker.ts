@@ -11,7 +11,7 @@ export enum AgentStatus {
 }
 
 export interface Agent {
-  id: string;
+  agentId: string;
   status: AgentStatus;
   startTime: Date;
   endTime?: Date;
@@ -22,7 +22,7 @@ export interface Agent {
 
 // Internal agent state tracking (similar to existing agentStates)
 export interface AgentState {
-  id: string;
+  agentId: string;
   goal: string;
   prompt: string;
   output: string;
@@ -45,32 +45,32 @@ export class AgentTracker {
 
   // Register a new agent
   public registerAgent(goal: string): string {
-    const id = uuidv4();
+    const agentId = uuidv4();
 
     // Create agent tracking entry
     const agent: Agent = {
-      id,
+      agentId: agentId,
       status: AgentStatus.RUNNING,
       startTime: new Date(),
       goal,
     };
 
-    this.agents.set(id, agent);
-    return id;
+    this.agents.set(agentId, agent);
+    return agentId;
   }
 
   // Register agent state
-  public registerAgentState(id: string, state: AgentState): void {
-    this.agentStates.set(id, state);
+  public registerAgentState(agentId: string, state: AgentState): void {
+    this.agentStates.set(agentId, state);
   }
 
   // Update agent status
   public updateAgentStatus(
-    id: string,
+    agentId: string,
     status: AgentStatus,
     metadata?: { result?: string; error?: string },
   ): boolean {
-    const agent = this.agents.get(id);
+    const agent = this.agents.get(agentId);
     if (!agent) {
       return false;
     }
@@ -94,13 +94,13 @@ export class AgentTracker {
   }
 
   // Get a specific agent state
-  public getAgentState(id: string): AgentState | undefined {
-    return this.agentStates.get(id);
+  public getAgentState(agentId: string): AgentState | undefined {
+    return this.agentStates.get(agentId);
   }
 
   // Get a specific agent tracking info
-  public getAgent(id: string): Agent | undefined {
-    return this.agents.get(id);
+  public getAgent(agentId: string): Agent | undefined {
+    return this.agents.get(agentId);
   }
 
   // Get all agents with optional filtering
@@ -118,12 +118,12 @@ export class AgentTracker {
    * Get list of active agents with their descriptions
    */
   public getActiveAgents(): Array<{
-    id: string;
+    agentId: string;
     description: string;
     status: AgentStatus;
   }> {
     return this.getAgents(AgentStatus.RUNNING).map((agent) => ({
-      id: agent.id,
+      agentId: agent.agentId,
       description: agent.goal,
       status: agent.status,
     }));
@@ -134,14 +134,14 @@ export class AgentTracker {
     const runningAgents = this.getAgents(AgentStatus.RUNNING);
 
     await Promise.all(
-      runningAgents.map((agent) => this.terminateAgent(agent.id)),
+      runningAgents.map((agent) => this.terminateAgent(agent.agentId)),
     );
   }
 
   // Terminate a specific agent
-  public async terminateAgent(id: string): Promise<void> {
+  public async terminateAgent(agentId: string): Promise<void> {
     try {
-      const agentState = this.agentStates.get(id);
+      const agentState = this.agentStates.get(agentId);
       if (agentState && !agentState.aborted) {
         // Set the agent as aborted and completed
         agentState.aborted = true;
@@ -152,9 +152,9 @@ export class AgentTracker {
         await agentState.context.shellTracker.cleanup();
         await agentState.context.browserTracker.cleanup();
       }
-      this.updateAgentStatus(id, AgentStatus.TERMINATED);
+      this.updateAgentStatus(agentId, AgentStatus.TERMINATED);
     } catch (error) {
-      this.updateAgentStatus(id, AgentStatus.ERROR, {
+      this.updateAgentStatus(agentId, AgentStatus.ERROR, {
         error: error instanceof Error ? error.message : String(error),
       });
     }

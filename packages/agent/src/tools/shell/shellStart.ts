@@ -57,7 +57,7 @@ const returnSchema = z.union([
   z
     .object({
       mode: z.literal('async'),
-      instanceId: z.string(),
+      shellId: z.string(),
       stdout: z.string(),
       stderr: z.string(),
       error: z.string().optional(),
@@ -104,7 +104,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
     return new Promise((resolve) => {
       try {
         // Generate a unique ID for this process
-        const instanceId = uuidv4();
+        const shellId = uuidv4();
 
         // Register this shell process with the shell tracker
         shellTracker.registerShell(command);
@@ -165,7 +165,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
         };
 
         // Initialize process state
-        shellTracker.processStates.set(instanceId, processState);
+        shellTracker.processStates.set(shellId, processState);
 
         // Handle process events
         if (childProcess.stdout)
@@ -173,7 +173,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             const output = data.toString();
             processState.stdout.push(output);
             logger[processState.showStdout ? 'log' : 'debug'](
-              `[${instanceId}] stdout: ${output.trim()}`,
+              `[${shellId}] stdout: ${output.trim()}`,
             );
           });
 
@@ -182,16 +182,16 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             const output = data.toString();
             processState.stderr.push(output);
             logger[processState.showStdout ? 'log' : 'debug'](
-              `[${instanceId}] stderr: ${output.trim()}`,
+              `[${shellId}] stderr: ${output.trim()}`,
             );
           });
 
         childProcess.on('error', (error) => {
-          logger.error(`[${instanceId}] Process error: ${error.message}`);
+          logger.error(`[${shellId}] Process error: ${error.message}`);
           processState.state.completed = true;
 
           // Update shell tracker with error status
-          shellTracker.updateShellStatus(instanceId, ShellStatus.ERROR, {
+          shellTracker.updateShellStatus(shellId, ShellStatus.ERROR, {
             error: error.message,
           });
 
@@ -199,7 +199,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
             hasResolved = true;
             resolve({
               mode: 'async',
-              instanceId,
+              shellId,
               stdout: processState.stdout.join('').trim(),
               stderr: processState.stderr.join('').trim(),
               error: error.message,
@@ -209,7 +209,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
         childProcess.on('exit', (code, signal) => {
           logger.debug(
-            `[${instanceId}] Process exited with code ${code} and signal ${signal}`,
+            `[${shellId}] Process exited with code ${code} and signal ${signal}`,
           );
 
           processState.state.completed = true;
@@ -218,7 +218,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
           // Update shell tracker with completed status
           const status = code === 0 ? ShellStatus.COMPLETED : ShellStatus.ERROR;
-          shellTracker.updateShellStatus(instanceId, status, {
+          shellTracker.updateShellStatus(shellId, status, {
             exitCode: code,
             signaled: signal !== null,
           });
@@ -247,7 +247,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
           hasResolved = true;
           resolve({
             mode: 'async',
-            instanceId,
+            shellId,
             stdout: processState.stdout.join('').trim(),
             stderr: processState.stderr.join('').trim(),
           });
@@ -258,7 +258,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
               hasResolved = true;
               resolve({
                 mode: 'async',
-                instanceId,
+                shellId,
                 stdout: processState.stdout.join('').trim(),
                 stderr: processState.stderr.join('').trim(),
               });
@@ -295,7 +295,7 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
   },
   logReturns: (output, { logger }) => {
     if (output.mode === 'async') {
-      logger.log(`Process started with instance ID: ${output.instanceId}`);
+      logger.log(`Process started with instance ID: ${output.shellId}`);
     } else {
       if (output.exitCode !== 0) {
         logger.error(`Process quit with exit code: ${output.exitCode}`);

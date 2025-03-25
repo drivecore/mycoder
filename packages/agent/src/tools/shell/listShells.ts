@@ -19,7 +19,7 @@ const parameterSchema = z.object({
 const returnSchema = z.object({
   shells: z.array(
     z.object({
-      id: z.string(),
+      shellId: z.string(),
       status: z.string(),
       startTime: z.string(),
       endTime: z.string().optional(),
@@ -70,7 +70,7 @@ export const listShellsTool: Tool<Parameters, ReturnType> = {
       const runtime = (endTime.getTime() - startTime.getTime()) / 1000; // in seconds
 
       return {
-        id: shell.id,
+        shellId: shell.shellId,
         status: shell.status,
         startTime: startTime.toISOString(),
         ...(shell.endTime && { endTime: shell.endTime.toISOString() }),

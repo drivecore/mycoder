@@ -29,10 +29,7 @@ describe('Browser Navigation Tests', () => {
     const title = await page.title();
     expect(title).toBe('The Internet');
 
-    const headerText = await page.$eval(
-      'h1.heading',
-      (el) => el.textContent,
-    );
+    const headerText = await page.$eval('h1.heading', (el) => el.textContent);
     expect(headerText).toBe('Welcome to the-internet');
   });
 

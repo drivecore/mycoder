@@ -19,7 +19,7 @@ describe('listShellsTool', () => {
 
     // Set up some test shells with different statuses
     const shell1 = {
-      id: 'shell-1',
+      shellId: 'shell-1',
       status: ShellStatus.RUNNING,
       startTime: new Date(mockNow - 1000 * 60 * 5), // 5 minutes ago
       metadata: {
@@ -28,7 +28,7 @@ describe('listShellsTool', () => {
     };
 
     const shell2 = {
-      id: 'shell-2',
+      shellId: 'shell-2',
       status: ShellStatus.COMPLETED,
       startTime: new Date(mockNow - 1000 * 60 * 10), // 10 minutes ago
       endTime: new Date(mockNow - 1000 * 60 * 9), // 9 minutes ago
@@ -39,7 +39,7 @@ describe('listShellsTool', () => {
     };
 
     const shell3 = {
-      id: 'shell-3',
+      shellId: 'shell-3',
       status: ShellStatus.ERROR,
       startTime: new Date(mockNow - 1000 * 60 * 15), // 15 minutes ago
       endTime: new Date(mockNow - 1000 * 60 * 14), // 14 minutes ago
@@ -63,7 +63,7 @@ describe('listShellsTool', () => {
     expect(result.count).toBe(3);
 
     // Check that shells are properly formatted
-    const shell1 = result.shells.find((s) => s.id === 'shell-1');
+    const shell1 = result.shells.find((s) => s.shellId === 'shell-1');
     expect(shell1).toBeDefined();
     expect(shell1?.status).toBe(ShellStatus.RUNNING);
     expect(shell1?.command).toBe('sleep 100');
@@ -81,7 +81,7 @@ describe('listShellsTool', () => {
 
     expect(result.shells.length).toBe(1);
     expect(result.count).toBe(1);
-    expect(result.shells[0]!.id).toBe('shell-1');
+    expect(result.shells[0]!.shellId).toBe('shell-1');
     expect(result.shells[0]!.status).toBe(ShellStatus.RUNNING);
   });
 
@@ -91,7 +91,7 @@ describe('listShellsTool', () => {
     expect(result.shells.length).toBe(3);
 
     // Check that metadata is included
-    const shell3 = result.shells.find((s) => s.id === 'shell-3');
+    const shell3 = result.shells.find((s) => s.shellId === 'shell-3');
     expect(shell3).toBeDefined();
     expect(shell3?.metadata).toBeDefined();
     expect(shell3?.metadata?.exitCode).toBe(127);
@@ -105,7 +105,7 @@ describe('listShellsTool', () => {
     );
 
     expect(result.shells.length).toBe(1);
-    expect(result.shells[0]!.id).toBe('shell-3');
+    expect(result.shells[0]!.shellId).toBe('shell-3');
     expect(result.shells[0]!.status).toBe(ShellStatus.ERROR);
     expect(result.shells[0]!.metadata).toBeDefined();
     expect(result.shells[0]!.metadata?.error).toBe('Command not found');

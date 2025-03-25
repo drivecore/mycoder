@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { performance } from 'perf_hooks';
 
 // Store start time as soon as this module is imported
@@ -76,7 +77,6 @@ async function reportPlatformInfo(): Promise<void> {
     // Check for antivirus markers by measuring file read time
     try {
       // Using dynamic import to avoid require
-      const fs = await import('fs');
       const startTime = performance.now();
       fs.readFileSync(process.execPath);
       console.log(

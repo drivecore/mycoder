@@ -46,7 +46,7 @@ describe('Log Capture in AgentTracker', () => {
     );
 
     // Get the agent state
-    const agentState = agentTracker.getAgentState(startResult.instanceId);
+    const agentState = agentTracker.getAgentState(startResult.agentId);
     expect(agentState).toBeDefined();
 
     if (!agentState) return; // TypeScript guard
@@ -90,7 +90,7 @@ describe('Log Capture in AgentTracker', () => {
     // Get the agent message output
     const messageResult = await agentMessageTool.execute(
       {
-        instanceId: startResult.instanceId,
+        agentId: startResult.agentId,
         description: 'Get agent output',
       },
       context,
@@ -126,7 +126,7 @@ describe('Log Capture in AgentTracker', () => {
     // Get the agent message output without any logs
     const messageResult = await agentMessageTool.execute(
       {
-        instanceId: startResult.instanceId,
+        agentId: startResult.agentId,
         description: 'Get agent output',
       },
       context,

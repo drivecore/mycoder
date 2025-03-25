@@ -26,7 +26,7 @@ const parameterSchema = z.object({
 });
 
 const returnSchema = z.object({
-  instanceId: z.string(),
+  sessionId: z.string(),
   status: z.string(),
   content: z.string().optional(),
   error: z.string().optional(),
@@ -51,7 +51,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
     const { logger, headless, userSession, browserTracker, ...otherContext } =
       context;
 
-    // Use provided contentFilter or default to 'raw'
+    // Use provided contentFilter or default to 'raw'mycoder
     const effectiveContentFilter = contentFilter || 'raw';
     // Get config from context if available
     const config = (otherContext as any).config || {};
@@ -60,9 +60,6 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
     logger.debug(`Webpage processing mode: ${effectiveContentFilter}`);
 
     try {
-      // Register this browser session with the tracker
-      const instanceId = browserTracker.registerBrowser(url);
-
       // Get browser configuration from config
       const browserConfig = config.browser || {};
 
@@ -96,7 +93,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
 
       // Create a session directly using the browserTracker
       const sessionId = await browserTracker.createSession(sessionConfig);
-      
+
       // Get reference to the page
       const page = browserTracker.getSessionPage(sessionId);
 
@@ -149,24 +146,24 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       logger.debug(`Content length: ${content.length} characters`);
 
       // Update browser tracker with running status
-      browserTracker.updateSessionStatus(instanceId, SessionStatus.RUNNING, {
+      browserTracker.updateSessionStatus(sessionId, SessionStatus.RUNNING, {
         url: url || 'about:blank',
         contentLength: content.length,
       });
 
       return {
-        instanceId,
+        sessionId,
         status: 'initialized',
         content: content || undefined,
       };
     } catch (error) {
       logger.error(`Failed to start browser: ${errorToString(error)}`);
 
-      // No need to update browser tracker here as we don't have a valid instanceId
+      // No need to update browser tracker here as we don't have a valid sessionId
       // when an error occurs before the browser is properly initialized
 
       return {
-        instanceId: '',
+        sessionId: '',
         status: 'error',
         error: errorToString(error),
       };
@@ -184,7 +181,7 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
     if (output.error) {
       logger.error(`Browser start failed: ${output.error}`);
     } else {
-      logger.log(`Browser session started with ID: ${output.instanceId}`);
+      logger.log(`Browser session started with ID: ${output.sessionId}`);
     }
   },
 };

@@ -24,15 +24,23 @@ export function generateStatusUpdate(
     : undefined;
 
   // Get active sub-agents
-  const activeAgents = context.agentTracker ? getActiveAgents(context) : [];
+  const activeAgents = context.agentTracker
+    ? context.agentTracker.getAgents(AgentStatus.RUNNING)
+    : [];
 
   // Get active shell processes
-  const activeShells = context.shellTracker ? getActiveShells(context) : [];
+  const activeShells = context.shellTracker
+    ? context.shellTracker.getShells(ShellStatus.RUNNING)
+    : [];
+
+  console.log('activeShells', activeShells);
 
   // Get active browser sessions
   const activeSessions = context.browserTracker
-    ? getActiveSessions(context)
+    ? context.browserTracker.getSessionsByStatus(SessionStatus.RUNNING)
     : [];
+
+  console.log('activeSessions', activeSessions);
 
   // Format the status message
   const statusContent = [
@@ -43,13 +51,13 @@ export function generateStatusUpdate(
     `Cost So Far: ${tokenTracker.getTotalCost()}`,
     ``,
     `Active Sub-Agents: ${activeAgents.length}`,
-    ...activeAgents.map((a) => `- ${a.id}: ${a.description}`),
+    ...activeAgents.map((a) => `- ${a.agentId}: ${a.goal}`),
     ``,
     `Active Shell Processes: ${activeShells.length}`,
-    ...activeShells.map((s) => `- ${s.id}: ${s.description}`),
+    ...activeShells.map((s) => `- ${s.shellId}: ${s.metadata.command}`),
     ``,
     `Active Browser Sessions: ${activeSessions.length}`,
-    ...activeSessions.map((s) => `- ${s.id}: ${s.description}`),
+    ...activeSessions.map((s) => `- ${s.sessionId}: ${s.metadata.url ?? ''}`),
     ``,
     usagePercentage !== undefined &&
       (usagePercentage >= 50
@@ -69,42 +77,4 @@ export function generateStatusUpdate(
  */
 function formatNumber(num: number): string {
   return num.toLocaleString();
-}
-
-/**
- * Get active agents from the agent tracker
- */
-function getActiveAgents(context: ToolContext) {
-  const agents = context.agentTracker.getAgents(AgentStatus.RUNNING);
-  return agents.map((agent) => ({
-    id: agent.id,
-    description: agent.goal,
-    status: agent.status,
-  }));
-}
-
-/**
- * Get active shells from the shell tracker
- */
-function getActiveShells(context: ToolContext) {
-  const shells = context.shellTracker.getShells(ShellStatus.RUNNING);
-  return shells.map((shell) => ({
-    id: shell.id,
-    description: shell.metadata.command,
-    status: shell.status,
-  }));
-}
-
-/**
- * Get active browser sessions from the session tracker
- */
-function getActiveSessions(context: ToolContext) {
-  const sessions = context.browserTracker.getSessionsByStatus(
-    SessionStatus.RUNNING,
-  );
-  return sessions.map((session) => ({
-    id: session.id,
-    description: session.metadata.url || 'No URL',
-    status: session.status,
-  }));
 }

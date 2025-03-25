@@ -57,7 +57,11 @@ describe('Wait Behavior Tests', () => {
         await page.waitForSelector('#nonexistent', { timeout: 1000 });
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
-        expect(error.message).toContain('Timeout');
+        if (error instanceof Error) {
+          expect(error.message).toContain('Timeout');
+        } else {
+          throw error;
+        }
       }
     });
   });

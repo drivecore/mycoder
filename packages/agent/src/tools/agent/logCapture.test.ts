@@ -18,7 +18,7 @@ describe('Log capture functionality', () => {
   test('should capture log messages based on log level and nesting', () => {
     // Create a mock agent state
     const agentState: AgentState = {
-      id: 'test-agent',
+      agentId: 'test-agent',
       goal: 'Test log capturing',
       prompt: 'Test prompt',
       output: '',
@@ -145,7 +145,7 @@ describe('Log capture functionality', () => {
   test('should handle nested loggers correctly', () => {
     // Create a mock agent state
     const agentState: AgentState = {
-      id: 'test-agent',
+      agentId: 'test-agent',
       goal: 'Test log capturing',
       prompt: 'Test prompt',
       output: '',

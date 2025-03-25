@@ -11,7 +11,7 @@ import { SessionStatus } from './SessionTracker.js';
 
 // Main parameter schema
 const parameterSchema = z.object({
-  instanceId: z.string().describe('The ID returned by sessionStart'),
+  sessionId: z.string().describe('The ID returned by sessionStart'),
   actionType: z
     .enum(['goto', 'click', 'type', 'wait', 'content', 'close'])
     .describe('Browser action to perform'),
@@ -83,7 +83,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     {
-      instanceId,
+      sessionId,
       actionType,
       url,
       selector,
@@ -97,22 +97,22 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     const effectiveContentFilter = contentFilter || 'raw';
 
     logger.debug(
-      `Browser action: ${actionType} on session ${instanceId.slice(0, 8)}`,
+      `Browser action: ${actionType} on session ${sessionId.slice(0, 8)}`,
     );
 
     try {
       // Get the session info
-      const sessionInfo = browserTracker.getSessionById(instanceId);
+      const sessionInfo = browserTracker.getSessionById(sessionId);
       if (!sessionInfo) {
         console.log(browserTracker.getSessions());
-        throw new Error(`Session ${instanceId} not found`);
+        throw new Error(`Session ${sessionId} not found`);
       }
 
       // Get the browser page
-      const page = browserTracker.getSessionPage(instanceId);
+      const page = browserTracker.getSessionPage(sessionId);
 
       // Update session metadata
-      browserTracker.updateSessionStatus(instanceId, SessionStatus.RUNNING, {
+      browserTracker.updateSessionStatus(sessionId, SessionStatus.RUNNING, {
         actionType,
       });
 
@@ -254,7 +254,7 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
 
         case 'close': {
           // Close the browser session
-          await browserTracker.closeSession(instanceId);
+          await browserTracker.closeSession(sessionId);
 
           return {
             status: 'closed',
@@ -267,9 +267,9 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
     } catch (error) {
       logger.error(`Browser action failed: ${errorToString(error)}`);
 
-      // Update session status if we have a valid instanceId
-      if (instanceId) {
-        browserTracker.updateSessionStatus(instanceId, SessionStatus.ERROR, {
+      // Update session status if we have a valid sessionId
+      if (sessionId) {
+        browserTracker.updateSessionStatus(sessionId, SessionStatus.ERROR, {
           error: errorToString(error),
         });
       }
@@ -282,10 +282,10 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
   },
 
   logParameters: (
-    { actionType, instanceId, url, selector, text: _text, description },
+    { actionType, sessionId, url, selector, text: _text, description },
     { logger },
   ) => {
-    const shortId = instanceId.substring(0, 8);
+    const shortId = sessionId.substring(0, 8);
     switch (actionType) {
       case 'goto':
         logger.log(`Navigating browser ${shortId} to ${url}, ${description}`);

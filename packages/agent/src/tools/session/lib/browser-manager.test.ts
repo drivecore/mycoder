@@ -21,7 +21,7 @@ describe('SessionTracker', () => {
     it('should create a new browser session', async () => {
       const sessionId = await browserTracker.createSession();
       expect(sessionId).toBeDefined();
-      
+
       const sessionInfo = browserTracker.getSessionById(sessionId);
       expect(sessionInfo).toBeDefined();
       expect(sessionInfo?.page).toBeDefined();
@@ -30,7 +30,7 @@ describe('SessionTracker', () => {
     it('should create a headless session when specified', async () => {
       const sessionId = await browserTracker.createSession({ headless: true });
       expect(sessionId).toBeDefined();
-      
+
       const sessionInfo = browserTracker.getSessionById(sessionId);
       expect(sessionInfo).toBeDefined();
     });
@@ -40,9 +40,9 @@ describe('SessionTracker', () => {
       const sessionId = await browserTracker.createSession({
         defaultTimeout: customTimeout,
       });
-      
+
       const page = browserTracker.getSessionPage(sessionId);
-      
+
       // Verify timeout by attempting to wait for a non-existent element
       try {
         await page.waitForSelector('#nonexistent', {
@@ -85,35 +85,6 @@ describe('SessionTracker', () => {
       }).toThrow(
         new BrowserError('Session not found', BrowserErrorCode.SESSION_ERROR),
       );
-    });
-  });
-
-  describe('session tracking', () => {
-    it('should register and track browser sessions', async () => {
-      const instanceId = browserTracker.registerBrowser('https://example.com');
-      expect(instanceId).toBeDefined();
-
-      const sessionInfo = browserTracker.getSessionById(instanceId);
-      expect(sessionInfo).toBeDefined();
-      expect(sessionInfo?.status).toBe('running');
-      expect(sessionInfo?.metadata.url).toBe('https://example.com');
-    });
-
-    it('should update session status', async () => {
-      const instanceId = browserTracker.registerBrowser();
-      const updated = browserTracker.updateSessionStatus(
-        instanceId,
-        SessionStatus.COMPLETED,
-        {
-          closedExplicitly: true,
-        },
-      );
-
-      expect(updated).toBe(true);
-
-      const sessionInfo = browserTracker.getSessionById(instanceId);
-      expect(sessionInfo?.status).toBe('completed');
-      expect(sessionInfo?.metadata.closedExplicitly).toBe(true);
     });
   });
 });
