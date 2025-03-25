@@ -103,11 +103,8 @@ export const shellStartTool: Tool<Parameters, ReturnType> = {
 
     return new Promise((resolve) => {
       try {
-        // Generate a unique ID for this process
-        const shellId = uuidv4();
-
-        // Register this shell process with the shell tracker
-        shellTracker.registerShell(command);
+        // Register this shell process with the shell tracker and get the shellId
+        const shellId = shellTracker.registerShell(command);
 
         let hasResolved = false;
 
