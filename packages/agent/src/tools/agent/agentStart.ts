@@ -186,9 +186,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     logger.debug(`Registered agent with ID: ${agentId}`);
 
-    // Get the agent for verification (not used but useful for debugging)
-    const _agent = agentTracker.getAgent(agentId);
-
     // Start the agent in a separate promise that we don't await
     // eslint-disable-next-line promise/catch-or-return
     Promise.resolve().then(async () => {

@@ -77,9 +77,7 @@ export const toolAgent = async (
     // Check for messages from parent agent
     // This assumes the context has an agentTracker and the current agent's ID
     if (context.agentTracker && context.currentAgentId) {
-      const agentState = context.agentTracker.getAgentState(
-        context.currentAgentId,
-      );
+      const agentState = context.agentTracker.getAgent(context.currentAgentId);
 
       // Process any new parent messages
       if (

@@ -144,20 +144,6 @@ export class AgentTracker {
     return agentId;
   }
 
-  /**
-   * @deprecated Use registerAgent instead
-   */
-  public registerAgentState(agentId: string, state: AgentState): void {
-    // Make a copy of state without the agentId to avoid duplication
-    const { agentId: _, ...stateWithoutId } = state;
-
-    // Register with the correct agentId
-    this.registerAgent({
-      ...stateWithoutId,
-      agentId,
-    });
-  }
-
   // Update agent status
   public updateAgentStatus(
     agentId: string,
@@ -197,20 +183,6 @@ export class AgentTracker {
   }
 
   /**
-   * @deprecated Use getAgent instead
-   */
-  public getAgentInfo(agentId: string): AgentInfo | undefined {
-    return this.getAgent(agentId);
-  }
-
-  /**
-   * @deprecated Use getAgent instead
-   */
-  public getAgentState(agentId: string): AgentState | undefined {
-    return this.getAgent(agentId);
-  }
-
-  /**
    * Get all agents, optionally filtered by status
    * @param status Optional status to filter by
    * @returns Array of agents
@@ -223,22 +195,6 @@ export class AgentTracker {
     }
 
     return agents.filter((agent) => agent.status === status);
-  }
-
-  /**
-   * Get list of active agents with their descriptions
-   * @deprecated Use getAgents(AgentStatus.RUNNING) instead
-   */
-  public getActiveAgents(): Array<{
-    agentId: string;
-    description: string;
-    status: AgentStatus;
-  }> {
-    return this.getAgents(AgentStatus.RUNNING).map((info) => ({
-      agentId: info.agentId,
-      description: info.goal,
-      status: info.status,
-    }));
   }
 
   // Cleanup and terminate agents
