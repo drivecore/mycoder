@@ -35,6 +35,9 @@ jobs:
           git config --global user.name "Ben Houston (via MyCoder)"
           git config --global user.email "neuralsoft@gmail.com"
       - run: pnpm install -g mycoder
+      - run: |
+          echo "${{ secrets.GH_PAT }}" | gh auth login --with-token
+          gh auth status
       - name: Get previous reviews
         id: get-reviews
         run: |
