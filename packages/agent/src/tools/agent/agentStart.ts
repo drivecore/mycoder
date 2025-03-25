@@ -11,10 +11,10 @@ import { Tool, ToolContext } from '../../core/types.js';
 import { LogLevel, Logger, LoggerListener } from '../../utils/logger.js';
 import { getTools } from '../getTools.js';
 
-import { AgentStatus, AgentState } from './AgentTracker.js';
+import { AgentStatus, AgentInfo } from './AgentTracker.js';
 
 // For backward compatibility
-export const agentStates = new Map<string, AgentState>();
+export const agentStates = new Map<string, AgentInfo>();
 
 // Generate a random color for an agent
 // Avoid colors that are too light or too similar to error/warning colors
@@ -104,11 +104,6 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       userPrompt = false,
     } = parameterSchema.parse(params);
 
-    // Register this agent with the agent tracker
-    const agentId = agentTracker.registerAgent(goal);
-
-    logger.debug(`Registered agent with ID: ${agentId}`);
-
     // Construct a well-structured prompt
     const prompt = [
       `Description: ${description}`,
@@ -124,22 +119,9 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     const tools = getTools({ userPrompt });
 
-    // Store the agent state
-    const agentState: AgentState = {
-      agentId,
-      goal,
-      prompt,
-      output: '',
-      capturedLogs: [], // Initialize empty array for captured logs
-      completed: false,
-      context: { ...context },
-      workingDirectory: workingDirectory ?? context.workingDirectory,
-      tools,
-      aborted: false,
-      parentMessages: [], // Initialize empty array for parent messages
-    };
-
     // Add a logger listener to capture log, warn, and error level messages
+    const capturedLogs: string[] = [];
+
     const logCaptureListener: LoggerListener = (logger, logLevel, lines) => {
       // Only capture log, warn, and error levels (not debug or info)
       if (
@@ -161,7 +143,7 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           lines.forEach((line) => {
             const loggerPrefix =
               logger.name !== 'agent' ? `[${logger.name}] ` : '';
-            agentState.capturedLogs.push(`${logPrefix}${loggerPrefix}${line}`);
+            capturedLogs.push(`${logPrefix}${loggerPrefix}${line}`);
           });
         }
       }
@@ -191,11 +173,27 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
       );
     }
 
-    // Register agent state with the tracker
-    agentTracker.registerAgentState(agentId, agentState);
+    // Register the agent with all the information we have
+    const agentId = agentTracker.registerAgent({
+      goal,
+      prompt,
+      output: '',
+      capturedLogs,
+      completed: false,
+      context: { ...context },
+      workingDirectory: workingDirectory ?? context.workingDirectory,
+      tools,
+      aborted: false,
+      parentMessages: [],
+    });
+
+    logger.debug(`Registered agent with ID: ${agentId}`);
 
     // For backward compatibility
-    agentStates.set(agentId, agentState);
+    const agent = agentTracker.getAgent(agentId);
+    if (agent) {
+      agentStates.set(agentId, agent);
+    }
 
     // Start the agent in a separate promise that we don't await
     // eslint-disable-next-line promise/catch-or-return
@@ -208,12 +206,12 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           currentAgentId: agentId, // Pass the agent's ID to the context
         });
 
-        // Update agent state with the result
-        const state = agentTracker.getAgentState(agentId);
-        if (state && !state.aborted) {
-          state.completed = true;
-          state.result = result;
-          state.output = result.result;
+        // Update agent with the result
+        const agent = agentTracker.getAgent(agentId);
+        if (agent && !agent.aborted) {
+          agent.completed = true;
+          agent.result_detailed = result;
+          agent.output = result.result;
 
           // Update agent tracker with completed status
           agentTracker.updateAgentStatus(agentId, AgentStatus.COMPLETED, {
@@ -223,11 +221,11 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
           });
         }
       } catch (error) {
-        // Update agent state with the error
-        const state = agentTracker.getAgentState(agentId);
-        if (state && !state.aborted) {
-          state.completed = true;
-          state.error = error instanceof Error ? error.message : String(error);
+        // Update agent with the error
+        const agent = agentTracker.getAgent(agentId);
+        if (agent && !agent.aborted) {
+          agent.completed = true;
+          agent.error = error instanceof Error ? error.message : String(error);
 
           // Update agent tracker with error status
           agentTracker.updateAgentStatus(agentId, AgentStatus.ERROR, {

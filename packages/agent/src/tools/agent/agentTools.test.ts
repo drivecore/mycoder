@@ -51,14 +51,15 @@ describe('Agent Tools', () => {
       expect(result).toHaveProperty('status');
       expect(result.status).toBe('Agent started successfully');
 
-      // Verify the agent state was created
-      expect(agentStates.has(result.agentId)).toBe(true);
+      // Verify the agent was created in the tracker
+      const agent = mockContext.agentTracker.getAgent(result.agentId);
+      expect(agent).toBeDefined();
+      expect(agent).toHaveProperty('goal', 'Test the agent tools');
+      expect(agent).toHaveProperty('completed', false);
+      expect(agent).toHaveProperty('aborted', false);
 
-      const state = agentStates.get(result.agentId);
-      expect(state).toHaveProperty('goal', 'Test the agent tools');
-      expect(state).toHaveProperty('prompt');
-      expect(state).toHaveProperty('completed', false);
-      expect(state).toHaveProperty('aborted', false);
+      // Verify it was also added to legacy agentStates for backward compatibility
+      expect(agentStates.has(result.agentId)).toBe(true);
     });
   });
 
@@ -124,23 +125,10 @@ describe('Agent Tools', () => {
       expect(messageResult).toHaveProperty('terminated', true);
       expect(messageResult).toHaveProperty('completed', true);
 
-      // Verify the agent state was updated - try both AgentTracker and legacy agentStates
-      const agentInfo = mockContext.agentTracker.getAgentInfo(
-        startResult.agentId,
-      );
-      const state = agentStates.get(startResult.agentId);
-
-      // At least one of them should have the expected properties
-      if (agentInfo) {
-        expect(agentInfo).toHaveProperty('aborted', true);
-        expect(agentInfo).toHaveProperty('completed', true);
-      } else if (state) {
-        expect(state).toHaveProperty('aborted', true);
-        expect(state).toHaveProperty('completed', true);
-      } else {
-        // If neither has the properties, fail the test
-        expect(true).toBe(false); // Force failure
-      }
+      // Verify the agent was updated
+      const agent = mockContext.agentTracker.getAgent(startResult.agentId);
+      expect(agent).toHaveProperty('aborted', true);
+      expect(agent).toHaveProperty('completed', true);
     });
   });
 });

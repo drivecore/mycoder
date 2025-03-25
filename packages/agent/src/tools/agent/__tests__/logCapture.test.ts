@@ -46,7 +46,7 @@ describe('Log Capture in AgentTracker', () => {
     );
 
     // Get the agent info directly
-    const agentInfo = agentTracker.getAgentInfo(startResult.agentId);
+    const agentInfo = agentTracker.getAgent(startResult.agentId);
     expect(agentInfo).toBeDefined();
 
     if (!agentInfo) return; // TypeScript guard

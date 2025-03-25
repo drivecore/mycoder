@@ -57,8 +57,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
   returnsJsonSchema: zodToJsonSchema(returnSchema),
 
   execute: async (
-    { agentId, guidance, terminate },
-    { logger, agentTracker, ..._ },
+    { agentId, guidance, terminate, description: _ },
+    { logger, agentTracker, ...__ },
   ): Promise<ReturnType> => {
     logger.debug(
       `Interacting with sub-agent ${agentId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
@@ -66,19 +66,18 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
     try {
       // First try to get the agent from the tracker
-      const agentInfo = agentTracker.getAgentInfo(agentId);
+      let agent = agentTracker.getAgent(agentId);
 
       // Fall back to legacy agentStates for backward compatibility
-      const agentState = agentInfo ? null : agentStates.get(agentId);
+      if (!agent && agentStates.has(agentId)) {
+        // If found in legacy store, register it with the tracker for future use
+        const legacyState = agentStates.get(agentId)!;
+        agentTracker.registerAgent(legacyState);
 
-      if (!agentInfo && !agentState) {
-        throw new Error(`No sub-agent found with ID ${agentId}`);
+        // Try again with the newly registered agent
+        agent = agentTracker.getAgent(agentId);
       }
 
-      // Use either agentInfo or agentState based on what we found
-      const agent = agentInfo || agentState;
-
-      // This shouldn't happen due to the check above, but TypeScript doesn't know that
       if (!agent) {
         throw new Error(`No sub-agent found with ID ${agentId}`);
       }
@@ -122,10 +121,7 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
       }
 
       // Get the current output and captured logs
-      const resultOutput = agentInfo
-        ? agentInfo.result_detailed?.result || ''
-        : agentState?.result?.result || '';
-
+      const resultOutput = agent.result_detailed?.result || '';
       let output = resultOutput || agent.output || 'No output yet';
 
       // Append captured logs if there are any

@@ -23,107 +23,138 @@ export interface AgentInfo {
   error?: string;
 
   // Internal state information
-  prompt: string;
+  prompt?: string;
   output: string;
   capturedLogs: string[]; // Captured log messages from agent and immediate tools
   completed: boolean;
   result_detailed?: ToolAgentResult;
-  context: ToolContext;
-  workingDirectory: string;
-  tools: unknown[];
+  context?: ToolContext;
+  workingDirectory?: string;
+  tools?: unknown[];
   aborted: boolean;
   parentMessages: string[]; // Messages from parent agent
 }
 
-// For backward compatibility
-export type Agent = Pick<
-  AgentInfo,
-  'agentId' | 'status' | 'startTime' | 'endTime' | 'goal' | 'result' | 'error'
->;
-export type AgentState = Pick<
-  AgentInfo,
-  | 'agentId'
-  | 'goal'
-  | 'prompt'
-  | 'output'
-  | 'capturedLogs'
-  | 'completed'
-  | 'error'
-  | 'context'
-  | 'workingDirectory'
-  | 'tools'
-  | 'aborted'
-  | 'parentMessages'
-> & { result?: ToolAgentResult };
+// For backward compatibility - these are deprecated and will be removed in a future version
+/** @deprecated Use AgentInfo instead */
+export type Agent = AgentInfo;
+/** @deprecated Use AgentInfo instead */
+export type AgentState = AgentInfo;
 
 export class AgentTracker {
   private agentInfos: Map<string, AgentInfo> = new Map();
 
   constructor(public ownerAgentId: string | undefined) {}
 
-  // Register a new agent
-  public registerAgent(goal: string): string {
-    const agentId = uuidv4();
+  /**
+   * Register a new agent with basic information or update an existing agent with full state
+   * @param goalOrState Either a goal string or a complete AgentInfo object
+   * @param state Optional additional state information to set
+   * @returns The agent ID
+   */
+  public registerAgent(
+    goalOrState: string | Partial<AgentInfo>,
+    state?: Partial<AgentInfo>,
+  ): string {
+    let agentId: string;
 
-    // Create basic agent info entry
-    const agentInfo: Partial<AgentInfo> = {
-      agentId: agentId,
-      status: AgentStatus.RUNNING,
-      startTime: new Date(),
-      goal,
-      // Initialize arrays and default values
-      capturedLogs: [],
-      completed: false,
-      aborted: false,
-      parentMessages: [],
-      output: '',
-    };
+    // Case 1: Simple registration with just a goal string
+    if (typeof goalOrState === 'string') {
+      agentId = uuidv4();
 
-    this.agentInfos.set(agentId, agentInfo as AgentInfo);
+      // Create basic agent info entry
+      const agentInfo: AgentInfo = {
+        agentId,
+        status: AgentStatus.RUNNING,
+        startTime: new Date(),
+        goal: goalOrState,
+        // Initialize arrays and default values
+        capturedLogs: [],
+        completed: false,
+        aborted: false,
+        parentMessages: [],
+        output: '',
+      };
+
+      this.agentInfos.set(agentId, agentInfo);
+    }
+    // Case 2: Registration with a partial or complete AgentInfo object
+    else {
+      if (goalOrState.agentId) {
+        // Use existing ID if provided
+        agentId = goalOrState.agentId;
+
+        // Check if agent already exists
+        const existingAgent = this.agentInfos.get(agentId);
+
+        if (existingAgent) {
+          // Update existing agent
+          Object.assign(existingAgent, goalOrState);
+        } else {
+          // Create new agent with provided ID
+          const newAgent: AgentInfo = {
+            // Set defaults for required fields
+            agentId,
+            status: AgentStatus.RUNNING,
+            startTime: new Date(),
+            goal: goalOrState.goal || 'Unknown goal',
+            capturedLogs: [],
+            completed: false,
+            aborted: false,
+            parentMessages: [],
+            output: '',
+            // Merge in provided values
+            ...goalOrState,
+          };
+
+          this.agentInfos.set(agentId, newAgent);
+        }
+      } else {
+        // Generate new ID if not provided
+        agentId = uuidv4();
+
+        // Create new agent
+        const newAgent: AgentInfo = {
+          // Set defaults for required fields
+          agentId,
+          status: AgentStatus.RUNNING,
+          startTime: new Date(),
+          goal: goalOrState.goal || 'Unknown goal',
+          capturedLogs: [],
+          completed: false,
+          aborted: false,
+          parentMessages: [],
+          output: '',
+          // Merge in provided values
+          ...goalOrState,
+        };
+
+        this.agentInfos.set(agentId, newAgent);
+      }
+    }
+
+    // Apply additional state if provided
+    if (state) {
+      const agent = this.agentInfos.get(agentId);
+      if (agent) {
+        Object.assign(agent, state);
+      }
+    }
+
     return agentId;
   }
 
-  // Register agent state - for backward compatibility
+  /**
+   * @deprecated Use registerAgent instead
+   */
   public registerAgentState(agentId: string, state: AgentState): void {
-    const agentInfo = this.agentInfos.get(agentId);
+    // Make a copy of state without the agentId to avoid duplication
+    const { agentId: _, ...stateWithoutId } = state;
 
-    if (!agentInfo) {
-      // If agent doesn't exist yet (shouldn't happen in normal flow), create it
-      const newAgentInfo: AgentInfo = {
-        agentId: state.agentId,
-        status: AgentStatus.RUNNING,
-        startTime: new Date(),
-        goal: state.goal,
-        prompt: state.prompt,
-        output: state.output,
-        capturedLogs: state.capturedLogs,
-        completed: state.completed,
-        error: state.error,
-        result_detailed: state.result,
-        context: state.context,
-        workingDirectory: state.workingDirectory,
-        tools: state.tools,
-        aborted: state.aborted,
-        parentMessages: state.parentMessages,
-      };
-      this.agentInfos.set(agentId, newAgentInfo);
-      return;
-    }
-
-    // Update existing agent info with state data
-    Object.assign(agentInfo, {
-      goal: state.goal,
-      prompt: state.prompt,
-      output: state.output,
-      capturedLogs: state.capturedLogs,
-      completed: state.completed,
-      error: state.error,
-      result_detailed: state.result,
-      context: state.context,
-      workingDirectory: state.workingDirectory,
-      tools: state.tools,
-      aborted: state.aborted,
-      parentMessages: state.parentMessages,
+    // Register with the correct agentId
+    this.registerAgent({
+      ...stateWithoutId,
+      agentId,
     });
   }
 
@@ -156,66 +187,36 @@ export class AgentTracker {
     return true;
   }
 
-  // Get a specific agent info
-  public getAgentInfo(agentId: string): AgentInfo | undefined {
+  /**
+   * Get an agent by ID
+   * @param agentId The agent ID
+   * @returns The agent info or undefined if not found
+   */
+  public getAgent(agentId: string): AgentInfo | undefined {
     return this.agentInfos.get(agentId);
   }
 
-  // Get a specific agent state - for backward compatibility
+  /**
+   * @deprecated Use getAgent instead
+   */
+  public getAgentInfo(agentId: string): AgentInfo | undefined {
+    return this.getAgent(agentId);
+  }
+
+  /**
+   * @deprecated Use getAgent instead
+   */
   public getAgentState(agentId: string): AgentState | undefined {
-    const agentInfo = this.agentInfos.get(agentId);
-    if (!agentInfo) return undefined;
-
-    // Convert AgentInfo to AgentState
-    const state: AgentState = {
-      agentId: agentInfo.agentId,
-      goal: agentInfo.goal,
-      prompt: agentInfo.prompt,
-      output: agentInfo.output,
-      capturedLogs: agentInfo.capturedLogs,
-      completed: agentInfo.completed,
-      error: agentInfo.error,
-      result: agentInfo.result_detailed,
-      context: agentInfo.context,
-      workingDirectory: agentInfo.workingDirectory,
-      tools: agentInfo.tools,
-      aborted: agentInfo.aborted,
-      parentMessages: agentInfo.parentMessages,
-    };
-
-    return state;
+    return this.getAgent(agentId);
   }
 
-  // Get a specific agent tracking info - for backward compatibility
-  public getAgent(agentId: string): Agent | undefined {
-    const agentInfo = this.agentInfos.get(agentId);
-    if (!agentInfo) return undefined;
-
-    // Convert AgentInfo to Agent
-    const agent: Agent = {
-      agentId: agentInfo.agentId,
-      status: agentInfo.status,
-      startTime: agentInfo.startTime,
-      endTime: agentInfo.endTime,
-      goal: agentInfo.goal,
-      result: agentInfo.result,
-      error: agentInfo.error,
-    };
-
-    return agent;
-  }
-
-  // Get all agents with optional filtering
-  public getAgents(status?: AgentStatus): Agent[] {
-    const agents = Array.from(this.agentInfos.values()).map((info) => ({
-      agentId: info.agentId,
-      status: info.status,
-      startTime: info.startTime,
-      endTime: info.endTime,
-      goal: info.goal,
-      result: info.result,
-      error: info.error,
-    }));
+  /**
+   * Get all agents, optionally filtered by status
+   * @param status Optional status to filter by
+   * @returns Array of agents
+   */
+  public getAgents(status?: AgentStatus): AgentInfo[] {
+    const agents = Array.from(this.agentInfos.values());
 
     if (!status) {
       return agents;
@@ -226,19 +227,18 @@ export class AgentTracker {
 
   /**
    * Get list of active agents with their descriptions
+   * @deprecated Use getAgents(AgentStatus.RUNNING) instead
    */
   public getActiveAgents(): Array<{
     agentId: string;
     description: string;
     status: AgentStatus;
   }> {
-    return Array.from(this.agentInfos.values())
-      .filter((info) => info.status === AgentStatus.RUNNING)
-      .map((info) => ({
-        agentId: info.agentId,
-        description: info.goal,
-        status: info.status,
-      }));
+    return this.getAgents(AgentStatus.RUNNING).map((info) => ({
+      agentId: info.agentId,
+      description: info.goal,
+      status: info.status,
+    }));
   }
 
   // Cleanup and terminate agents
@@ -260,9 +260,11 @@ export class AgentTracker {
         agentInfo.completed = true;
 
         // Clean up resources owned by this sub-agent
-        await agentInfo.context.agentTracker.cleanup();
-        await agentInfo.context.shellTracker.cleanup();
-        await agentInfo.context.browserTracker.cleanup();
+        if (agentInfo.context) {
+          await agentInfo.context.agentTracker.cleanup();
+          await agentInfo.context.shellTracker.cleanup();
+          await agentInfo.context.browserTracker.cleanup();
+        }
       }
       this.updateAgentStatus(agentId, AgentStatus.TERMINATED);
     } catch (error) {
