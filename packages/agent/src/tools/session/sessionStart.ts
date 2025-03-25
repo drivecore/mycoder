@@ -5,10 +5,9 @@ import { Tool } from '../../core/types.js';
 import { errorToString } from '../../utils/errorToString.js';
 import { sleep } from '../../utils/sleep.js';
 
-import { BrowserDetector } from './lib/BrowserDetector.js';
+// Use detectBrowsers directly from SessionTracker since we've inlined browser detection
 import { filterPageContent } from './lib/filterPageContent.js';
-import { SessionManager } from './lib/SessionManager.js';
-import { browserSessions, BrowserConfig } from './lib/types.js';
+import { BrowserConfig } from './lib/types.js';
 import { SessionStatus } from './SessionTracker.js';
 
 const parameterSchema = z.object({
@@ -82,46 +81,21 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
         sessionConfig.useSystemBrowsers = true;
         sessionConfig.preferredType = 'chromium';
 
-        // Try to detect Chrome browser
-        const browsers = await BrowserDetector.detectBrowsers();
-        const chrome = browsers.find((b) =>
-          b.name.toLowerCase().includes('chrome'),
-        );
-        if (chrome) {
-          logger.debug(`Found system Chrome at ${chrome.path}`);
-          sessionConfig.executablePath = chrome.path;
-        }
+        // Try to detect Chrome browser using browserTracker
+        // No need to detect browsers here, the SessionTracker will handle it
+        // Chrome detection is now handled by SessionTracker
       }
 
       logger.debug(`Browser config: ${JSON.stringify(sessionConfig)}`);
 
-      // Create a session manager and launch browser
-      const sessionManager = new SessionManager();
-      const session = await sessionManager.createSession(sessionConfig);
+      // Create a session directly using the browserTracker
+      const session = await browserTracker.createSession(sessionConfig);
 
       // Set the default timeout
       session.page.setDefaultTimeout(timeout);
 
-      // Get references to the browser and page
-      const browser = session.browser;
+      // Get reference to the page
       const page = session.page;
-
-      // Store the session in the browserSessions map for compatibility
-      browserSessions.set(instanceId, {
-        browser,
-        page,
-        id: instanceId,
-      });
-
-      // Setup cleanup handlers
-      browser.on('disconnected', () => {
-        browserSessions.delete(instanceId);
-        // Update browser tracker when browser disconnects
-        browserTracker.updateSessionStatus(
-          instanceId,
-          SessionStatus.TERMINATED,
-        );
-      });
 
       // Navigate to URL if provided
       let content = '';

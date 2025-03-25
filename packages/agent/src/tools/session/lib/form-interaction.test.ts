@@ -8,19 +8,21 @@ import {
   vi,
 } from 'vitest';
 
-import { SessionManager } from './SessionManager.js';
+import { MockLogger } from '../../../utils/mockLogger.js';
+import { SessionTracker } from '../SessionTracker.js';
+
 import { Session } from './types.js';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Form Interaction Tests', () => {
-  let browserManager: SessionManager;
+  let browserManager: SessionTracker;
   let session: Session;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
-    browserManager = new SessionManager();
+    browserManager = new SessionTracker('test-agent', new MockLogger());
     session = await browserManager.createSession({ headless: true });
   });
 
