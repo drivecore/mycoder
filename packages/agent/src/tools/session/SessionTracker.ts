@@ -243,7 +243,7 @@ export class SessionTracker {
       this.browserSessions.set(session.id, session);
       // Also store in global browserSessions for compatibility
       browserSessions.set(session.id, session);
-      
+
       this.setupCleanup(session);
 
       return session;
@@ -312,7 +312,7 @@ export class SessionTracker {
     this.browserSessions.set(session.id, session);
     // Also store in global browserSessions for compatibility
     browserSessions.set(session.id, session);
-    
+
     this.setupCleanup(session);
 
     return session;
@@ -348,11 +348,11 @@ export class SessionTracker {
       // In Playwright, we should close the context which will automatically close its pages
       await session.page.context().close();
       await session.browser.close();
-      
+
       // Remove from both maps
       this.browserSessions.delete(sessionId);
       browserSessions.delete(sessionId);
-      
+
       // Update status
       this.updateSessionStatus(sessionId, SessionStatus.COMPLETED, {
         closedExplicitly: true,
@@ -361,7 +361,7 @@ export class SessionTracker {
       this.updateSessionStatus(sessionId, SessionStatus.ERROR, {
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       throw new BrowserError(
         'Failed to close session',
         BrowserErrorCode.SESSION_ERROR,
@@ -392,7 +392,7 @@ export class SessionTracker {
     session.browser.on('disconnected', () => {
       this.browserSessions.delete(session.id);
       browserSessions.delete(session.id);
-      
+
       // Update session status
       this.updateSessionStatus(session.id, SessionStatus.TERMINATED);
     });
