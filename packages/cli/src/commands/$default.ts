@@ -246,18 +246,36 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
     const config = await loadConfig(argvConfig);
     let prompt: string | undefined;
 
+    // Initialize prompt variable
+    let fileContent: string | undefined;
+    let interactiveContent: string | undefined;
+
     // If promptFile is specified, read from file
     if (argv.file) {
-      prompt = await fs.readFile(argv.file, 'utf-8');
+      fileContent = await fs.readFile(argv.file, 'utf-8');
     }
 
     // If interactive mode
     if (argv.interactive) {
-      prompt = await userPrompt(
-        "Type your request below or 'help' for usage information. Use Ctrl+C to exit.",
-      );
-    } else if (!prompt) {
-      // Use command line prompt if provided
+      // If we already have file content, let the user know
+      const promptMessage = fileContent
+        ? "File content loaded. Add additional instructions below or 'help' for usage information. Use Ctrl+C to exit."
+        : "Type your request below or 'help' for usage information. Use Ctrl+C to exit.";
+
+      interactiveContent = await userPrompt(promptMessage);
+    }
+
+    // Combine inputs or use individual ones
+    if (fileContent && interactiveContent) {
+      // Combine both inputs with a separator
+      prompt = `${fileContent}\n\n--- Additional instructions ---\n\n${interactiveContent}`;
+      console.log('Combined file content with interactive input.');
+    } else if (fileContent) {
+      prompt = fileContent;
+    } else if (interactiveContent) {
+      prompt = interactiveContent;
+    } else if (argv.prompt) {
+      // Use command line prompt if provided and no other input method was used
       prompt = argv.prompt;
     }
 
