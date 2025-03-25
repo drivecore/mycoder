@@ -58,22 +58,35 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
   execute: async (
     { agentId, guidance, terminate },
-    { logger, ..._ },
+    { logger, agentTracker, ..._ },
   ): Promise<ReturnType> => {
     logger.debug(
       `Interacting with sub-agent ${agentId}${guidance ? ' with guidance' : ''}${terminate ? ' with termination request' : ''}`,
     );
 
     try {
-      const agentState = agentStates.get(agentId);
-      if (!agentState) {
+      // First try to get the agent from the tracker
+      const agentInfo = agentTracker.getAgentInfo(agentId);
+
+      // Fall back to legacy agentStates for backward compatibility
+      const agentState = agentInfo ? null : agentStates.get(agentId);
+
+      if (!agentInfo && !agentState) {
+        throw new Error(`No sub-agent found with ID ${agentId}`);
+      }
+
+      // Use either agentInfo or agentState based on what we found
+      const agent = agentInfo || agentState;
+
+      // This shouldn't happen due to the check above, but TypeScript doesn't know that
+      if (!agent) {
         throw new Error(`No sub-agent found with ID ${agentId}`);
       }
 
       // Check if the agent was already terminated
-      if (agentState.aborted) {
+      if (agent.aborted) {
         return {
-          output: agentState.output || 'Sub-agent was previously terminated',
+          output: agent.output || 'Sub-agent was previously terminated',
           completed: true,
           terminated: true,
           messageSent: false,
@@ -83,11 +96,11 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
 
       // Terminate the agent if requested
       if (terminate) {
-        agentState.aborted = true;
-        agentState.completed = true;
+        agent.aborted = true;
+        agent.completed = true;
 
         return {
-          output: agentState.output || 'Sub-agent terminated before completion',
+          output: agent.output || 'Sub-agent terminated before completion',
           completed: true,
           terminated: true,
           messageSent: false,
@@ -101,42 +114,43 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
         logger.log(`Guidance provided to sub-agent ${agentId}: ${guidance}`);
 
         // Add the guidance to the parentMessages array
-        agentState.parentMessages.push(guidance);
+        agent.parentMessages.push(guidance);
 
         logger.debug(
-          `Added message to sub-agent ${agentId}'s parentMessages queue. Total messages: ${agentState.parentMessages.length}`,
+          `Added message to sub-agent ${agentId}'s parentMessages queue. Total messages: ${agent.parentMessages.length}`,
         );
       }
 
       // Get the current output and captured logs
-      let output =
-        agentState.result?.result || agentState.output || 'No output yet';
+      const resultOutput = agentInfo
+        ? agentInfo.result_detailed?.result || ''
+        : agentState?.result?.result || '';
+
+      let output = resultOutput || agent.output || 'No output yet';
 
       // Append captured logs if there are any
-      if (agentState.capturedLogs && agentState.capturedLogs.length > 0) {
-        // Only append logs if there's actual output or if logs are the only content
-        if (output !== 'No output yet' || agentState.capturedLogs.length > 0) {
-          const logContent = agentState.capturedLogs.join('\n');
-          output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
+      if (agent.capturedLogs && agent.capturedLogs.length > 0) {
+        // Always append logs if there are any
+        const logContent = agent.capturedLogs.join('\n');
+        output = `${output}\n\n--- Agent Log Messages ---\n${logContent}`;
 
-          // Log that we're returning captured logs
-          logger.debug(
-            `Returning ${agentState.capturedLogs.length} captured log messages for agent ${agentId}`,
-          );
-        }
+        // Log that we're returning captured logs
+        logger.debug(
+          `Returning ${agent.capturedLogs.length} captured log messages for agent ${agentId}`,
+        );
         // Clear the captured logs after retrieving them
-        agentState.capturedLogs = [];
+        agent.capturedLogs = [];
       }
 
       // Reset the output to an empty string
-      agentState.output = '';
+      agent.output = '';
 
       return {
         output,
-        completed: agentState.completed,
-        ...(agentState.error && { error: agentState.error }),
+        completed: agent.completed,
+        ...(agent.error && { error: agent.error }),
         messageSent: guidance ? true : false,
-        messageCount: agentState.parentMessages.length,
+        messageCount: agent.parentMessages.length,
       };
     } catch (error) {
       if (error instanceof Error) {

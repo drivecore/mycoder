@@ -45,15 +45,15 @@ describe('Log Capture in AgentTracker', () => {
       context,
     );
 
-    // Get the agent state
-    const agentState = agentTracker.getAgentState(startResult.agentId);
-    expect(agentState).toBeDefined();
+    // Get the agent info directly
+    const agentInfo = agentTracker.getAgentInfo(startResult.agentId);
+    expect(agentInfo).toBeDefined();
 
-    if (!agentState) return; // TypeScript guard
+    if (!agentInfo) return; // TypeScript guard
 
-    // For testing purposes, manually add logs to the agent state
+    // For testing purposes, manually add logs to the agent info
     // In a real scenario, these would be added by the log listener
-    agentState.capturedLogs = [
+    agentInfo.capturedLogs = [
       'This log message should be captured',
       '[WARN] This warning message should be captured',
       '[ERROR] This error message should be captured',
@@ -62,28 +62,28 @@ describe('Log Capture in AgentTracker', () => {
     ];
 
     // Check that the right messages were captured
-    expect(agentState.capturedLogs.length).toBe(5);
-    expect(agentState.capturedLogs).toContain(
+    expect(agentInfo.capturedLogs.length).toBe(5);
+    expect(agentInfo.capturedLogs).toContain(
       'This log message should be captured',
     );
-    expect(agentState.capturedLogs).toContain(
+    expect(agentInfo.capturedLogs).toContain(
       '[WARN] This warning message should be captured',
     );
-    expect(agentState.capturedLogs).toContain(
+    expect(agentInfo.capturedLogs).toContain(
       '[ERROR] This error message should be captured',
     );
-    expect(agentState.capturedLogs).toContain(
+    expect(agentInfo.capturedLogs).toContain(
       'This tool log message should be captured',
     );
-    expect(agentState.capturedLogs).toContain(
+    expect(agentInfo.capturedLogs).toContain(
       '[WARN] This tool warning message should be captured',
     );
 
     // Make sure deep messages were not captured
-    expect(agentState.capturedLogs).not.toContain(
+    expect(agentInfo.capturedLogs).not.toContain(
       'This deep log message should NOT be captured',
     );
-    expect(agentState.capturedLogs).not.toContain(
+    expect(agentInfo.capturedLogs).not.toContain(
       '[ERROR] This deep error message should NOT be captured',
     );
 
@@ -109,7 +109,7 @@ describe('Log Capture in AgentTracker', () => {
     );
 
     // Check that the logs were cleared after being retrieved
-    expect(agentState.capturedLogs.length).toBe(0);
+    expect(agentInfo.capturedLogs.length).toBe(0);
   });
 
   it('should not include log section if no logs were captured', async () => {

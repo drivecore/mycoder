@@ -124,10 +124,23 @@ describe('Agent Tools', () => {
       expect(messageResult).toHaveProperty('terminated', true);
       expect(messageResult).toHaveProperty('completed', true);
 
-      // Verify the agent state was updated
+      // Verify the agent state was updated - try both AgentTracker and legacy agentStates
+      const agentInfo = mockContext.agentTracker.getAgentInfo(
+        startResult.agentId,
+      );
       const state = agentStates.get(startResult.agentId);
-      expect(state).toHaveProperty('aborted', true);
-      expect(state).toHaveProperty('completed', true);
+
+      // At least one of them should have the expected properties
+      if (agentInfo) {
+        expect(agentInfo).toHaveProperty('aborted', true);
+        expect(agentInfo).toHaveProperty('completed', true);
+      } else if (state) {
+        expect(state).toHaveProperty('aborted', true);
+        expect(state).toHaveProperty('completed', true);
+      } else {
+        // If neither has the properties, fail the test
+        expect(true).toBe(false); // Force failure
+      }
     });
   });
 });
