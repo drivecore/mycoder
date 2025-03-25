@@ -3,8 +3,6 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { Tool } from '../../core/types.js';
 
-import { agentStates } from './agentStart.js';
-
 const parameterSchema = z.object({
   agentId: z.string().describe('The ID returned by agentStart'),
   guidance: z
@@ -65,18 +63,8 @@ export const agentMessageTool: Tool<Parameters, ReturnType> = {
     );
 
     try {
-      // First try to get the agent from the tracker
-      let agent = agentTracker.getAgent(agentId);
-
-      // Fall back to legacy agentStates for backward compatibility
-      if (!agent && agentStates.has(agentId)) {
-        // If found in legacy store, register it with the tracker for future use
-        const legacyState = agentStates.get(agentId)!;
-        agentTracker.registerAgent(legacyState);
-
-        // Try again with the newly registered agent
-        agent = agentTracker.getAgent(agentId);
-      }
+      // Get the agent from the tracker
+      const agent = agentTracker.getAgent(agentId);
 
       if (!agent) {
         throw new Error(`No sub-agent found with ID ${agentId}`);

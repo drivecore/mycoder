@@ -11,10 +11,7 @@ import { Tool, ToolContext } from '../../core/types.js';
 import { LogLevel, Logger, LoggerListener } from '../../utils/logger.js';
 import { getTools } from '../getTools.js';
 
-import { AgentStatus, AgentInfo } from './AgentTracker.js';
-
-// For backward compatibility
-export const agentStates = new Map<string, AgentInfo>();
+import { AgentStatus } from './AgentTracker.js';
 
 // Generate a random color for an agent
 // Avoid colors that are too light or too similar to error/warning colors
@@ -189,11 +186,8 @@ export const agentStartTool: Tool<Parameters, ReturnType> = {
 
     logger.debug(`Registered agent with ID: ${agentId}`);
 
-    // For backward compatibility
-    const agent = agentTracker.getAgent(agentId);
-    if (agent) {
-      agentStates.set(agentId, agent);
-    }
+    // Get the agent for verification (not used but useful for debugging)
+    const _agent = agentTracker.getAgent(agentId);
 
     // Start the agent in a separate promise that we don't await
     // eslint-disable-next-line promise/catch-or-return

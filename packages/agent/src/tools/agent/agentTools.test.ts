@@ -7,7 +7,7 @@ import { SessionTracker } from '../session/SessionTracker.js';
 import { ShellTracker } from '../shell/ShellTracker.js';
 
 import { agentMessageTool } from './agentMessage.js';
-import { agentStartTool, agentStates } from './agentStart.js';
+import { agentStartTool } from './agentStart.js';
 import { AgentTracker } from './AgentTracker.js';
 
 // Mock the toolAgent function
@@ -57,9 +57,6 @@ describe('Agent Tools', () => {
       expect(agent).toHaveProperty('goal', 'Test the agent tools');
       expect(agent).toHaveProperty('completed', false);
       expect(agent).toHaveProperty('aborted', false);
-
-      // Verify it was also added to legacy agentStates for backward compatibility
-      expect(agentStates.has(result.agentId)).toBe(true);
     });
   });
 
