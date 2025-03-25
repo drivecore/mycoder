@@ -108,9 +108,8 @@ export const sessionMessageTool: Tool<Parameters, ReturnType> = {
         throw new Error(`Session ${instanceId} not found`);
       }
 
-      // Get the browser session
-      const session = browserTracker.getSession(instanceId);
-      const page = session.page;
+      // Get the browser page
+      const page = browserTracker.getSessionPage(instanceId);
 
       // Update session metadata
       browserTracker.updateSessionStatus(instanceId, SessionStatus.RUNNING, {

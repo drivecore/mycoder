@@ -3,19 +3,21 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { MockLogger } from '../../../utils/mockLogger.js';
 import { SessionTracker } from '../SessionTracker.js';
 
-import { Session } from './types.js';
+import type { Page } from '@playwright/test';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Browser Navigation Tests', () => {
   let browserManager: SessionTracker;
-  let session: Session;
+  let sessionId: string;
+  let page: Page;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
     browserManager = new SessionTracker('test-agent', new MockLogger());
-    session = await browserManager.createSession({ headless: true });
+    sessionId = await browserManager.createSession({ headless: true });
+    page = browserManager.getSessionPage(sessionId);
   });
 
   afterAll(async () => {
@@ -23,11 +25,11 @@ describe('Browser Navigation Tests', () => {
   });
 
   it('should navigate to main page and verify content', async () => {
-    await session.page.goto(baseUrl);
-    const title = await session.page.title();
+    await page.goto(baseUrl);
+    const title = await page.title();
     expect(title).toBe('The Internet');
 
-    const headerText = await session.page.$eval(
+    const headerText = await page.$eval(
       'h1.heading',
       (el) => el.textContent,
     );
@@ -35,35 +37,35 @@ describe('Browser Navigation Tests', () => {
   });
 
   it('should navigate to login page and verify title', async () => {
-    await session.page.goto(`${baseUrl}/login`);
-    const title = await session.page.title();
+    await page.goto(`${baseUrl}/login`);
+    const title = await page.title();
     expect(title).toBe('The Internet');
 
-    const headerText = await session.page.$eval('h2', (el) => el.textContent);
+    const headerText = await page.$eval('h2', (el) => el.textContent);
     expect(headerText).toBe('Login Page');
   });
 
   it('should handle 404 pages appropriately', async () => {
-    await session.page.goto(`${baseUrl}/nonexistent`);
+    await page.goto(`${baseUrl}/nonexistent`);
 
     // Wait for the page to stabilize
-    await session.page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle');
 
     // Check for 404 content instead of title since title may vary
-    const bodyText = await session.page.$eval('body', (el) => el.textContent);
+    const bodyText = await page.$eval('body', (el) => el.textContent);
     expect(bodyText).toContain('Not Found');
   });
 
   it('should handle navigation timeouts', async () => {
     await expect(
-      session.page.goto(`${baseUrl}/slow`, { timeout: 1 }),
+      page.goto(`${baseUrl}/slow`, { timeout: 1 }),
     ).rejects.toThrow();
   });
 
   it('should wait for network idle', async () => {
-    await session.page.goto(baseUrl, {
+    await page.goto(baseUrl, {
       waitUntil: 'networkidle',
     });
-    expect(session.page.url()).toBe(`${baseUrl}/`);
+    expect(page.url()).toBe(`${baseUrl}/`);
   });
 });

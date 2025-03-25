@@ -95,13 +95,10 @@ export const sessionStartTool: Tool<Parameters, ReturnType> = {
       logger.debug(`Browser config: ${JSON.stringify(sessionConfig)}`);
 
       // Create a session directly using the browserTracker
-      const session = await browserTracker.createSession(sessionConfig);
-
-      // Set the default timeout
-      session.page.setDefaultTimeout(timeout);
-
+      const sessionId = await browserTracker.createSession(sessionConfig);
+      
       // Get reference to the page
-      const page = session.page;
+      const page = browserTracker.getSessionPage(sessionId);
 
       // Navigate to URL if provided
       let content = '';

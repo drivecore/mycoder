@@ -6,10 +6,8 @@ import { Logger } from '../../utils/logger.js';
 import { BrowserInfo } from './lib/browserDetectors.js';
 import {
   BrowserConfig,
-  Session,
   BrowserError,
   BrowserErrorCode,
-  browserSessions,
 } from './lib/types.js';
 
 // Status of a browser session
@@ -26,6 +24,7 @@ export interface SessionInfo {
   status: SessionStatus;
   startTime: Date;
   endTime?: Date;
+  page?: import('@playwright/test').Page;
   metadata: {
     url?: string;
     contentLength?: number;
@@ -41,8 +40,7 @@ export interface SessionInfo {
 export class SessionTracker {
   // Map to track session info for reporting
   private sessions: Map<string, SessionInfo> = new Map();
-  // Map to track actual browser sessions
-  private browserSessions: Map<string, Session> = new Map();
+  private browser: import('@playwright/test').Browser | null = null;
   private readonly defaultConfig: BrowserConfig = {
     headless: true,
     defaultTimeout: 30000,
@@ -51,6 +49,7 @@ export class SessionTracker {
   };
   private detectedBrowsers: BrowserInfo[] = [];
   private browserDetectionPromise: Promise<void> | null = null;
+  private currentConfig: BrowserConfig | null = null;
 
   constructor(
     public ownerAgentId: string | undefined,
@@ -64,10 +63,10 @@ export class SessionTracker {
     this.setupGlobalCleanup();
   }
 
-  // Register a new browser session
+  // Register a new browser session without creating a page yet
   public registerBrowser(url?: string): string {
     const id = uuidv4();
-    const session: SessionInfo = {
+    const sessionInfo: SessionInfo = {
       id,
       status: SessionStatus.RUNNING,
       startTime: new Date(),
@@ -75,7 +74,7 @@ export class SessionTracker {
         url,
       },
     };
-    this.sessions.set(id, session);
+    this.sessions.set(id, sessionInfo);
     return id;
   }
 
@@ -125,63 +124,13 @@ export class SessionTracker {
   /**
    * Create a new browser session
    */
-  public async createSession(config?: BrowserConfig): Promise<Session> {
+  public async createSession(config?: BrowserConfig): Promise<string> {
     try {
-      // Wait for browser detection to complete if it's still running
-      if (this.browserDetectionPromise) {
-        await this.browserDetectionPromise;
-        this.browserDetectionPromise = null;
-      }
-
       const sessionConfig = { ...this.defaultConfig, ...config };
-
-      // Determine if we should try to use system browsers
-      const useSystemBrowsers = sessionConfig.useSystemBrowsers !== false;
-
-      // If a specific executable path is provided, use that
-      if (sessionConfig.executablePath) {
-        console.log(
-          `Using specified browser executable: ${sessionConfig.executablePath}`,
-        );
-        return this.launchWithExecutablePath(
-          sessionConfig.executablePath,
-          sessionConfig.preferredType || 'chromium',
-          sessionConfig,
-        );
-      }
-
-      // Try to use a system browser if enabled and any were detected
-      if (useSystemBrowsers && this.detectedBrowsers.length > 0) {
-        const preferredType = sessionConfig.preferredType || 'chromium';
-
-        // First try to find a browser of the preferred type
-        let browserInfo = this.detectedBrowsers.find(
-          (b) => b.type === preferredType,
-        );
-
-        // If no preferred browser type found, use any available browser
-        if (!browserInfo) {
-          browserInfo = this.detectedBrowsers[0];
-        }
-
-        if (browserInfo) {
-          console.log(
-            `Using system browser: ${browserInfo.name} (${browserInfo.type}) at ${browserInfo.path}`,
-          );
-          return this.launchWithExecutablePath(
-            browserInfo.path,
-            browserInfo.type,
-            sessionConfig,
-          );
-        }
-      }
-
-      // Fall back to Playwright's bundled browser
-      console.log('Using Playwright bundled browser');
-      const browser = await chromium.launch({
-        headless: sessionConfig.headless,
-      });
-
+      
+      // Initialize browser if needed
+      const browser = await this.initializeBrowser(sessionConfig);
+      
       // Create a new context (equivalent to incognito)
       const context = await browser.newContext({
         viewport: null,
@@ -192,19 +141,19 @@ export class SessionTracker {
       const page = await context.newPage();
       page.setDefaultTimeout(sessionConfig.defaultTimeout ?? 30000);
 
-      const session: Session = {
-        browser,
+      // Create session info
+      const id = uuidv4();
+      const sessionInfo: SessionInfo = {
+        id,
+        status: SessionStatus.RUNNING,
+        startTime: new Date(),
         page,
-        id: uuidv4(),
+        metadata: {},
       };
 
-      this.browserSessions.set(session.id, session);
-      // Also store in global browserSessions for compatibility
-      browserSessions.set(session.id, session);
+      this.sessions.set(id, sessionInfo);
 
-      this.setupCleanup(session);
-
-      return session;
+      return id;
     } catch (error) {
       throw new BrowserError(
         'Failed to create browser session',
@@ -214,95 +163,35 @@ export class SessionTracker {
     }
   }
 
-  /**
-   * Launch a browser with a specific executable path
-   */
-  private async launchWithExecutablePath(
-    executablePath: string,
-    browserType: 'chromium' | 'firefox' | 'webkit',
-    config: BrowserConfig,
-  ): Promise<Session> {
-    let browser;
 
-    // Launch the browser using the detected executable path
-    switch (browserType) {
-      case 'chromium':
-        browser = await chromium.launch({
-          headless: config.headless,
-          executablePath: executablePath,
-        });
-        break;
-      case 'firefox':
-        browser = await firefox.launch({
-          headless: config.headless,
-          executablePath: executablePath,
-        });
-        break;
-      case 'webkit':
-        browser = await webkit.launch({
-          headless: config.headless,
-          executablePath: executablePath,
-        });
-        break;
-      default:
-        throw new BrowserError(
-          `Unsupported browser type: ${browserType}`,
-          BrowserErrorCode.LAUNCH_FAILED,
-        );
-    }
-
-    // Create a new context (equivalent to incognito)
-    const context = await browser.newContext({
-      viewport: null,
-      userAgent:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    });
-
-    const page = await context.newPage();
-    page.setDefaultTimeout(config.defaultTimeout ?? 30000);
-
-    const session: Session = {
-      browser,
-      page,
-      id: uuidv4(),
-    };
-
-    this.browserSessions.set(session.id, session);
-    // Also store in global browserSessions for compatibility
-    browserSessions.set(session.id, session);
-
-    this.setupCleanup(session);
-
-    return session;
-  }
 
   /**
-   * Get a browser session by ID
+   * Get a page from a session by ID
    */
-  public getSession(sessionId: string): Session {
-    const session = this.browserSessions.get(sessionId);
-    if (!session) {
+  public getSessionPage(sessionId: string): import('@playwright/test').Page {
+    const sessionInfo = this.sessions.get(sessionId);
+    if (!sessionInfo || !sessionInfo.page) {
       console.log(
         'getting session, but here are the sessions',
-        this.browserSessions,
+        this.sessions,
       );
       throw new BrowserError(
         'Session not found',
         BrowserErrorCode.SESSION_ERROR,
       );
     }
-    return session;
+    return sessionInfo.page;
   }
 
   /**
    * Close a specific browser session
    */
   public async closeSession(sessionId: string): Promise<void> {
-    const session = this.browserSessions.get(sessionId);
-    if (!session) {
+    const sessionInfo = this.sessions.get(sessionId);
+    if (!sessionInfo || !sessionInfo.page) {
       console.log(
         'closing session, but here are the sessions',
-        this.browserSessions,
+        this.sessions,
       );
       throw new BrowserError(
         'Session not found',
@@ -312,12 +201,10 @@ export class SessionTracker {
 
     try {
       // In Playwright, we should close the context which will automatically close its pages
-      await session.page.context().close();
-      await session.browser.close();
-
-      // Remove from both maps
-      this.browserSessions.delete(sessionId);
-      browserSessions.delete(sessionId);
+      await sessionInfo.page.context().close();
+      
+      // Remove the page reference
+      sessionInfo.page = undefined;
 
       // Update status
       this.updateSessionStatus(sessionId, SessionStatus.COMPLETED, {
@@ -337,40 +224,161 @@ export class SessionTracker {
   }
 
   /**
-   * Cleans up all browser sessions associated with this tracker
+   * Cleans up all browser sessions and the browser itself
    */
   public async cleanup(): Promise<void> {
     await this.closeAllSessions();
+    
+    // Close the browser if it exists
+    if (this.browser) {
+      try {
+        await this.browser.close();
+        this.browser = null;
+        this.currentConfig = null;
+      } catch (error) {
+        console.error('Error closing browser:', error);
+      }
+    }
   }
 
   /**
    * Close all browser sessions
    */
   public async closeAllSessions(): Promise<void> {
-    const closePromises = Array.from(this.browserSessions.keys()).map(
-      (sessionId) => this.closeSession(sessionId).catch(() => {}),
-    );
+    const closePromises = Array.from(this.sessions.keys())
+      .filter(sessionId => {
+        const sessionInfo = this.sessions.get(sessionId);
+        return sessionInfo && sessionInfo.page;
+      })
+      .map(sessionId => this.closeSession(sessionId).catch(() => {}));
+    
     await Promise.all(closePromises);
-  }
-
-  private setupCleanup(session: Session): void {
-    // Handle browser disconnection
-    session.browser.on('disconnected', () => {
-      this.browserSessions.delete(session.id);
-      browserSessions.delete(session.id);
-
-      // Update session status
-      this.updateSessionStatus(session.id, SessionStatus.TERMINATED);
-    });
   }
 
   /**
    * Sets up global cleanup handlers for all browser sessions
    */
+  /**
+   * Lazily initializes the browser instance
+   */
+  private async initializeBrowser(config: BrowserConfig): Promise<import('@playwright/test').Browser> {
+    if (this.browser) {
+      // If we already have a browser with the same config, reuse it
+      if (this.currentConfig && 
+          this.currentConfig.headless === config.headless &&
+          this.currentConfig.executablePath === config.executablePath &&
+          this.currentConfig.preferredType === config.preferredType) {
+        return this.browser;
+      }
+      
+      // Otherwise, close the existing browser before creating a new one
+      await this.browser.close();
+      this.browser = null;
+    }
+
+    // Wait for browser detection to complete if it's still running
+    if (this.browserDetectionPromise) {
+      await this.browserDetectionPromise;
+      this.browserDetectionPromise = null;
+    }
+
+    // Determine if we should try to use system browsers
+    const useSystemBrowsers = config.useSystemBrowsers !== false;
+
+    // If a specific executable path is provided, use that
+    if (config.executablePath) {
+      console.log(
+        `Using specified browser executable: ${config.executablePath}`,
+      );
+      this.browser = await this.launchBrowserWithExecutablePath(
+        config.executablePath,
+        config.preferredType || 'chromium',
+        config,
+      );
+    } 
+    // Try to use a system browser if enabled and any were detected
+    else if (useSystemBrowsers && this.detectedBrowsers.length > 0) {
+      const preferredType = config.preferredType || 'chromium';
+
+      // First try to find a browser of the preferred type
+      let browserInfo = this.detectedBrowsers.find(
+        (b) => b.type === preferredType,
+      );
+
+      // If no preferred browser type found, use any available browser
+      if (!browserInfo) {
+        browserInfo = this.detectedBrowsers[0];
+      }
+
+      if (browserInfo) {
+        console.log(
+          `Using system browser: ${browserInfo.name} (${browserInfo.type}) at ${browserInfo.path}`,
+        );
+        this.browser = await this.launchBrowserWithExecutablePath(
+          browserInfo.path,
+          browserInfo.type,
+          config,
+        );
+      }
+    }
+
+    // Fall back to Playwright's bundled browser if no browser was created
+    if (!this.browser) {
+      console.log('Using Playwright bundled browser');
+      this.browser = await chromium.launch({
+        headless: config.headless,
+      });
+    }
+
+    // Store the current config
+    this.currentConfig = { ...config };
+    
+    // Set up event handlers for the browser
+    this.browser.on('disconnected', () => {
+      this.browser = null;
+      this.currentConfig = null;
+    });
+
+    return this.browser;
+  }
+
+  /**
+   * Launch a browser with a specific executable path
+   */
+  private async launchBrowserWithExecutablePath(
+    executablePath: string,
+    browserType: 'chromium' | 'firefox' | 'webkit',
+    config: BrowserConfig,
+  ): Promise<import('@playwright/test').Browser> {
+    // Launch the browser using the detected executable path
+    switch (browserType) {
+      case 'chromium':
+        return await chromium.launch({
+          headless: config.headless,
+          executablePath: executablePath,
+        });
+      case 'firefox':
+        return await firefox.launch({
+          headless: config.headless,
+          executablePath: executablePath,
+        });
+      case 'webkit':
+        return await webkit.launch({
+          headless: config.headless,
+          executablePath: executablePath,
+        });
+      default:
+        throw new BrowserError(
+          `Unsupported browser type: ${browserType}`,
+          BrowserErrorCode.LAUNCH_FAILED,
+        );
+    }
+  }
+
   private setupGlobalCleanup(): void {
     // Use beforeExit for async cleanup
     process.on('beforeExit', () => {
-      this.closeAllSessions().catch((err) => {
+      this.cleanup().catch((err) => {
         console.error('Error closing browser sessions:', err);
       });
     });
@@ -378,10 +386,10 @@ export class SessionTracker {
     // Use exit for synchronous cleanup (as a fallback)
     process.on('exit', () => {
       // Can only do synchronous operations here
-      for (const session of this.browserSessions.values()) {
+      if (this.browser) {
         try {
           // Attempt synchronous close - may not fully work
-          session.browser.close();
+          this.browser.close();
         } catch {
           // Ignore errors during exit
         }
@@ -390,7 +398,7 @@ export class SessionTracker {
 
     // Handle SIGINT (Ctrl+C)
     process.on('SIGINT', () => {
-      this.closeAllSessions()
+      this.cleanup()
         .catch(() => {
           return false;
         })

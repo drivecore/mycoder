@@ -19,25 +19,33 @@ describe('SessionTracker', () => {
 
   describe('createSession', () => {
     it('should create a new browser session', async () => {
-      const session = await browserTracker.createSession();
-      expect(session.id).toBeDefined();
-      expect(session.browser).toBeDefined();
-      expect(session.page).toBeDefined();
+      const sessionId = await browserTracker.createSession();
+      expect(sessionId).toBeDefined();
+      
+      const sessionInfo = browserTracker.getSessionById(sessionId);
+      expect(sessionInfo).toBeDefined();
+      expect(sessionInfo?.page).toBeDefined();
     });
 
     it('should create a headless session when specified', async () => {
-      const session = await browserTracker.createSession({ headless: true });
-      expect(session.id).toBeDefined();
+      const sessionId = await browserTracker.createSession({ headless: true });
+      expect(sessionId).toBeDefined();
+      
+      const sessionInfo = browserTracker.getSessionById(sessionId);
+      expect(sessionInfo).toBeDefined();
     });
 
     it('should apply custom timeout when specified', async () => {
       const customTimeout = 500;
-      const session = await browserTracker.createSession({
+      const sessionId = await browserTracker.createSession({
         defaultTimeout: customTimeout,
       });
+      
+      const page = browserTracker.getSessionPage(sessionId);
+      
       // Verify timeout by attempting to wait for a non-existent element
       try {
-        await session.page.waitForSelector('#nonexistent', {
+        await page.waitForSelector('#nonexistent', {
           timeout: customTimeout - 100,
         });
       } catch (error: any) {
@@ -49,12 +57,12 @@ describe('SessionTracker', () => {
 
   describe('closeSession', () => {
     it('should close an existing session', async () => {
-      const session = await browserTracker.createSession();
-      await browserTracker.closeSession(session.id);
+      const sessionId = await browserTracker.createSession();
+      await browserTracker.closeSession(sessionId);
 
-      expect(() => {
-        browserTracker.getSession(session.id);
-      }).toThrow(BrowserError);
+      const sessionInfo = browserTracker.getSessionById(sessionId);
+      expect(sessionInfo?.status).toBe(SessionStatus.COMPLETED);
+      expect(sessionInfo?.page).toBeUndefined();
     });
 
     it('should throw error when closing non-existent session', async () => {
@@ -64,16 +72,16 @@ describe('SessionTracker', () => {
     });
   });
 
-  describe('getSession', () => {
-    it('should return existing session', async () => {
-      const session = await browserTracker.createSession();
-      const retrieved = browserTracker.getSession(session.id);
-      expect(retrieved.id).toBe(session.id);
+  describe('getSessionPage', () => {
+    it('should return page for existing session', async () => {
+      const sessionId = await browserTracker.createSession();
+      const page = browserTracker.getSessionPage(sessionId);
+      expect(page).toBeDefined();
     });
 
     it('should throw error for non-existent session', () => {
       expect(() => {
-        browserTracker.getSession('invalid-id');
+        browserTracker.getSessionPage('invalid-id');
       }).toThrow(
         new BrowserError('Session not found', BrowserErrorCode.SESSION_ERROR),
       );

@@ -11,19 +11,21 @@ import {
 import { MockLogger } from '../../../utils/mockLogger.js';
 import { SessionTracker } from '../SessionTracker.js';
 
-import { Session } from './types.js';
+import type { Page } from '@playwright/test';
 
 // Set global timeout for all tests in this file
 vi.setConfig({ testTimeout: 15000 });
 
 describe('Wait Behavior Tests', () => {
   let browserManager: SessionTracker;
-  let session: Session;
+  let sessionId: string;
+  let page: Page;
   const baseUrl = 'https://the-internet.herokuapp.com';
 
   beforeAll(async () => {
     browserManager = new SessionTracker('test-agent', new MockLogger());
-    session = await browserManager.createSession({ headless: true });
+    sessionId = await browserManager.createSession({ headless: true });
+    page = browserManager.getSessionPage(sessionId);
   });
 
   afterAll(async () => {
@@ -32,29 +34,29 @@ describe('Wait Behavior Tests', () => {
 
   describe('Dynamic Loading Tests', () => {
     beforeEach(async () => {
-      await session.page.goto(`${baseUrl}/dynamic_loading/2`);
+      await page.goto(`${baseUrl}/dynamic_loading/2`);
     });
 
     it('should handle dynamic loading with explicit waits', async () => {
-      await session.page.click('button');
+      await page.click('button');
 
       // Wait for loading element to appear and then disappear
-      await session.page.waitForSelector('#loading');
-      await session.page.waitForSelector('#loading', { state: 'hidden' });
+      await page.waitForSelector('#loading');
+      await page.waitForSelector('#loading', { state: 'hidden' });
 
-      const finishElement = await session.page.waitForSelector('#finish');
+      const finishElement = await page.waitForSelector('#finish');
       const finishText = await finishElement?.evaluate((el) => el.textContent);
       expect(finishText).toBe('Hello World!');
     });
 
     it('should timeout on excessive wait times', async () => {
-      await session.page.click('button');
+      await page.click('button');
 
       // Attempt to find a non-existent element with short timeout
       try {
-        await session.page.waitForSelector('#nonexistent', { timeout: 1000 });
+        await page.waitForSelector('#nonexistent', { timeout: 1000 });
         expect(true).toBe(false); // Should not reach here
-      } catch (error: any) {
+      } catch (error) {
         expect(error.message).toContain('Timeout');
       }
     });
@@ -62,33 +64,33 @@ describe('Wait Behavior Tests', () => {
 
   describe('Dynamic Controls Tests', () => {
     beforeEach(async () => {
-      await session.page.goto(`${baseUrl}/dynamic_controls`);
+      await page.goto(`${baseUrl}/dynamic_controls`);
     });
 
     it('should wait for element state changes', async () => {
       // Click remove button
-      await session.page.click('button:has-text("Remove")');
+      await page.click('button:has-text("Remove")');
 
       // Wait for checkbox to be removed
-      await session.page.waitForSelector('#checkbox', { state: 'hidden' });
+      await page.waitForSelector('#checkbox', { state: 'hidden' });
 
       // Verify gone message
-      const message = await session.page.waitForSelector('#message');
+      const message = await page.waitForSelector('#message');
       const messageText = await message?.evaluate((el) => el.textContent);
       expect(messageText).toContain("It's gone!");
     });
 
     it('should handle multiple sequential dynamic changes', async () => {
       // Remove checkbox
-      await session.page.click('button:has-text("Remove")');
-      await session.page.waitForSelector('#checkbox', { state: 'hidden' });
+      await page.click('button:has-text("Remove")');
+      await page.waitForSelector('#checkbox', { state: 'hidden' });
 
       // Add checkbox back
-      await session.page.click('button:has-text("Add")');
-      await session.page.waitForSelector('#checkbox');
+      await page.click('button:has-text("Add")');
+      await page.waitForSelector('#checkbox');
 
       // Verify checkbox is present
-      const checkbox = await session.page.$('#checkbox');
+      const checkbox = await page.$('#checkbox');
       expect(checkbox).toBeTruthy();
     });
   });
