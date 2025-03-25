@@ -231,6 +231,12 @@ export async function executePrompt(
   );
 }
 
+type PromptSource = {
+  type: 'user' | 'file';
+  source: string;
+  content: string;
+};
+
 export const command: CommandModule<SharedOptions, DefaultArgs> = {
   command: '* [prompt]',
   describe: 'Execute a prompt or start interactive mode',
@@ -244,39 +250,50 @@ export const command: CommandModule<SharedOptions, DefaultArgs> = {
     // Get configuration for model provider and name
     const argvConfig = getConfigFromArgv(argv);
     const config = await loadConfig(argvConfig);
-    let prompt: string | undefined;
 
     // Initialize prompt variable
-    let fileContent: string | undefined;
-    let interactiveContent: string | undefined;
+    const prompts: PromptSource[] = [];
 
+    // If prompt is specified, use it as inline prompt
+    if (argv.prompt) {
+      prompts.push({
+        type: 'user',
+        source: 'command line',
+        content: argv.prompt,
+      });
+    }
     // If promptFile is specified, read from file
     if (argv.file) {
-      fileContent = await fs.readFile(argv.file, 'utf-8');
+      prompts.push({
+        type: 'file',
+        source: argv.file,
+        content: await fs.readFile(argv.file, 'utf-8'),
+      });
     }
-
     // If interactive mode
     if (argv.interactive) {
       // If we already have file content, let the user know
-      const promptMessage = fileContent
-        ? "File content loaded. Add additional instructions below or 'help' for usage information. Use Ctrl+C to exit."
-        : "Type your request below or 'help' for usage information. Use Ctrl+C to exit.";
+      const promptMessage =
+        (prompts.length > 0
+          ? 'Add additional instructions'
+          : 'Enter your request') +
+        " below or 'help' for usage information. Use Ctrl+C to exit.";
+      const interactiveContent = await userPrompt(promptMessage);
 
-      interactiveContent = await userPrompt(promptMessage);
+      prompts.push({
+        type: 'user',
+        source: 'interactive',
+        content: interactiveContent,
+      });
     }
 
-    // Combine inputs or use individual ones
-    if (fileContent && interactiveContent) {
-      // Combine both inputs with a separator
-      prompt = `${fileContent}\n\n--- Additional instructions ---\n\n${interactiveContent}`;
-      console.log('Combined file content with interactive input.');
-    } else if (fileContent) {
-      prompt = fileContent;
-    } else if (interactiveContent) {
-      prompt = interactiveContent;
-    } else if (argv.prompt) {
-      // Use command line prompt if provided and no other input method was used
-      prompt = argv.prompt;
+    let prompt = '';
+    for (const promptSource of prompts) {
+      if (promptSource.type === 'user') {
+        prompt += `--- ${promptSource.source} ---\n\n${promptSource.content}\n\n`;
+      } else if (promptSource.type === 'file') {
+        prompt += `--- contents of ${promptSource.source} ---\n\n${promptSource.content}\n\n`;
+      }
     }
 
     if (!prompt) {
