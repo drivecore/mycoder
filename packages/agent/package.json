@@ -44,7 +44,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37",
     "@modelcontextprotocol/sdk": "^1.7.0",
-    "@mozilla/readability": "^0.5.0",
+    "@mozilla/readability": "^0.6.0",
     "@playwright/test": "^1.50.1",
     "@vitest/browser": "^3.0.5",
     "chalk": "^5.4.1",
